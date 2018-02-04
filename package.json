@@ -1,0 +1,19 @@
+{
+  "name": "aln-nodejs",
+  "version": "1.0.0",
+  "description": "A remplacement for alnpet.com API to make HoneyGuaridan S25 more secure",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dean151/Aln-NodeJs.git"
+  },
+  "author": "Dean151 a.k.a. Thomas Durand",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Dean151/Aln-NodeJs/issues"
+  },
+  "homepage": "https://github.com/Dean151/Aln-NodeJs#readme"
+}
