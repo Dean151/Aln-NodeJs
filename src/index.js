@@ -16,4 +16,15 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 'use strict'
 
-console.log("Hello World!");
+var net = require('net');
+var server = net.createServer(function(socket) {
+        //console.log(socket);
+        //socket.write('Echo server\r\n');
+        //socket.pipe(socket);
+        socket.on('data', function(data) {
+          console.log(data);
+        });
+});
+
+// Listen port 1032 ; that will be called by device
+server.listen(1032, 'localhost');
