@@ -30,7 +30,7 @@ var server = net.createServer(function(socket) {
 
         var connect_prefix = new Buffer([157, 161, 6, 1]);
         var date = new DateTime();
-        var connect_response = Buffer.concat(connect_prefix, date.buffered());
+        var connect_response = Buffer.concat([connect_prefix, date.buffered()]);
         socket.write(connect_response.toString('hex'), 'hex', function() {
           console.log('Sent data: ' + connect_response.toString('hex'));
         });
