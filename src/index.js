@@ -17,13 +17,24 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 'use strict'
 
 var net = require('net');
+var DateTime = require('./datetime.js');
+
 var server = net.createServer(function(socket) {
-        //console.log(socket);
-        //socket.write('Echo server\r\n');
-        //socket.pipe(socket);
-        socket.on('data', function(data) {
-          console.log(data);
+    socket.on('data', function(data) {
+      console.log('Received data: ' + data);
+
+      if (data.length == 20) {
+        var identifier_data = data.slice(2, 16);
+        // Todo: use identifier later
+
+        var connect_prefix = new Buffer([157, 161, 6, 1]);
+        var date = new DateTime();
+        var connect_response = date.buffered(connect_prefix);
+        socket.write(connect_response.toString('hex'), 'hex', function() {
+          console.log('Sent data: ' + connect_response);
         });
+      }
+    });
 });
 
 // Listen port 1032 ; that will be called by device

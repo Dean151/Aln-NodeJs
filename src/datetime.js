@@ -41,4 +41,18 @@ DateTime.prototype.numberOfSeconds = function() {
   return hours * 60 + this._minutes;
 };
 
+DateTime.prototype.buffered = function(prefix) {
+
+  var seconds = this.numberOfSeconds();
+  var b2 = seconds % 255;
+  var b1 = (seconds - b2) / 255;
+
+  var buffer = new Buffer([b1, b2]);
+
+  if (prefix === undefined) {
+    return buffer;
+  }
+  return Buffer.concat([prefix, buffer]);
+}
+
 module.exports = DateTime;
