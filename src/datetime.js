@@ -41,18 +41,12 @@ DateTime.prototype.numberOfSeconds = function() {
   return hours * 60 + this._minutes;
 };
 
-DateTime.prototype.buffered = function(prefix) {
-
+DateTime.prototype.buffered = function() {
   var seconds = this.numberOfSeconds();
-  var b2 = seconds % 255;
-  var b1 = (seconds - b2) / 255;
+  var b2 = seconds % 256;
+  var b1 = (seconds - b2) / 256;
 
-  var buffer = new Buffer([b1, b2]);
-
-  if (prefix === undefined) {
-    return buffer;
-  }
-  return Buffer.concat([prefix, buffer]);
+  return new Buffer([b1, b2]);
 }
 
 module.exports = DateTime;
