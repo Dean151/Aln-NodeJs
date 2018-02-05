@@ -27,4 +27,4 @@ var server = net.createServer(function(socket) {
 });
 
 // Listen port 1032 ; that will be called by device
-server.listen(1032, 'localhost');
+server.listen(1032, '192.168.1.1');
