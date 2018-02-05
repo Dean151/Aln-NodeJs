@@ -21,7 +21,7 @@ var DateTime = require('./datetime.js');
 
 var server = net.createServer(function(socket) {
     socket.on('data', function(data) {
-      console.log('Received data: ' + data);
+      console.log('Received data: ' + data.toString('hex'));
 
       if (data.length == 20) {
         var identifier_data = data.slice(2, 16);
@@ -31,7 +31,7 @@ var server = net.createServer(function(socket) {
         var date = new DateTime();
         var connect_response = date.buffered(connect_prefix);
         socket.write(connect_response.toString('hex'), 'hex', function() {
-          console.log('Sent data: ' + connect_response);
+          console.log('Sent data: ' + connect_response.toString('hex'));
         });
       }
     });
