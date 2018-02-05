@@ -17,6 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 'use strict'
 
 var net = require('net');
+var console = require('console-prefix');
 var DateTime = require('./datetime.js');
 
 var server = net.createServer(function(socket) {
