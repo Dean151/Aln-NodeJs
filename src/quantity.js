@@ -14,7 +14,7 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
 /**
  * Instanciate a new Quantity object to be used with the feeder
@@ -22,16 +22,16 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  * @param {number} amount [5-150] (required)
  */
 function Quantity(amount) {
-  if (isNaN(+amount)) {
-    throw 'Given amount is not a number';
-  }
+	if (isNaN(+amount)) {
+		throw "Given amount is not a number";
+	}
 
-  var numberAmount = Math.floor(+amount);
-  if (numberAmount < 5 || numberAmount > 150) {
-  	throw 'Given amount is out of bounds (5g to 150g)'
-  }
+	var numberAmount = Math.floor(+amount);
+	if (numberAmount < 5 || numberAmount > 150) {
+		throw "Given amount is out of bounds (5g to 150g)";
+	}
 
-  this._amount = numberAmount;
+	this._amount = numberAmount;
 }
 
 /**
@@ -39,15 +39,15 @@ function Quantity(amount) {
  * @return {numeric} the amount associated to the quantity
  */
 Quantity.prototype.amout = function() {
-  return this._amount;
-}
+	return this._amount;
+};
 
 /**
  * Returns the amount of food in binary, readable by the feeder
  * @return {Buffer} the binary buffer representing the amount of food to give.
  */
 Quantity.prototype.buffered = function() {
-  return new Buffer([this.amout()]);
-}
+	return new Buffer([this.amout()]);
+};
 
 module.exports = Quantity;
