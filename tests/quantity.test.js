@@ -18,20 +18,20 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const Quantity = require("./../src/quantity");
 
-// amout()
-test("amout() should send the correct integer value", () => {
-	expect(new Quantity(5).amout()).toBe(5);
-	expect(new Quantity(10).amout()).toBe(10);
-	expect(new Quantity(25).amout()).toBe(25);
-	expect(new Quantity(75).amout()).toBe(75);
-	expect(new Quantity(100).amout()).toBe(100);
-	expect(new Quantity(150).amout()).toBe(150);
+// amount()
+test("amount() should send the correct integer value", () => {
+	expect(new Quantity(5).amount()).toBe(5);
+	expect(new Quantity(10).amount()).toBe(10);
+	expect(new Quantity(25).amount()).toBe(25);
+	expect(new Quantity(75).amount()).toBe(75);
+	expect(new Quantity(100).amount()).toBe(100);
+	expect(new Quantity(150).amount()).toBe(150);
 
 	// Particularities
-	expect(new Quantity(5.25).amout()).toBe(5);
-	expect(new Quantity(10.9).amout()).toBe(10);
-	expect(new Quantity("05").amout()).toBe(5);
-	expect(new Quantity("100").amout()).toBe(100);
+	expect(new Quantity(5.25).amount()).toBe(5);
+	expect(new Quantity(10.9).amount()).toBe(10);
+	expect(new Quantity("05").amount()).toBe(5);
+	expect(new Quantity("100").amount()).toBe(100);
 });
 
 // Unvalid constructors

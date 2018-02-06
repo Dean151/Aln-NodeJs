@@ -38,7 +38,7 @@ function Quantity(amount) {
  * Getter for the amount property
  * @return {numeric} the amount associated to the quantity
  */
-Quantity.prototype.amout = function() {
+Quantity.prototype.amount = function() {
 	return this._amount;
 };
 
@@ -47,7 +47,7 @@ Quantity.prototype.amout = function() {
  * @return {Buffer} the binary buffer representing the amount of food to give.
  */
 Quantity.prototype.buffered = function() {
-	return new Buffer([this.amout()]);
+	return new Buffer([this.amount()]);
 };
 
 module.exports = Quantity;

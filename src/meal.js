@@ -16,9 +16,33 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const Time = require('./time');
+const Quantity = require('./quantity');
+
 /**
  * Instanciate a new Meal object to be used with the feeder
  */
-function Meal() {}
+function Meal() {
+
+  if (arguments.length === 2 && arguments[0].constructor == Time && arguments[1].constructor == Quantity) {
+    this._time = arguments[0];
+    this._quantity = arguments[1];
+  }
+  else if (arguments.length === 3) {
+    this._time = new Time(arguments[0], arguments[1]);
+    this._quantity = new Quantity(arguments[2]);
+  }
+  else {
+    throw 'Wrong arguments in Meal constructor';
+  }
+}
+
+Meal.prototype.time = function() {
+  return this._time;
+};
+
+Meal.prototype.quantity = function() {
+  return this._quantity;
+};
 
 module.exports = Meal;
