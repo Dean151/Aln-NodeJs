@@ -18,7 +18,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 var net = require('net');
 var console = require('console-prefix');
-var DateTime = require('./datetime.js');
+
+var Time = require('./time.js');
 
 var server = net.createServer(function(socket) {
     socket.on('data', function(data) {
@@ -29,8 +30,8 @@ var server = net.createServer(function(socket) {
         // Todo: use identifier later
 
         var connect_prefix = new Buffer([157, 161, 6, 1]);
-        var date = new DateTime();
-        var connect_response = Buffer.concat([connect_prefix, date.buffered()]);
+        var time = new Time();
+        var connect_response = Buffer.concat([connect_prefix, time.buffered()]);
         socket.write(connect_response.toString('hex'), 'hex', function() {
           console.log('Sent data: ' + connect_response.toString('hex'));
         });
