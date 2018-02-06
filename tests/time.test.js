@@ -14,9 +14,9 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-const Time = require('./../src/time');
+const Time = require("./../src/time");
 
 // Default constructor
 test('Time() should be "now" datetime', () => {
@@ -27,51 +27,51 @@ test('Time() should be "now" datetime', () => {
 });
 
 // Unvalid constructors
-test('Time() with unvalid parameters should throw', () => {
+test("Time() with unvalid parameters should throw", () => {
   expect(() => new Time(42, 0)).toThrow();
-  expect(() => new Time(1, 61)).toThrow();  
-  expect(() => new Time(-2, 0)).toThrow();  
-  expect(() => new Time(5, -6)).toThrow();  
+  expect(() => new Time(1, 61)).toThrow();
+  expect(() => new Time(-2, 0)).toThrow();
+  expect(() => new Time(5, -6)).toThrow();
   expect(() => new Time(2)).toThrow();
-  expect(() => new Quantity('Hello', 'World!')).toThrow();
-  expect(() => new Quantity('8f', '2a')).toThrow();
+  expect(() => new Quantity("Hello", "World!")).toThrow();
+  expect(() => new Quantity("8f", "2a")).toThrow();
 });
 
 // numberOfSeconds()
-test('numberOfSeconds() should send the correct integer value', () => {
+test("numberOfSeconds() should send the correct integer value", () => {
   // Default offset for the feeder
-  expect((new Time(0,0)).numberOfSeconds()).toBe(420);
-  expect((new Time(5,30)).numberOfSeconds()).toBe(750);
-  expect((new Time(12,0)).numberOfSeconds()).toBe(1140);
-  expect((new Time(16,59)).numberOfSeconds()).toBe(1439);
-  expect((new Time(17,0)).numberOfSeconds()).toBe(0);
-  expect((new Time(18,0)).numberOfSeconds()).toBe(60);
-  expect((new Time(20,30)).numberOfSeconds()).toBe(210);
+  expect(new Time(0, 0).numberOfSeconds()).toBe(420);
+  expect(new Time(5, 30).numberOfSeconds()).toBe(750);
+  expect(new Time(12, 0).numberOfSeconds()).toBe(1140);
+  expect(new Time(16, 59).numberOfSeconds()).toBe(1439);
+  expect(new Time(17, 0).numberOfSeconds()).toBe(0);
+  expect(new Time(18, 0).numberOfSeconds()).toBe(60);
+  expect(new Time(20, 30).numberOfSeconds()).toBe(210);
 
   // No offset
-  expect((new Time(0,0)).numberOfSeconds(0,0)).toBe(0);
-  expect((new Time(12,0)).numberOfSeconds(0,0)).toBe(720);
+  expect(new Time(0, 0).numberOfSeconds(0, 0)).toBe(0);
+  expect(new Time(12, 0).numberOfSeconds(0, 0)).toBe(720);
 
   // Some offsets
-  expect((new Time(1,0)).numberOfSeconds(1,0)).toBe(0);
-  expect((new Time(12,0)).numberOfSeconds(12,0)).toBe(0);
-  expect((new Time(12,30)).numberOfSeconds(0,30)).toBe(720);
+  expect(new Time(1, 0).numberOfSeconds(1, 0)).toBe(0);
+  expect(new Time(12, 0).numberOfSeconds(12, 0)).toBe(0);
+  expect(new Time(12, 30).numberOfSeconds(0, 30)).toBe(720);
 
   // Special
-  expect((new Time(5.23,30.151)).numberOfSeconds()).toBe(750);
-  expect((new Time('05','30')).numberOfSeconds()).toBe(750);
+  expect(new Time(5.23, 30.151).numberOfSeconds()).toBe(750);
+  expect(new Time("05", "30").numberOfSeconds()).toBe(750);
 });
 
 // buffered()
-test('buffered() should send the correct binary value', () => {
-  expect((new Time(0,0)).buffered().toString('hex')).toBe('01a4');
-  expect((new Time(5,30)).buffered().toString('hex')).toBe('02ee');
-  expect((new Time(12,0)).buffered().toString('hex')).toBe('0474');
-  expect((new Time(16,59)).buffered().toString('hex')).toBe('059f');
-  expect((new Time(17,0)).buffered().toString('hex')).toBe('0000');
-  expect((new Time(17,1)).buffered().toString('hex')).toBe('0001');
-  expect((new Time(17,10)).buffered().toString('hex')).toBe('000a');
-  expect((new Time(17,16)).buffered().toString('hex')).toBe('0010');
-  expect((new Time(18,0)).buffered().toString('hex')).toBe('003c');
-  expect((new Time(20,30)).buffered().toString('hex')).toBe('00d2');
+test("buffered() should send the correct binary value", () => {
+  expect(new Time(0, 0).buffered().toString("hex")).toBe("01a4");
+  expect(new Time(5, 30).buffered().toString("hex")).toBe("02ee");
+  expect(new Time(12, 0).buffered().toString("hex")).toBe("0474");
+  expect(new Time(16, 59).buffered().toString("hex")).toBe("059f");
+  expect(new Time(17, 0).buffered().toString("hex")).toBe("0000");
+  expect(new Time(17, 1).buffered().toString("hex")).toBe("0001");
+  expect(new Time(17, 10).buffered().toString("hex")).toBe("000a");
+  expect(new Time(17, 16).buffered().toString("hex")).toBe("0010");
+  expect(new Time(18, 0).buffered().toString("hex")).toBe("003c");
+  expect(new Time(20, 30).buffered().toString("hex")).toBe("00d2");
 });

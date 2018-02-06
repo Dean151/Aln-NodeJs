@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/Dean151/Aln-NodeJs#readme",
   "devDependencies": {
-    "jest": "^22.1.4"
+    "jest": "^22.1.4",
+    "prettier": "1.10.2"
   },
   "dependencies": {
     "console-prefix": "^1.0.0"

@@ -14,7 +14,7 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
 /**
  * Instanciate a new Time object to be used with the feeder
@@ -28,13 +28,12 @@ function Time(hours, minutes) {
     var now = new Date();
     this._hours = now.getHours();
     this._minutes = now.getMinutes();
-  }
-  else {
+  } else {
     var numberHours = Math.floor(+hours);
     if (numberHours >= 0 && numberHours % 24 === numberHours) {
       this._hours = numberHours;
     }
-    
+
     var numberMinutes = Math.floor(+minutes);
     if (numberMinutes >= 0 && numberMinutes % 60 === numberMinutes) {
       this._minutes = numberMinutes;
@@ -42,7 +41,7 @@ function Time(hours, minutes) {
   }
 
   if (this._hours === undefined || this._minutes === undefined) {
-    throw 'hours or minutes parameters are unvalid';
+    throw "hours or minutes parameters are unvalid";
   }
 }
 
@@ -52,9 +51,12 @@ function Time(hours, minutes) {
  * @param {number} minutes_offset ; default to 0 (optional)
  * @return {number} the number of seconds since offset for this Time instance.
  */
-Time.prototype.numberOfSeconds = function(hours_offset = 17, minutes_offset = 0) {
-  var hours = ((this._hours - hours_offset) + 24) % 24;
-  var minutes = ((this._minutes - minutes_offset) + 60) % 60;
+Time.prototype.numberOfSeconds = function(
+  hours_offset = 17,
+  minutes_offset = 0
+) {
+  var hours = (this._hours - hours_offset + 24) % 24;
+  var minutes = (this._minutes - minutes_offset + 60) % 60;
   return hours * 60 + minutes;
 };
 
@@ -69,6 +71,6 @@ Time.prototype.buffered = function(hours_offset = 17, minutes_offset = 0) {
   var b2 = seconds % 256;
   var b1 = (seconds - b2) / 256;
   return new Buffer([b1, b2]);
-}
+};
 
 module.exports = Time;

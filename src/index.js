@@ -14,30 +14,30 @@ OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
 CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-'use strict'
+"use strict";
 
-var net = require('net');
-var console = require('console-prefix');
+var net = require("net");
+var console = require("console-prefix");
 
-var Time = require('./time.js');
+var Time = require("./time.js");
 
 var server = net.createServer(function(socket) {
-    socket.on('data', function(data) {
-      console.log('Received data: ' + data.toString('hex'));
+  socket.on("data", function(data) {
+    console.log("Received data: " + data.toString("hex"));
 
-      if (data.length == 20) {
-        var identifier_data = data.slice(2, 16);
-        // Todo: use identifier later
+    if (data.length == 20) {
+      var identifier_data = data.slice(2, 16);
+      // Todo: use identifier later
 
-        var connect_prefix = new Buffer([157, 161, 6, 1]);
-        var time = new Time();
-        var connect_response = Buffer.concat([connect_prefix, time.buffered()]);
-        socket.write(connect_response.toString('hex'), 'hex', function() {
-          console.log('Sent data: ' + connect_response.toString('hex'));
-        });
-      }
-    });
+      var connect_prefix = new Buffer([157, 161, 6, 1]);
+      var time = new Time();
+      var connect_response = Buffer.concat([connect_prefix, time.buffered()]);
+      socket.write(connect_response.toString("hex"), "hex", function() {
+        console.log("Sent data: " + connect_response.toString("hex"));
+      });
+    }
+  });
 });
 
 // Listen port 1032 ; that will be called by device
-server.listen(1032, '192.168.1.1');
+server.listen(1032, "192.168.1.1");
