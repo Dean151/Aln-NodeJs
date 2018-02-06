@@ -30,3 +30,15 @@ test("Meal constructor", () => {
   expect(new Meal(12, 30, 10).time().numberOfSeconds()).toBe(1170);
   expect(new Meal(12, 30, 10).quantity().amount()).toBe(10);
 });
+
+// Unvalid constructors
+test("Meal() with unvalid parameters should throw", () => {
+  expect(() => new Meal()).toThrow();
+  expect(() => new Meal(1)).toThrow();
+  expect(() => new Meal(-5, 0, 8)).toThrow();
+  expect(() => new Meal(0, 0, 151)).toThrow();
+  expect(() => new Meal("Hello", "World")).toThrow();
+  expect(() => new Meal(24, 0, 5)).toThrow();
+  expect(() => new Meal(22, 60, 10)).toThrow();
+  expect(() => new Meal(22, 30, 0)).toThrow();
+});
