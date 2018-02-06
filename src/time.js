@@ -30,11 +30,14 @@ function Time(hours, minutes) {
     this._minutes = now.getMinutes();
   }
   else {
-    if (hours >= 0 && hours % 24 === hours) {
-      this._hours = hours;
+    var numberHours = Math.floor(+hours);
+    if (numberHours >= 0 && numberHours % 24 === numberHours) {
+      this._hours = numberHours;
     }
-    if (minutes >= 0 && minutes % 60 === minutes) {
-      this._minutes = minutes;
+    
+    var numberMinutes = Math.floor(+minutes);
+    if (numberMinutes >= 0 && numberMinutes % 60 === numberMinutes) {
+      this._minutes = numberMinutes;
     }
   }
 

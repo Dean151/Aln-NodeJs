@@ -33,6 +33,8 @@ test('Time() with unvalid parameters should throw', () => {
   expect(() => new Time(-2, 0)).toThrow();  
   expect(() => new Time(5, -6)).toThrow();  
   expect(() => new Time(2)).toThrow();
+  expect(() => new Quantity('Hello', 'World!')).toThrow();
+  expect(() => new Quantity('8f', '2a')).toThrow();
 });
 
 // numberOfSeconds()
@@ -54,6 +56,10 @@ test('numberOfSeconds() should send the correct integer value', () => {
   expect((new Time(1,0)).numberOfSeconds(1,0)).toBe(0);
   expect((new Time(12,0)).numberOfSeconds(12,0)).toBe(0);
   expect((new Time(12,30)).numberOfSeconds(0,30)).toBe(720);
+
+  // Special
+  expect((new Time(5.23,30.151)).numberOfSeconds()).toBe(750);
+  expect((new Time('05','30')).numberOfSeconds()).toBe(750);
 });
 
 // buffered()
