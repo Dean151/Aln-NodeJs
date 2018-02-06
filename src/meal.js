@@ -16,24 +16,25 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require('./time');
-const Quantity = require('./quantity');
+const Time = require("./time");
+const Quantity = require("./quantity");
 
 /**
  * Instanciate a new Meal object to be used with the feeder
  */
 function Meal() {
-
-  if (arguments.length === 2 && arguments[0].constructor == Time && arguments[1].constructor == Quantity) {
+  if (
+    arguments.length === 2 &&
+    arguments[0].constructor == Time &&
+    arguments[1].constructor == Quantity
+  ) {
     this._time = arguments[0];
     this._quantity = arguments[1];
-  }
-  else if (arguments.length === 3) {
+  } else if (arguments.length === 3) {
     this._time = new Time(arguments[0], arguments[1]);
     this._quantity = new Quantity(arguments[2]);
-  }
-  else {
-    throw 'Wrong arguments in Meal constructor';
+  } else {
+    throw "Wrong arguments in Meal constructor";
   }
 }
 
@@ -47,7 +48,11 @@ Meal.prototype.quantity = function() {
 
 Meal.prototype.buffered = function(hours_offset = 17, minutes_offset = 0) {
   var space = new Buffer([0]);
-  return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), space, this.quantity().buffered()])
-}
+  return Buffer.concat([
+    this.time().buffered(hours_offset, minutes_offset),
+    space,
+    this.quantity().buffered()
+  ]);
+};
 
 module.exports = Meal;

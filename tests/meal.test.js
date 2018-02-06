@@ -16,15 +16,18 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require('./../src/time');
-const Quantity = require('./../src/quantity');
+const Time = require("./../src/time");
+const Quantity = require("./../src/quantity");
 const Meal = require("./../src/meal");
 
 test("Meal constructor", () => {
-
   // Two parameters
-  expect(new Meal(new Time(12, 30), new Quantity(10)).time().numberOfSeconds()).toBe(1170);
-  expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(10);
+  expect(
+    new Meal(new Time(12, 30), new Quantity(10)).time().numberOfSeconds()
+  ).toBe(1170);
+  expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(
+    10
+  );
 
   // Three parameters
   expect(new Meal(12, 30, 10).time().numberOfSeconds()).toBe(1170);
