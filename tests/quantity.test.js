@@ -44,3 +44,15 @@ test('Quantity() with unvalid parameters should throw', () => {
   expect(() => new Quantity('8f')).toThrow();
   expect(() => new Quantity(2.5)).toThrow();
 });
+
+// buffered()
+test('buffered() should send the correct binary value', () => {
+  expect((new Quantity(5)).buffered().toString('hex')).toBe('05');
+  expect((new Quantity(10)).buffered().toString('hex')).toBe('0a');
+  expect((new Quantity(25)).buffered().toString('hex')).toBe('19');
+  expect((new Quantity(50)).buffered().toString('hex')).toBe('32');
+  expect((new Quantity(75)).buffered().toString('hex')).toBe('4b');
+  expect((new Quantity(100)).buffered().toString('hex')).toBe('64');
+  expect((new Quantity(125)).buffered().toString('hex')).toBe('7d');
+  expect((new Quantity(150)).buffered().toString('hex')).toBe('96');
+});

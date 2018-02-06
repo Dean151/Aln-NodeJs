@@ -42,4 +42,12 @@ Quantity.prototype.amout = function() {
   return this._amount;
 }
 
+/**
+ * Returns the amount of food in binary, readable by the feeder
+ * @return {Buffer} the binary buffer representing the amount of food to give.
+ */
+Quantity.prototype.buffered = function() {
+  return new Buffer([this.amout()]);
+}
+
 module.exports = Quantity;
