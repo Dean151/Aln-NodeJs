@@ -26,7 +26,7 @@ test('Time() should be "now" datetime', () => {
   expect(date._minutes).toBe(now.getMinutes());
 });
 
-// Unvalid construction
+// Unvalid constructors
 test('Time() with unvalid parameters should throw', () => {
   expect(() => new Time(42, 0)).toThrow();
   expect(() => new Time(1, 61)).toThrow();  
