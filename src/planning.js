@@ -26,4 +26,8 @@ Planning.prototype.numberOfMeals = function() {
   return this._meals.length;
 };
 
+Planning.prototype.totalQuantity = function() {
+  return this._meals.reduce((amount, meal) => amount + meal.quantity().amount(), 0);
+}
+
 module.exports = Planning;

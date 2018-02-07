@@ -28,3 +28,13 @@ test("numberOfMeals() tests", () => {
   var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).numberOfMeals()).toBe(3);
 });
+
+test('totalQuantity() tests', () => {
+  expect(new Planning([]).totalQuantity()).toBe(0);
+  var meal1 = new Meal({ hours: 12, minutes: 30 }, 10);
+  expect(new Planning([meal1]).totalQuantity()).toBe(10);
+  var meal2 = new Meal({ hours: 18, minutes: 20 }, 15);
+  expect(new Planning([meal1, meal2]).totalQuantity()).toBe(25);
+  var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
+  expect(new Planning([meal1, meal2, meal3]).totalQuantity()).toBe(30);
+});
