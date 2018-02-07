@@ -19,6 +19,12 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 const Meal = require("./../src/meal");
 const Planning = require("./../src/planning");
 
-test("fake test", () => {
-  expect(true).toBe(true);
+test("numberOfMeals() tests", () => {
+  expect(new Planning([]).numberOfMeals()).toBe(0);
+  var meal1 = new Meal({ hours: 12, minutes: 30 }, 10);
+  expect(new Planning([meal1]).numberOfMeals()).toBe(1);
+  var meal2 = new Meal({ hours: 18, minutes: 20 }, 15);
+  expect(new Planning([meal1, meal2]).numberOfMeals()).toBe(2);
+  var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
+  expect(new Planning([meal1, meal2, meal3]).numberOfMeals()).toBe(3);
 });

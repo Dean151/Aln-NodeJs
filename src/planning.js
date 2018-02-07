@@ -18,6 +18,12 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const Meal = require("./meal");
 
-function Planning(meals) {}
+function Planning(meals) {
+  this._meals = meals;
+}
+
+Planning.prototype.numberOfMeals = function() {
+  return this._meals.length;
+};
 
 module.exports = Planning;
