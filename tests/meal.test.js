@@ -26,26 +26,27 @@ test("Meal constructor", () => {
   expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(10);
 
   // Three parameters
-  expect(new Meal(12, 30, 10).time().numberOfSeconds()).toBe(1170);
-  expect(new Meal(12, 30, 10).quantity().amount()).toBe(10);
+  expect(new Meal({ hours: 12, minutes: 30 }, 10).time().numberOfSeconds()).toBe(1170);
+  expect(new Meal({ hours: 12, minutes: 30 }, 10).quantity().amount()).toBe(10);
 });
 
 // Unvalid constructors
 test("Meal() with unvalid parameters should throw", () => {
   expect(() => new Meal()).toThrow();
   expect(() => new Meal(1)).toThrow();
-  expect(() => new Meal(-5, 0, 8)).toThrow();
-  expect(() => new Meal(0, 0, 151)).toThrow();
+  expect(() => new Meal({ hours: -5, minutes: 0 }, 8)).toThrow();
+  expect(() => new Meal({ hours: 0, minutes: 0 }, 151)).toThrow();
   expect(() => new Meal("Hello", "World")).toThrow();
-  expect(() => new Meal(24, 0, 5)).toThrow();
-  expect(() => new Meal(22, 60, 10)).toThrow();
-  expect(() => new Meal(22, 30, 0)).toThrow();
+  expect(() => new Meal({ hours: 24, minutes: 0 }, 5)).toThrow();
+  expect(() => new Meal({ hours: 22, minutes: 60 }, 10)).toThrow();
+  expect(() => new Meal({ hours: 22, minutes: 30 }, 0)).toThrow();
+  expect(() => new Meal({ }, 10)).toThrow();
 });
 
 // buffered()
 test("buffered() should send the correct binary value", () => {
-  expect(new Meal(0, 0, 5).buffered(0, 0).toString("hex")).toBe("00000005");
-  expect(new Meal(8, 30, 8).buffered().toString("hex")).toBe("03a20008");
-  expect(new Meal(12, 30, 10).buffered().toString("hex")).toBe("0492000a");
-  expect(new Meal(16, 0, 11).buffered().toString("hex")).toBe("0564000b");
+  expect(new Meal({ hours: 0, minutes: 0 }, 5).buffered(0, 0).toString("hex")).toBe("00000005");
+  expect(new Meal({ hours: 8, minutes: 30 }, 8).buffered().toString("hex")).toBe("03a20008");
+  expect(new Meal({ hours: 12, minutes: 30 }, 10).buffered().toString("hex")).toBe("0492000a");
+  expect(new Meal({ hours: 16, minutes: 0 }, 11).buffered().toString("hex")).toBe("0564000b");
 });

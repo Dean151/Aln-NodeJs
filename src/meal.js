@@ -22,14 +22,20 @@ const Quantity = require("./quantity");
 /**
  * Instanciate a new Meal object to be used with the feeder
  */
-function Meal() {
-  if (arguments.length === 2 && arguments[0].constructor == Time && arguments[1].constructor == Quantity) {
-    this._time = arguments[0];
-    this._quantity = arguments[1];
-  } else if (arguments.length === 3) {
-    this._time = new Time(arguments[0], arguments[1]);
-    this._quantity = new Quantity(arguments[2]);
+function Meal(time, quantity) {
+  if (time.constructor == Time) {
+    this._time = time;
+  } else if (time.hours !== undefined && time.minutes !== undefined) {
+    this._time = new Time(time.hours, time.minutes);
+  }
+
+  if (quantity.constructor == Quantity) {
+    this._quantity = quantity;
   } else {
+    this._quantity = new Quantity(quantity);
+  }
+
+  if (this._time === undefined || this._quantity === undefined) {
     throw "Wrong arguments in Meal constructor";
   }
 }
