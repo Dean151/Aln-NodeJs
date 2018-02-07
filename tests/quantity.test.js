@@ -20,39 +20,39 @@ const Quantity = require("./../src/quantity");
 
 // amount()
 test("amount() should send the correct integer value", () => {
-	expect(new Quantity(5).amount()).toBe(5);
-	expect(new Quantity(10).amount()).toBe(10);
-	expect(new Quantity(25).amount()).toBe(25);
-	expect(new Quantity(75).amount()).toBe(75);
-	expect(new Quantity(100).amount()).toBe(100);
-	expect(new Quantity(150).amount()).toBe(150);
+  expect(new Quantity(5).amount()).toBe(5);
+  expect(new Quantity(10).amount()).toBe(10);
+  expect(new Quantity(25).amount()).toBe(25);
+  expect(new Quantity(75).amount()).toBe(75);
+  expect(new Quantity(100).amount()).toBe(100);
+  expect(new Quantity(150).amount()).toBe(150);
 
-	// Particularities
-	expect(new Quantity(5.25).amount()).toBe(5);
-	expect(new Quantity(10.9).amount()).toBe(10);
-	expect(new Quantity("05").amount()).toBe(5);
-	expect(new Quantity("100").amount()).toBe(100);
+  // Particularities
+  expect(new Quantity(5.25).amount()).toBe(5);
+  expect(new Quantity(10.9).amount()).toBe(10);
+  expect(new Quantity("05").amount()).toBe(5);
+  expect(new Quantity("100").amount()).toBe(100);
 });
 
 // Unvalid constructors
 test("Quantity() with unvalid parameters should throw", () => {
-	expect(() => new Quantity()).toThrow();
-	expect(() => new Quantity(0)).toThrow();
-	expect(() => new Quantity(-5)).toThrow();
-	expect(() => new Quantity(151)).toThrow();
-	expect(() => new Quantity("Hello")).toThrow();
-	expect(() => new Quantity("8f")).toThrow();
-	expect(() => new Quantity(2.5)).toThrow();
+  expect(() => new Quantity()).toThrow();
+  expect(() => new Quantity(0)).toThrow();
+  expect(() => new Quantity(-5)).toThrow();
+  expect(() => new Quantity(151)).toThrow();
+  expect(() => new Quantity("Hello")).toThrow();
+  expect(() => new Quantity("8f")).toThrow();
+  expect(() => new Quantity(2.5)).toThrow();
 });
 
 // buffered()
 test("buffered() should send the correct binary value", () => {
-	expect(new Quantity(5).buffered().toString("hex")).toBe("05");
-	expect(new Quantity(10).buffered().toString("hex")).toBe("0a");
-	expect(new Quantity(25).buffered().toString("hex")).toBe("19");
-	expect(new Quantity(50).buffered().toString("hex")).toBe("32");
-	expect(new Quantity(75).buffered().toString("hex")).toBe("4b");
-	expect(new Quantity(100).buffered().toString("hex")).toBe("64");
-	expect(new Quantity(125).buffered().toString("hex")).toBe("7d");
-	expect(new Quantity(150).buffered().toString("hex")).toBe("96");
+  expect(new Quantity(5).buffered().toString("hex")).toBe("05");
+  expect(new Quantity(10).buffered().toString("hex")).toBe("0a");
+  expect(new Quantity(25).buffered().toString("hex")).toBe("19");
+  expect(new Quantity(50).buffered().toString("hex")).toBe("32");
+  expect(new Quantity(75).buffered().toString("hex")).toBe("4b");
+  expect(new Quantity(100).buffered().toString("hex")).toBe("64");
+  expect(new Quantity(125).buffered().toString("hex")).toBe("7d");
+  expect(new Quantity(150).buffered().toString("hex")).toBe("96");
 });

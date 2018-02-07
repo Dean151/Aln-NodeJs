@@ -22,5 +22,8 @@
   },
   "dependencies": {
     "console-prefix": "^1.0.0"
+  },
+  "prettier": {
+    "printWidth": 120
   }
 }

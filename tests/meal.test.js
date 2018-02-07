@@ -22,12 +22,8 @@ const Meal = require("./../src/meal");
 
 test("Meal constructor", () => {
   // Two parameters
-  expect(
-    new Meal(new Time(12, 30), new Quantity(10)).time().numberOfSeconds()
-  ).toBe(1170);
-  expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(
-    10
-  );
+  expect(new Meal(new Time(12, 30), new Quantity(10)).time().numberOfSeconds()).toBe(1170);
+  expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(10);
 
   // Three parameters
   expect(new Meal(12, 30, 10).time().numberOfSeconds()).toBe(1170);
@@ -48,7 +44,7 @@ test("Meal() with unvalid parameters should throw", () => {
 
 // buffered()
 test("buffered() should send the correct binary value", () => {
-  expect(new Meal(0, 0, 5).buffered(0,0).toString("hex")).toBe("00000005");
+  expect(new Meal(0, 0, 5).buffered(0, 0).toString("hex")).toBe("00000005");
   expect(new Meal(8, 30, 8).buffered().toString("hex")).toBe("03a20008");
   expect(new Meal(12, 30, 10).buffered().toString("hex")).toBe("0492000a");
   expect(new Meal(16, 0, 11).buffered().toString("hex")).toBe("0564000b");
