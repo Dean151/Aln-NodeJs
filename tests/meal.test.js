@@ -40,7 +40,7 @@ test("Meal() with unvalid parameters should throw", () => {
   expect(() => new Meal({ hours: 24, minutes: 0 }, 5)).toThrow();
   expect(() => new Meal({ hours: 22, minutes: 60 }, 10)).toThrow();
   expect(() => new Meal({ hours: 22, minutes: 30 }, 0)).toThrow();
-  expect(() => new Meal({ }, 10)).toThrow();
+  expect(() => new Meal({}, 10)).toThrow();
 });
 
 // buffered()
