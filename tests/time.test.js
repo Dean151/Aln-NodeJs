@@ -37,29 +37,29 @@ test("Time() with unvalid parameters should throw", () => {
   expect(() => new Quantity("8f", "2a")).toThrow();
 });
 
-// numberOfSeconds()
-test("numberOfSeconds() should send the correct integer value", () => {
+// numberOfMinutes()
+test("numberOfMinutes() should send the correct integer value", () => {
   // Default offset for the feeder
-  expect(new Time(0, 0).numberOfSeconds()).toBe(420);
-  expect(new Time(5, 30).numberOfSeconds()).toBe(750);
-  expect(new Time(12, 0).numberOfSeconds()).toBe(1140);
-  expect(new Time(16, 59).numberOfSeconds()).toBe(1439);
-  expect(new Time(17, 0).numberOfSeconds()).toBe(0);
-  expect(new Time(18, 0).numberOfSeconds()).toBe(60);
-  expect(new Time(20, 30).numberOfSeconds()).toBe(210);
+  expect(new Time(0, 0).numberOfMinutes()).toBe(420);
+  expect(new Time(5, 30).numberOfMinutes()).toBe(750);
+  expect(new Time(12, 0).numberOfMinutes()).toBe(1140);
+  expect(new Time(16, 59).numberOfMinutes()).toBe(1439);
+  expect(new Time(17, 0).numberOfMinutes()).toBe(0);
+  expect(new Time(18, 0).numberOfMinutes()).toBe(60);
+  expect(new Time(20, 30).numberOfMinutes()).toBe(210);
 
   // No offset
-  expect(new Time(0, 0).numberOfSeconds(0, 0)).toBe(0);
-  expect(new Time(12, 0).numberOfSeconds(0, 0)).toBe(720);
+  expect(new Time(0, 0).numberOfMinutes(0, 0)).toBe(0);
+  expect(new Time(12, 0).numberOfMinutes(0, 0)).toBe(720);
 
   // Some offsets
-  expect(new Time(1, 0).numberOfSeconds(1, 0)).toBe(0);
-  expect(new Time(12, 0).numberOfSeconds(12, 0)).toBe(0);
-  expect(new Time(12, 30).numberOfSeconds(0, 30)).toBe(720);
+  expect(new Time(1, 0).numberOfMinutes(1, 0)).toBe(0);
+  expect(new Time(12, 0).numberOfMinutes(12, 0)).toBe(0);
+  expect(new Time(12, 30).numberOfMinutes(0, 30)).toBe(720);
 
   // Special
-  expect(new Time(5.23, 30.151).numberOfSeconds()).toBe(750);
-  expect(new Time("05", "30").numberOfSeconds()).toBe(750);
+  expect(new Time(5.23, 30.151).numberOfMinutes()).toBe(750);
+  expect(new Time("05", "30").numberOfMinutes()).toBe(750);
 });
 
 // buffered()

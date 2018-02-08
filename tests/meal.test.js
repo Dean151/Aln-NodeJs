@@ -22,11 +22,11 @@ const Meal = require("./../src/meal");
 
 test("Meal constructor", () => {
   // Two parameters
-  expect(new Meal(new Time(12, 30), new Quantity(10)).time().numberOfSeconds()).toBe(1170);
+  expect(new Meal(new Time(12, 30), new Quantity(10)).time().numberOfMinutes()).toBe(1170);
   expect(new Meal(new Time(12, 30), new Quantity(10)).quantity().amount()).toBe(10);
 
   // Three parameters
-  expect(new Meal({ hours: 12, minutes: 30 }, 10).time().numberOfSeconds()).toBe(1170);
+  expect(new Meal({ hours: 12, minutes: 30 }, 10).time().numberOfMinutes()).toBe(1170);
   expect(new Meal({ hours: 12, minutes: 30 }, 10).quantity().amount()).toBe(10);
 });
 
