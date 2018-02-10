@@ -49,8 +49,7 @@ Meal.prototype.quantity = function() {
 };
 
 Meal.prototype.buffered = function(hours_offset = 17, minutes_offset = 0) {
-  var space = new Buffer([0]);
-  return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), space, this.quantity().buffered()]);
+  return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), this.quantity().buffered()]);
 };
 
 module.exports = Meal;
