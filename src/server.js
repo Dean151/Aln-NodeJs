@@ -24,7 +24,7 @@ function Server(feederCoordinator) {
   // Create a service (the app object is just a callback).
   var app = express();
 
-  if (process.env.USE_HTTPS) {
+  if (process.env.USE_HTTPS == 'true') {
     const https = require('https');
     const fs = require('fs');
 
@@ -43,7 +43,7 @@ function Server(feederCoordinator) {
     // Create an HTTP service.
     http.createServer(app).listen(80);
   }
-  
+
 }
 
 module.exports = Server;
