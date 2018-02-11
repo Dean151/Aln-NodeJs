@@ -16,8 +16,6 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const ResponseBuilder = require("./response-builder");
-
 // This will handle feeders connexions
 const FeederCoordinator = require("./feeder-coordinator");
 var feederCoordinator = new FeederCoordinator();

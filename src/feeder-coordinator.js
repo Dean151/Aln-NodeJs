@@ -39,6 +39,7 @@ function FeederCoordinator() {
         this.registerFeeder(identifier, c);
 
         // Send it back the time
+        const ResponseBuilder = require("./response-builder");
         this.write(identifier, ResponseBuilder.time());
       }
     });
