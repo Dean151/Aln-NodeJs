@@ -16,6 +16,10 @@
     "url": "https://github.com/Dean151/Aln-NodeJs/issues"
   },
   "homepage": "https://github.com/Dean151/Aln-NodeJs#readme",
+  "dependencies": {
+    "dotenv": "^5.0.0",
+    "express": "^4.16.2"
+  },
   "devDependencies": {
     "jest": "^22.1.4",
     "prettier": "1.10.2"
