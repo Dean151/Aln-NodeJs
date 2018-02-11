@@ -29,9 +29,9 @@ function FeederCoordinator() {
     c.on('data', (data) => {
       var hexData = data.toString('hex');
       console.log('Data received: ' + hexData);
-      if (hexData.startsWith('9da1') && hexData.endsWith('d0010000')) {
+      if (hexData.startsWith('9da114') && hexData.endsWith('01d0010000')) {
         // It's an feeder identifier
-        var hexIdentifier = hexData.replace(/^9da1([0-9a-f]+)d0010000$/, "$1");
+        var hexIdentifier = hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
         var identifier = new Buffer(hexIdentifier, 'hex').toString();
         console.log('Feeder identified with: ' + identifier);
 
