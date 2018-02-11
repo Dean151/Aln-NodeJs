@@ -22,4 +22,4 @@ function Server(feederCoordinator) {
   // Create the API server
 }
 
-module.exports(Server);
+module.exports = Server;
