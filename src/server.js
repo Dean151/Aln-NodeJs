@@ -16,10 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-// Load configuration
-require('dotenv').config();
-
-function Server(feederCoordinator) {
+function Server(feederCoordinator, environment) {
   this.feederCoordinator = feederCoordinator;
 
   const express = require('express');
@@ -27,14 +24,14 @@ function Server(feederCoordinator) {
   // Create a service (the app object is just a callback).
   var app = express();
 
-  if (process.env.USE_HTTPS == 'true') {
+  if (environment.USE_HTTPS == 'true') {
     const https = require('https');
     const fs = require('fs');
 
     // This line is from the Node.js HTTPS documentation.
     var options = {
-      key: fs.readFileSync(process.env.CERTIFICATE_KEY),
-      cert: fs.readFileSync(process.env.CERTIFICATE)
+      key: fs.readFileSync(environment.CERTIFICATE_KEY),
+      cert: fs.readFileSync(environment.CERTIFICATE)
     };
 
     // Create an HTTPS service identical to the HTTP service.

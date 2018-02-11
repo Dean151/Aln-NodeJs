@@ -16,10 +16,13 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+// Load configuration
+require('dotenv').config();
+
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
 var feederCoordinator = new FeederCoordinator();
 
 // This will handle the REST API
 const Server = require("./src/server");
-var server = new Server(feederCoordinator);
+var server = new Server(feederCoordinator, process.env);
