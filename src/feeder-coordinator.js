@@ -23,26 +23,20 @@ function FeederCoordinator() {}
 FeederCoordinator.feeders = {};
 
 FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
-  if identifier in FeederCoordinator.feeders {
-    FeederCoordinator.feeders[identifier].hasResponded(socket);
-  }
-  else {
+  if (FeederCoordinator.feeders[identifier] === undefined) {
     var feeder = new Feeder(identifier, socket);
     FeederCoordinator.feeders[identifier] = feeder;
+  }
+  else {
+    FeederCoordinator.feeders[identifier].hasResponded(socket);
   }
 }
 
 FeederCoordinator.prototype.write = function (identifier, hexData, callback) {
-  if identifier in FeederCoordinator.feeders {
-    FeederCoordinator.feeders[identifier]._socket.write(hexData, 'hex', () => {
-      Console.log("Data sent: " . data);
-      callback();
-    });
-    return true;
-  }
-  else {
-    return false;
-  }
+  FeederCoordinator.feeders[identifier]._socket.write(hexData, 'hex', () => {
+    Console.log("Data sent: " . data);
+    callback();
+  });
 }
 
 module.exports = FeederCoordinator;
