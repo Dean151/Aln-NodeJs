@@ -16,6 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+// Load configuration
+require('dotenv').config();
+
 function Server(feederCoordinator) {
   this.feederCoordinator = feederCoordinator;
 
