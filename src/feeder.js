@@ -21,7 +21,7 @@ function Feeder(identifier, socket) {
   this.hasResponded(socket);
 }
 
-Feeder.prototype.hasResponded(socket) {
+Feeder.prototype.hasResponded = function(socket) {
   this._socket = socket;
   this._lastResponded = new Date();
 }
