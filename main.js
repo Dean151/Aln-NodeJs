@@ -17,6 +17,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 // This will handle feeders connexions
-const FeederCoordinator = require("./feeder-coordinator");
+const FeederCoordinator = require("./src/feeder-coordinator");
 var feederCoordinator = new FeederCoordinator();
 
+// This will handle the REST API
+const Server = require("./src/server");
+var server = new Server(feederCoordinator);

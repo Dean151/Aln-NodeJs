@@ -2,7 +2,7 @@
   "name": "aln-nodejs",
   "version": "1.0.0",
   "description": "A remplacement for alnpet.com API to make HoneyGuaridan S25 more secure",
-  "main": "src/main.js",
+  "main": "main.js",
   "scripts": {
     "test": "jest"
   },
@@ -19,9 +19,6 @@
   "devDependencies": {
     "jest": "^22.1.4",
     "prettier": "1.10.2"
-  },
-  "dependencies": {
-    "console-prefix": "^1.0.0"
   },
   "prettier": {
     "printWidth": 120
