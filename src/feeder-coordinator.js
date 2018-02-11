@@ -34,7 +34,7 @@ FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
 
 FeederCoordinator.prototype.write = function (identifier, hexData, callback) {
   FeederCoordinator.feeders[identifier]._socket.write(hexData, 'hex', () => {
-    console.log("Data sent: " . data);
+    console.log("Data sent: " + data);
     if (typeof(callback) == "function") {
       callback();
     }
