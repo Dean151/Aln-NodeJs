@@ -16,6 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+var Time = require("./time.js");
+
 function ResponseBuilder() {}
 
 ResponseBuilder.time = function() {
