@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-function Server(feederCoordinator, environment) {
+function Server(feederCoordinator, config) {
   this.feederCoordinator = feederCoordinator;
 
   const express = require('express');
@@ -24,14 +24,14 @@ function Server(feederCoordinator, environment) {
   // Create a service (the app object is just a callback).
   var app = express();
 
-  if (environment.USE_HTTPS == 'true') {
+  if (config.use_https == 'true') {
     const https = require('https');
     const fs = require('fs');
 
     // This line is from the Node.js HTTPS documentation.
     var options = {
-      key: fs.readFileSync(environment.CERTIFICATE_KEY),
-      cert: fs.readFileSync(environment.CERTIFICATE)
+      key: fs.readFileSync(config.certificate_key),
+      cert: fs.readFileSync(config.certificate)
     };
 
     // Create an HTTPS service identical to the HTTP service.
