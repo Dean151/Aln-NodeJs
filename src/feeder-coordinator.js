@@ -19,7 +19,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 const Feeder = require("./feeder");
 
 function FeederCoordinator() {
-  
+
   const net = require("net");
   const server = net.createServer((c) => {
     console.log('Client connected');
@@ -36,10 +36,10 @@ function FeederCoordinator() {
         console.log('Feeder identified with: ' + identifier);
 
         // Register it
-        feederCoordinator.registerFeeder(identifier, c);
+        this.registerFeeder(identifier, c);
 
         // Send it back the time
-        feederCoordinator.write(identifier, ResponseBuilder.time());
+        this.write(identifier, ResponseBuilder.time());
       }
     });
     c.pipe(c);
