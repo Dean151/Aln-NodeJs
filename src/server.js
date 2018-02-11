@@ -19,7 +19,31 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 function Server(feederCoordinator) {
   this.feederCoordinator = feederCoordinator;
 
-  // Create the API server
+  const express = require('express');
+
+  // Create a service (the app object is just a callback).
+  var app = express();
+
+  if (process.env.USE_HTTPS) {
+    const https = require('https');
+    const fs = require('fs');
+
+    // This line is from the Node.js HTTPS documentation.
+    var options = {
+      key: fs.readFileSync(process.env.CERTIFICATE_KEY),
+      cert: fs.readFileSync(process.env.CERTIFICATE)
+    };
+
+    // Create an HTTPS service identical to the HTTP service.
+    https.createServer(options, app).listen(443);
+  }
+  else {
+    const http = require('http');
+
+    // Create an HTTP service.
+    http.createServer(app).listen(80);
+  }
+  
 }
 
 module.exports = Server;
