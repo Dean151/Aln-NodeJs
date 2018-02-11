@@ -16,14 +16,41 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-var Time = require("./time.js");
-
 function ResponseBuilder() {}
 
 ResponseBuilder.time = function() {
-  var prefix = new Buffer([157, 161, 6, 1]);
+  var Time = require("./time");
   var time = new Time();
+
+  // 9da10601
+  var prefix = new Buffer([157, 161, 6, 1]);
   return Buffer.concat([prefix, time.buffered()]);
+}
+
+ResponseBuilder.changeDefaultQuantity = function(quantity) {
+  var Quantity = require("./quantity");
+  if (quantity.constructor !== Quantity) {
+    throw "Wrong argument passed to changeDefaultQuantity()";
+  }
+
+  // 9da106c3
+  var prefix = new Buffer([157, 161, 6, 195]);
+  return Buffer.concat([prefix, quantity.buffered()]);
+}
+
+ResponseBuilder.changePlanning = function(planning) {
+  var Planning = require("./planning");
+  if (planning.constructor !== Planning) {
+    throw "Wrong argument passed to changePlanning()";
+  }
+
+  // 9da12dc4
+  var prefix = new Buffer([157, 161, 45, 196]);
+  return Buffer.concat([prefix, planning.buffered()]);
+}
+
+ResponseBuilder.feedNow = function() {
+  throw "Not implemented exception";
 }
 
 module.exports = ResponseBuilder;
