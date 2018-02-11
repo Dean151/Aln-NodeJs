@@ -24,7 +24,7 @@ function Server(feederCoordinator, config) {
   // Create a service (the app object is just a callback).
   var app = express();
 
-  if (config.use_https == 'true') {
+  if (config.use_https) {
     const https = require('https');
     const fs = require('fs');
 
