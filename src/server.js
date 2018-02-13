@@ -25,26 +25,27 @@ function Server(feederCoordinator, config) {
   var app = express();
 
   if (config.use_https) {
-    const https = require('https');
     const fs = require('fs');
-    const strongClusterTlsStore = require('strong-cluster-tls-store');
-
-    // This line is from the Node.js HTTPS documentation.
     var options = {
       key: fs.readFileSync(config.certificate_key),
       cert: fs.readFileSync(config.certificate),
-      ca: fs.readFileSync(config.ca_certificate)
+      ca: fs.readFileSync(config.ca_certificate),
+      secureOptions: require('minimum-tls-version')('tlsv11')
     };
 
     // Create an HTTPS service identical to the HTTP service.
-    const server = https.createServer(options, app).listen(443);
+    const https = require('https');
+    const server = https.createServer(options, app).listen(config.server_port);
+
+    // Allowing TLS session resume
+    const strongClusterTlsStore = require('strong-cluster-tls-store');
     strongClusterTlsStore(server);
   }
   else {
     const http = require('http');
 
     // Create an HTTP service.
-    http.createServer(app).listen(80);
+    http.createServer(app).listen(config.server_port);
   }
 
 }
