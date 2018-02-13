@@ -31,9 +31,16 @@ function Server(feederCoordinator, config) {
       key: fs.readFileSync(config.certificate_key),
       cert: fs.readFileSync(config.certificate),
       ca: fs.readFileSync(config.ca_certificate),
-      ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5;',
       secureOptions: minTlsVersion('tlsv11')
     };
+
+    // Adding HSTS
+    const hsts = require('hsts')
+    app.use(hsts({
+      maxAge: 15552000,        // Must be at least 1 year to be approved
+      includeSubDomains: true, // Must be enabled to be approved
+      preload: true
+    }));
 
     // Create an HTTPS service identical to the HTTP service.
     const https = require('https');

@@ -19,6 +19,7 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "express": "^4.16.2",
+    "hsts": "^2.1.0",
     "jsonwebtoken": "^8.1.1",
     "minimum-tls-version": "0.0.3",
     "strong-cluster-tls-store": "^1.0.3",
