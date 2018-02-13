@@ -20,5 +20,5 @@ module.exports = {
   'use_https': false,
   'certificate': 'fullchain.pem',
   'certificate_key': 'privkey.pem',
-  'trusted_certificate': 'chain.pem'
+  'ca_certificate': 'chain.pem'
 };

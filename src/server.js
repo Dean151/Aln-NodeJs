@@ -32,6 +32,7 @@ function Server(feederCoordinator, config) {
     var options = {
       key: fs.readFileSync(config.certificate_key),
       cert: fs.readFileSync(config.certificate)
+      ca: fs.readFileSync(config.ca_certificate)
     };
 
     // Create an HTTPS service identical to the HTTP service.
