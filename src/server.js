@@ -26,11 +26,12 @@ function Server(feederCoordinator, config) {
 
   if (config.use_https) {
     const fs = require('fs');
+    const minTlsVersion = require('minimum-tls-version');
     var options = {
       key: fs.readFileSync(config.certificate_key),
       cert: fs.readFileSync(config.certificate),
       ca: fs.readFileSync(config.ca_certificate),
-      secureOptions: require('minimum-tls-version')('tlsv11')
+      secureOptions: minTlsVersion('tlsv11')
     };
 
     // Create an HTTPS service identical to the HTTP service.
