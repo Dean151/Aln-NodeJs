@@ -20,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "express": "^4.16.2",
     "jsonwebtoken": "^8.1.1",
+    "minimum-tls-version": "0.0.3",
     "strong-cluster-tls-store": "^1.0.3",
     "strong-store-cluster": "^1.0.1"
   },
