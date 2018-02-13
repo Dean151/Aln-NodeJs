@@ -31,7 +31,7 @@ function Server(feederCoordinator, config) {
     // This line is from the Node.js HTTPS documentation.
     var options = {
       key: fs.readFileSync(config.certificate_key),
-      cert: fs.readFileSync(config.certificate)
+      cert: fs.readFileSync(config.certificate),
       ca: fs.readFileSync(config.ca_certificate)
     };
 
