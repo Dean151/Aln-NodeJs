@@ -27,6 +27,7 @@ function Server(feederCoordinator, config) {
   if (config.use_https) {
     const https = require('https');
     const fs = require('fs');
+    const strongClusterTlsStore = require('strong-cluster-tls-store');
 
     // This line is from the Node.js HTTPS documentation.
     var options = {
@@ -36,7 +37,8 @@ function Server(feederCoordinator, config) {
     };
 
     // Create an HTTPS service identical to the HTTP service.
-    https.createServer(options, app).listen(443);
+    const server = https.createServer(options, app).listen(443);
+    strongClusterTlsStore(server);
   }
   else {
     const http = require('http');
