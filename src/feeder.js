@@ -19,11 +19,33 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 function Feeder(identifier, socket) {
   this._identifier = identifier;
   this.hasResponded(socket);
+
+  var Storage = require('node-storage');
+  this.store = new Storage('data/storage.data');
+  this.planning = this.store.get(identifier);
 }
 
 Feeder.prototype.hasResponded = function(socket) {
   this._socket = socket;
   this._lastResponded = new Date();
+}
+
+Feeder.prototype.write = function(data, callback) {
+  var hexData = data.toString('hex');
+  this._socket.write(hexData, 'hex', () => {
+    console.log("Data sent: " + hexData);
+    if (typeof(callback) == "function") {
+      callback();
+    }
+  });
+}
+
+Feeder.prototype.setPlanning = function(planning) {
+  this.planning = planning
+  this.store.put(this._identifier, planning);
+  this.write(planning.buffered(), function() {
+    console.log('Planning changed');
+  });
 }
 
 module.exports = Feeder;

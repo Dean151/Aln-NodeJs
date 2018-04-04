@@ -22,6 +22,7 @@
     "hsts": "^2.1.0",
     "jsonwebtoken": "^8.1.1",
     "minimum-tls-version": "0.0.3",
+    "node-storage": "0.0.7",
     "strong-cluster-tls-store": "^1.0.3",
     "strong-store-cluster": "^1.0.1"
   },
