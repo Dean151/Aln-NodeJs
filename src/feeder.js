@@ -22,7 +22,29 @@ function Feeder(identifier, socket) {
 
   var Storage = require('node-storage');
   this.store = new Storage('data/storage.data');
-  this.planning = this.store.get(identifier);
+
+  this.feederData = this.store.get(identifier);
+
+  // Initializing data if missing
+  if (typeof this.feederData === 'undefined') {
+    this.feederData = {
+      quantity: new Quantity(5),
+      planning: new Planning([]),
+    };
+    this.saveData();
+  }
+}
+
+Feeder.prototype.saveData = function() {
+  this.store.put(this._identifier, this.feederData);
+}
+
+Feeder.prototype.quantity = function() {
+  return this.feederData.quantity;
+}
+
+Feeder.prototype.planning = function() {
+  return this.feederData.planning;
 }
 
 Feeder.prototype.hasResponded = function(socket) {
@@ -34,17 +56,56 @@ Feeder.prototype.write = function(data, callback) {
   var hexData = data.toString('hex');
   this._socket.write(hexData, 'hex', () => {
     console.log("Data sent: " + hexData);
-    if (typeof(callback) == "function") {
+    if (typeof callback == "function") {
       callback();
     }
   });
 }
 
-Feeder.prototype.setPlanning = function(planning) {
-  this.planning = planning
-  this.store.put(this._identifier, planning);
-  this.write(planning.buffered(), function() {
+Feeder.prototype.setAmount = function(quantity, callback) {
+  var message = Buffer.concat([new Buffer([157, 161, 6, 195]), quantity.buffered()]);
+  this.write(message, function() {
+    this.feederData.quantity = quantity
+    this.saveData();
+
+    console.log('Amount changed');
+    if (typeof callback == 'function') {
+      callback();
+    }
+  });
+}
+
+Feeder.prototype.feedNow = function(callback) {
+  var message = new Buffer([]); // FIXME: We do not yet have the correct bytes sentence to send here
+  this.write(message, function() {
+
+    console.log('Feeding order sent');
+    if (typeof callback == 'function') {
+      callback();
+    }
+  });
+}
+
+Feeder.prototype.feedAmountNow = function(quantity, callback) {
+  this.setAmount(quantity, function() {
+    this.feedNow(function() {
+      if (typeof callback == 'function') {
+        callback();
+      }
+    });
+  });
+}
+
+Feeder.prototype.setPlanning = function(planning, callback) {
+  var message = Buffer.concat([new Buffer([157, 161, 5, 196]), planning.buffered()]);
+  this.write(message, function() {
+    this.feederData.planning = planning
+    this.saveData();
+
     console.log('Planning changed');
+    if (typeof callback == 'function') {
+      callback();
+    }
   });
 }
 
