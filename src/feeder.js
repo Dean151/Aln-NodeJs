@@ -16,11 +16,15 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const Quantity = require("./quantity");
+const Planning = require("./planning");
+
+const Storage = require('node-storage');
+
 function Feeder(identifier, socket) {
   this._identifier = identifier;
   this.hasResponded(socket);
 
-  var Storage = require('node-storage');
   this.store = new Storage('data/storage.data');
 
   this.feederData = this.store.get(identifier);
