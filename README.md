@@ -53,7 +53,6 @@ For a use with supervisor on your raspebrry pi, this is an example config to mak
 
 [program:aln-nodejs]
 command=/opt/node/bin/node /home/pi/Aln-NodeJs/main.js
-user=pi
 ```
 
 Then restart supervisor. It should start automatically the package, it's ready to use !
