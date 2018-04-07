@@ -20,16 +20,28 @@ function Server(feederCoordinator, config) {
   this.feederCoordinator = feederCoordinator;
 
   const express = require('express');
+  const bodyParser = require('body-parser');
 
   // Create a service (the app object is just a callback).
   var app = express();
+
+  app.use(bodyParser.urlencoded({ extended: true }));
+  app.use(bodyParser.json());
 
   // Create the routes for the API
   var router = express.Router();
 
   router.route('/amount').post(function(req, res) {
-    console.log(req);
-    console.log(res);
+    try {
+      const Quantity = require("./quantity");
+      var quantity = new Quantity(req.body.quantity);
+      feederCoordinator[req.body.identifier].setAmount(quantity, function() {
+        res.json({ message: 'Quantity successfully setted!' });
+      });
+    }
+    catch(error) {
+      res.send(error);
+    }
   });
 
   // Use the routes
