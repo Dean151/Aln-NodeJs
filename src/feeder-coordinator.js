@@ -85,4 +85,20 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
   });
 }
 
+FeederCoordinator.prototype.feedNow = function (identifier, callback) {
+  const ResponseBuilder = require("./response-builder");
+  this.write(identifier, ResponseBuilder.feedNow(), function() {
+    console.log('Feeding requested');
+    if (typeof callback == 'function') {
+      callback();
+    }
+  });
+}
+
+FeederCoordinator.prototype.feedAmountNow = function (identifier, quantity, callback) {
+  this.setDefaultQuantity(identifier, quantity, function() {
+    this.feedNow(identifier, callback);
+  });
+}
+
 module.exports = FeederCoordinator;

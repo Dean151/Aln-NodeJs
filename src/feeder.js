@@ -19,28 +19,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 const Quantity = require("./quantity");
 const Planning = require("./planning");
 
-const Storage = require('node-storage');
-
 function Feeder(identifier, socket) {
   this._identifier = identifier;
   this.hasResponded(socket);
-
-  this.store = new Storage('data/storage.data');
-
-  this.feederData = this.store.get(identifier);
-
-  // Initializing data if missing
-  if (typeof this.feederData === 'undefined') {
-    this.feederData = {
-      quantity: new Quantity(5),
-      planning: new Planning([]),
-    };
-    this.saveData();
-  }
-}
-
-Feeder.prototype.saveData = function() {
-  this.store.put(this._identifier, this.feederData);
 }
 
 Feeder.prototype.quantity = function() {
@@ -61,40 +42,6 @@ Feeder.prototype.write = function(data, callback) {
   this._socket.write(hexData, 'hex', () => {
     console.log("Data sent: " + hexData);
     if (typeof callback == "function") {
-      callback();
-    }
-  });
-}
-
-Feeder.prototype.feedNow = function(callback) {
-  var message = new Buffer([]); // FIXME: We do not yet have the correct bytes sentence to send here
-  this.write(message, function() {
-
-    console.log('Feeding order sent');
-    if (typeof callback == 'function') {
-      callback();
-    }
-  });
-}
-
-Feeder.prototype.feedAmountNow = function(quantity, callback) {
-  this.setAmount(quantity, function() {
-    this.feedNow(function() {
-      if (typeof callback == 'function') {
-        callback();
-      }
-    });
-  });
-}
-
-Feeder.prototype.setPlanning = function(planning, callback) {
-  var message = Buffer.concat([new Buffer([157, 161, 5, 196]), planning.buffered()]);
-  this.write(message, function() {
-    this.feederData.planning = planning
-    this.saveData();
-
-    console.log('Planning changed');
-    if (typeof callback == 'function') {
       callback();
     }
   });
