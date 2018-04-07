@@ -104,7 +104,9 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   feeder._socket.on('data', expectationListener);
 
   // Write to the feeder
-  FeederCoordinator.feeders[identifier].write(data, callback);
+  FeederCoordinator.feeders[identifier].write(data, () => {
+    console.log('Changing amount requested ...');
+  });
 }
 
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
