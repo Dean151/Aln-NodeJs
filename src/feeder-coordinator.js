@@ -69,7 +69,20 @@ FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
 }
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
+  if (!(identifier in FeederCoordinator.feeders)) {
+    throw 'Feeder not found';
+  }
   FeederCoordinator.feeders[identifier].write(data, callback);
+}
+
+FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
+  const ResponseBuilder = require("./response-builder");
+  this.write(identifier, ResponseBuilder.changeDefaultQuantity(quantity), function() {
+    console.log('Amount changed');
+    if (typeof callback == 'function') {
+      callback();
+    }
+  });
 }
 
 module.exports = FeederCoordinator;

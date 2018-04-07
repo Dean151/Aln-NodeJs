@@ -66,19 +66,6 @@ Feeder.prototype.write = function(data, callback) {
   });
 }
 
-Feeder.prototype.setAmount = function(quantity, callback) {
-  var message = Buffer.concat([new Buffer([157, 161, 6, 195]), quantity.buffered()]);
-  this.write(message, function() {
-    this.feederData.quantity = quantity
-    this.saveData();
-
-    console.log('Amount changed');
-    if (typeof callback == 'function') {
-      callback();
-    }
-  });
-}
-
 Feeder.prototype.feedNow = function(callback) {
   var message = new Buffer([]); // FIXME: We do not yet have the correct bytes sentence to send here
   this.write(message, function() {
