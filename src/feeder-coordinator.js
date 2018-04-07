@@ -110,7 +110,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex'); + 'c3d0a10000';
+  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'c3d0a10000';
   this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, () => {
     console.log('Amount changed');
     if (typeof callback == 'function') {
