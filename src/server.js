@@ -24,6 +24,17 @@ function Server(feederCoordinator, config) {
   // Create a service (the app object is just a callback).
   var app = express();
 
+  // Create the routes for the API
+  var router = express.Router();
+
+  var router.route('/amount').post(function(req, res) {
+    console.log(req);
+    console.log(res);
+  });
+
+  // Use the routes
+  app.use('/api', router);
+
   if (config.use_https) {
     const fs = require('fs');
     const minTlsVersion = require('minimum-tls-version');
