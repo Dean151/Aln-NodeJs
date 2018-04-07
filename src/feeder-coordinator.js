@@ -75,9 +75,43 @@ FeederCoordinator.prototype.write = function (identifier, data, callback) {
   FeederCoordinator.feeders[identifier].write(data, callback);
 }
 
+FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectation, callback) {
+  if (!(identifier in FeederCoordinator.feeders)) {
+    throw 'Feeder not found';
+  }
+  var feeder = FeederCoordinator.feeders[identifier];
+
+  console.log('Expecting ' + expectation);
+
+  // Prepare a timeout for execution
+  var timeout = setTimeout(() => {
+    feeder._socket.removeListener('data', expectationListener);
+    throw 'Timeout';
+  }, 30000);
+
+  var expectationListener = (data) => {
+    var hexData = data.toString('hex');
+    if (hexData == expectation) {
+      if (typeof function == 'function') {
+        callback();
+      }
+      feeder._socket.removeListener('data', expectationListener);
+      clearTimeout(timeout);
+    }
+  };
+
+  // Listen for the expectation
+  feeder._socket.on('data', expectationListener);
+
+  // Write to the feeder
+  FeederCoordinator.feeders[identifier].write(data, callback);
+}
+
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
-  this.write(identifier, ResponseBuilder.changeDefaultQuantity(quantity), function() {
+
+  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex'); + '1c3d0a10000';
+  this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, () => {
     console.log('Amount changed');
     if (typeof callback == 'function') {
       callback();
