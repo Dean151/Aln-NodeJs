@@ -27,7 +27,7 @@ function Server(feederCoordinator, config) {
   // Create the routes for the API
   var router = express.Router();
 
-  var router.route('/amount').post(function(req, res) {
+  router.route('/amount').post(function(req, res) {
     console.log(req);
     console.log(res);
   });
