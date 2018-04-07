@@ -92,7 +92,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   var expectationListener = (data) => {
     var hexData = data.toString('hex');
     if (hexData == expectation) {
-      if (typeof function == 'function') {
+      if (typeof callback == 'function') {
         callback();
       }
       feeder._socket.removeListener('data', expectationListener);
