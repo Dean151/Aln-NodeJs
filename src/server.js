@@ -48,7 +48,7 @@ function Server(feederCoordinator, config) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, function() {
+      feederCoordinator.feedNow(req.body.identifier, quantity, function() {
         res.json({ message: 'Feeding requested!' });
       });
     }
