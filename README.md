@@ -6,7 +6,82 @@ The original API is absolutly not secure, so it needed a full replacement. ([How
 
 ## Usage
 
-Work in progress
+### Overall usage
+
+The api is callable through the routes prefixed by `api`
+
+*Example:* `http(s)://myhost/api/anything`
+
+Every incoming request shall have a few headers informations:
+
+| Key            | Value                       |
+|----------------|-----------------------------|
+| Accept         | application/json            |
+| Content-Type   | application/json            |
+| x-access-token | the-secret-key-in-config.js |
+
+### Setting the default feeding amount
+
+This is the amount of food that will be given when you pressed the manual button on the feeder.
+
+**URI:** `POST http(s)://myhost/api/quantity`
+
+**Parameters** : `identifier` and `quantity`
+
+*Example:* To set a default feeding amount of 10 grams.
+
+```
+POST http(s)://myhost/api/quantity
+{
+  "identifier": "XXX012345678",
+  "quantity": 10
+}
+```
+
+*You can set a quantity from 5 grams to 150 grams.*
+
+### Setting the planning for automated meals
+
+You can setup the feeder to trigger regulary up to 10 meals a day with different times and amounts.
+
+**URI:** `POST http(s)://myhost/api/planning`
+
+**Parameters** : `identifier` and `meals`
+
+*Example:* To set three meals of 20 grams each. The time must be UTC time ; adjust accordingly for your timezone. DST is not yet supported.
+
+```
+{
+  "identifier": "XXX012345678",
+  "meals": [
+    {"time":{"hours": 8, "minutes": 0}, "quantity": 20},
+    {"time":{"hours": 13, "minutes": 0}, "quantity": 20},
+    {"time":{"hours": 21, "minutes": 0}, "quantity": 20}
+  ]
+}
+```
+
+*You can set up to 10 meals, and quantity goes from 5 grams to 150 grams.*
+
+### Feeding
+
+You can trigger a new meal by doing just one request!
+
+**URI:** `POST http(s)://myhost/api/feed`
+
+**Parameters** : `identifier` and `quantity`
+
+*Example:* To feed now a meal of 5 grams.
+
+```
+POST http(s)://myhost/api/feed
+{
+  "identifier": "XXX012345678",
+  "quantity": 5
+}
+```
+
+*You can set a quantity from 5 grams to 150 grams.*
 
 ## Installation
 
