@@ -51,7 +51,7 @@ function Time(hours, minutes) {
  * @param {number} minutes_offset ; default to 0 (optional)
  * @return {number} the number of seconds since offset for this Time instance.
  */
-Time.prototype.numberOfMinutes = function(hours_offset = 17, minutes_offset = 0) {
+Time.prototype.numberOfMinutes = function(hours_offset = 16, minutes_offset = 0) {
   var hours = (this._hours - hours_offset + 24) % 24;
   var minutes = (this._minutes - minutes_offset + 60) % 60;
   return hours * 60 + minutes;
@@ -63,7 +63,7 @@ Time.prototype.numberOfMinutes = function(hours_offset = 17, minutes_offset = 0)
  * @param {number} minutes_offset ; default to 0 (optional)
  * @return {Buffer} the binary buffer representing the number of seconds since offset for this Time instance.
  */
-Time.prototype.buffered = function(hours_offset = 17, minutes_offset = 0) {
+Time.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   var seconds = this.numberOfMinutes(hours_offset, minutes_offset);
   var b2 = seconds % 256;
   var b1 = (seconds - b2) / 256;
