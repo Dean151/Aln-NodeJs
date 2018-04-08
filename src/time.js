@@ -26,8 +26,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 function Time(hours, minutes) {
   if (hours === undefined && minutes === undefined) {
     var now = new Date();
-    this._hours = now.getHours();
-    this._minutes = now.getMinutes();
+    this._hours = now.getUTCHours();
+    this._minutes = now.getUTCMinutes();
   } else {
     var numberHours = Math.floor(+hours);
     if (numberHours >= 0 && numberHours % 24 === numberHours) {
