@@ -31,7 +31,7 @@ function Server(feederCoordinator, config) {
   // Create the routes for the API
   var router = express.Router();
 
-  router.route('/amount').post(function(req, res) {
+  router.route('/quantity').post(function(req, res) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
@@ -51,7 +51,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feedNow').post(function(req, res) {
+  router.route('/feed').post(function(req, res) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
