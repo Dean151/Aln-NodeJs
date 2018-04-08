@@ -17,6 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 module.exports = {
+  'server_port': 8080,
   'use_https': false,
   'certificate': 'fullchain.pem',
   'certificate_key': 'privkey.pem',
