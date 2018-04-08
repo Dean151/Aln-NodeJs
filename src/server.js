@@ -55,11 +55,57 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/quantity').post(function(req, res) {
+  router.route('/quantity')
+  .get(function(req, res) {
+    try {
+      var quantity = feederCoordinator.getDefaultQuantity(req.body.identifier, (quantity) => {
+        res.json({ success: true, quantity: quantity });
+      });
+    }
+    catch(error) {
+      res.status(400);
+      res.json({ success: false, error: error});
+    }
+  })
+  .post(function(req, res) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
       feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
+        if (msg == 'success') {
+          res.json({ success: true, message: 'Quantity successfully setted!' });
+        }
+        else {
+          res.status(400);
+          res.json({ success: false, error: msg });
+        }
+      });
+    }
+    catch(error) {
+      res.status(400);
+      res.json({ success: false, error: error});
+    }
+  });
+
+  router.route('/planning')
+  .get(function(req, res) {
+    try {
+      var planning = feederCoordinator.getPlanning(req.body.identifier, (planning) => {
+        res.json({ success: true, planning: planning });
+      });
+    }
+    catch(error) {
+      res.status(400);
+      res.json({ success: false, error: error});
+    }
+  })
+  .post(function(req, res) {
+    try {
+      const Meal = require('./meal');
+      var meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
+      const Planning = require("./planning");
+      var planning = new Planning(meals);
+      feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
         if (msg == 'success') {
           res.json({ success: true, message: 'Quantity successfully setted!' });
         }

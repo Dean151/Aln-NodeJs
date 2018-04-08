@@ -107,6 +107,11 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   });
 }
 
+FeederCoordinator.prototype.getDefaultQuantity = function (identifier, callback) {
+  // TODO
+  throw 'Not implemented exception';
+}
+
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
@@ -114,6 +119,22 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
   this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, (msg) => {
     if (typeof callback == 'function') {
       callback(msg);
+    }
+  });
+}
+
+FeederCoordinator.prototype.getPlanning = function (identifier, callback) {
+  // TODO
+  throw 'Not implemented exception';
+}
+
+FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
+  const ResponseBuilder = require("./response-builder");
+
+  this.write(identifier, ResponseBuilder.changePlanning(planning), () => {
+    console.log('Planning changed');
+    if (typeof callback == 'function') {
+      callback('success');
     }
   });
 }
