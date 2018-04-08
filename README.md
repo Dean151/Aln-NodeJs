@@ -51,6 +51,7 @@ You can setup the feeder to trigger regulary up to 10 meals a day with different
 *Example:* To set three meals of 20 grams each. The time must be UTC time ; adjust accordingly for your timezone. DST is not yet supported.
 
 ```
+POST http(s)://myhost/api/planning
 {
   "identifier": "XXX012345678",
   "meals": [
