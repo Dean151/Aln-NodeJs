@@ -46,7 +46,7 @@ test("Meal() with unvalid parameters should throw", () => {
 // buffered()
 test("buffered() should send the correct binary value", () => {
   expect(new Meal({ hours: 0, minutes: 0 }, 5).buffered(0, 0).toString("hex")).toBe("00000005");
-  expect(new Meal({ hours: 8, minutes: 30 }, 8).buffered().toString("hex")).toBe("03a20008");
-  expect(new Meal({ hours: 12, minutes: 30 }, 10).buffered().toString("hex")).toBe("0492000a");
-  expect(new Meal({ hours: 16, minutes: 0 }, 11).buffered().toString("hex")).toBe("0564000b");
+  expect(new Meal({ hours: 7, minutes: 30 }, 8).buffered().toString("hex")).toBe("03a20008");
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).buffered().toString("hex")).toBe("0492000a");
+  expect(new Meal({ hours: 15, minutes: 0 }, 11).buffered().toString("hex")).toBe("0564000b");
 });

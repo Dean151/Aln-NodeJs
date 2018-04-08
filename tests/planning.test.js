@@ -21,30 +21,30 @@ const Planning = require("./../src/planning");
 
 test("numberOfMeals() tests", () => {
   expect(new Planning([]).numberOfMeals()).toBe(0);
-  var meal1 = new Meal({ hours: 12, minutes: 30 }, 10);
+  var meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
   expect(new Planning([meal1]).numberOfMeals()).toBe(1);
-  var meal2 = new Meal({ hours: 18, minutes: 20 }, 15);
+  var meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
   expect(new Planning([meal1, meal2]).numberOfMeals()).toBe(2);
-  var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
+  var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).numberOfMeals()).toBe(3);
 });
 
 test('totalQuantity() tests', () => {
   expect(new Planning([]).totalQuantity()).toBe(0);
-  var meal1 = new Meal({ hours: 12, minutes: 30 }, 10);
+  var meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
   expect(new Planning([meal1]).totalQuantity()).toBe(10);
-  var meal2 = new Meal({ hours: 18, minutes: 20 }, 15);
+  var meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
   expect(new Planning([meal1, meal2]).totalQuantity()).toBe(25);
-  var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
+  var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).totalQuantity()).toBe(30);
 });
 
 test('buffered() tests', () => {
   expect(new Planning([]).buffered().toString('hex')).toBe("00");
-  var meal1 = new Meal({ hours: 12, minutes: 30 }, 10);
+  var meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
   expect(new Planning([meal1]).buffered().toString('hex')).toBe("010492000a");
-  var meal2 = new Meal({ hours: 18, minutes: 20 }, 15);
+  var meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
   expect(new Planning([meal1, meal2]).buffered().toString('hex')).toBe("020492000a0050000f");
-  var meal3 = new Meal({ hours: 6, minutes: 0 }, 5);
+  var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).buffered().toString('hex')).toBe("030492000a0050000f030c0005");
 });
