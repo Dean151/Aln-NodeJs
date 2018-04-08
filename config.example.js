@@ -27,6 +27,6 @@ module.exports = {
   'ca_certificate': 'chain.pem',
 
   // API secrets
-  'allowed_feeders' = ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.
-  'api_secret' = '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
+  'allowed_feeders': ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.
+  'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
 };
