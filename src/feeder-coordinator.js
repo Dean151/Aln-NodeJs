@@ -105,7 +105,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 
   // Write to the feeder
   FeederCoordinator.feeders[identifier].write(data, () => {
-    console.log('Changing amount requested ...');
+    console.log('Waiting for expectation ...');
   });
 }
 
@@ -121,19 +121,13 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
   });
 }
 
-FeederCoordinator.prototype.feedNow = function (identifier, callback) {
+FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
-  this.write(identifier, ResponseBuilder.feedNow(), function() {
+  this.write(identifier, ResponseBuilder.feedNow(quantity), function() {
     console.log('Feeding requested');
     if (typeof callback == 'function') {
       callback();
     }
-  });
-}
-
-FeederCoordinator.prototype.feedAmountNow = function (identifier, quantity, callback) {
-  this.setDefaultQuantity(identifier, quantity, function() {
-    this.feedNow(identifier, callback);
   });
 }
 

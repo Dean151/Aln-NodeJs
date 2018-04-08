@@ -49,8 +49,15 @@ ResponseBuilder.changePlanning = function(planning) {
   return Buffer.concat([prefix, planning.buffered()]);
 }
 
-ResponseBuilder.feedNow = function() {
-  throw "Not implemented exception";
+ResponseBuilder.feedNow = function(quantity) {
+  var Quantity = require("./quantity");
+  if (quantity.constructor !== Quantity) {
+    throw "Wrong argument passed to changeDefaultQuantity()";
+  }
+
+  // 9da106a2
+  var prefix = new Buffer([157, 161, 6, 162]);
+  return Buffer.concat([prefix, quantity.buffered()]);
 }
 
 module.exports = ResponseBuilder;

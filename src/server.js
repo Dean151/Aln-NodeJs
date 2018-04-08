@@ -46,18 +46,11 @@ function Server(feederCoordinator, config) {
 
   router.route('/feedNow').post(function(req, res) {
     try {
-      if (req.body.quantity) {
-        const Quantity = require("./quantity");
-        var quantity = new Quantity(req.body.quantity);
-        feederCoordinator.feedAmountNow(req.body.identifier, function() {
-          res.json({ message: 'Feeding requested!' });
-        });
-      }
-      else {
-        feederCoordinator.feedNow(req.body.identifier, function() {
-          res.json({ message: 'Feeding requested!' });
-        });
-      }
+      const Quantity = require("./quantity");
+      var quantity = new Quantity(req.body.quantity);
+      feederCoordinator.feedNow(req.body.identifier, function() {
+        res.json({ message: 'Feeding requested!' });
+      });
     }
     catch(error) {
       res.send(error);
