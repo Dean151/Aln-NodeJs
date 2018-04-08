@@ -49,7 +49,7 @@ function Server(feederCoordinator, config) {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.body.identifier, quantity, function() {
-        res.json({ message: 'Feeding requested!' });
+        res.json({ message: 'Feeding completed!' });
       });
     }
     catch(error) {
