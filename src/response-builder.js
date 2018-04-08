@@ -52,7 +52,7 @@ ResponseBuilder.changePlanning = function(planning) {
 ResponseBuilder.feedNow = function(quantity) {
   var Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
-    throw "Wrong argument passed to changeDefaultQuantity()";
+    throw "Wrong argument passed to feedNow()";
   }
 
   // 9da106a2

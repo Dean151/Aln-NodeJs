@@ -35,12 +35,19 @@ function Server(feederCoordinator, config) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function() {
-        res.json({ message: 'Quantity successfully setted!' });
+      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
+        if (msg == 'success') {
+          res.json({ success: true, message: 'Quantity successfully setted!' });
+        }
+        else {
+          res.status(400);
+          res.json({ success: false, error: msg });
+        }
       });
     }
     catch(error) {
-      res.send(error);
+      res.status(400);
+      res.json({ success: false, error: error});
     }
   });
 
@@ -48,12 +55,19 @@ function Server(feederCoordinator, config) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, function() {
-        res.json({ message: 'Feeding completed!' });
+      feederCoordinator.feedNow(req.body.identifier, quantity, function(msg) {
+        if (msg == 'success') {
+          res.json({ success: true, message: 'Feeding completed!' });
+        }
+        else {
+          res.status(400);
+          res.json({ success: false, error: msg });
+        }
       });
     }
     catch(error) {
-      res.send(error);
+      res.status(400);
+      res.json({ success: false, error: error});
     }
   });
 

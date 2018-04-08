@@ -81,19 +81,17 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   }
   var feeder = FeederCoordinator.feeders[identifier];
 
-  console.log('Expecting ' + expectation);
-
   // Prepare a timeout for execution
   var timeout = setTimeout(() => {
     feeder._socket.removeListener('data', expectationListener);
-    throw 'Timeout';
+    callback('timeout');
   }, 30000);
 
   var expectationListener = (data) => {
     var hexData = data.toString('hex');
     if (hexData == expectation) {
       if (typeof callback == 'function') {
-        callback();
+        callback('success');
       }
       feeder._socket.removeListener('data', expectationListener);
       clearTimeout(timeout);
@@ -113,10 +111,9 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
   const ResponseBuilder = require("./response-builder");
 
   var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'c3d0a10000';
-  this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, () => {
-    console.log('Amount changed');
+  this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, (msg) => {
     if (typeof callback == 'function') {
-      callback();
+      callback(msg);
     }
   });
 }
@@ -125,10 +122,9 @@ FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) 
   const ResponseBuilder = require("./response-builder");
 
   var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'a2d0a10000';
-  this.writeAndExpect(identifier, ResponseBuilder.feedNow(quantity), expectation, () => {
-    console.log('Feeding completed');
+  this.writeAndExpect(identifier, ResponseBuilder.feedNow(quantity), expectation, (msg) => {
     if (typeof callback == 'function') {
-      callback();
+      callback(msg);
     }
   });
 }
