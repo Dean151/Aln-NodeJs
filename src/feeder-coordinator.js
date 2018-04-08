@@ -123,8 +123,10 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
 
 FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
-  this.write(identifier, ResponseBuilder.feedNow(quantity), function() {
-    console.log('Feeding requested');
+
+  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'a2d0a10000';
+  this.writeAndExpect(identifier, ResponseBuilder.feedNow(quantity), expectation, () => {
+    console.log('Feeding completed');
     if (typeof callback == 'function') {
       callback();
     }
