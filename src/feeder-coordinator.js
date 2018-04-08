@@ -131,10 +131,10 @@ FeederCoordinator.prototype.getPlanning = function (identifier, callback) {
 FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  this.write(identifier, ResponseBuilder.changePlanning(planning), () => {
-    console.log('Planning changed');
+  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'c4d0a10000';
+  this.writeAndExpect(identifier, ResponseBuilder.changePlanning(planning), expectation, (msg) => {
     if (typeof callback == 'function') {
-      callback('success');
+      callback(msg);
     }
   });
 }

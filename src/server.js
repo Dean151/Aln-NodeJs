@@ -107,7 +107,7 @@ function Server(feederCoordinator, config) {
       var planning = new Planning(meals);
       feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
         if (msg == 'success') {
-          res.json({ success: true, message: 'Quantity successfully setted!' });
+          res.json({ success: true, message: 'Planning successfully setted!' });
         }
         else {
           res.status(400);
