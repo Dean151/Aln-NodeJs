@@ -31,6 +31,30 @@ function Server(feederCoordinator, config) {
   // Create the routes for the API
   var router = express.Router();
 
+  router.use(function(req, res, next) {
+
+    // Check the request header token to validate we're not messing around
+    if (config.api_secret != req.headers['x-access-token']) {
+      res.status(403);
+      res.json({ success: false, error: 'Authentication needed.'})
+      // We return to prevent to go to next step
+      return;
+    }
+
+    // Check that the feeder is in the allowed feeders list
+    else if (!config.allowed_feeders.includes(req.body.identifier)) {
+      res.status(403);
+      res.json({ success: false, error: 'Unrecognized feeder identifier.'})
+      // We return to prevent to go to next step
+      return;
+    }
+
+    // Make sure we go to the next routes and don't stop here
+    else {
+      next();
+    }
+  });
+
   router.route('/quantity').post(function(req, res) {
     try {
       const Quantity = require("./quantity");
