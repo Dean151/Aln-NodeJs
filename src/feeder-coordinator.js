@@ -88,8 +88,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   }, 30000);
 
   var expectationListener = (data) => {
-    var hexData = data.toString('hex');
-    if (hexData == expectation) {
+    if (data.toString('hex') == expectation.toString('hex')) {
       if (typeof callback == 'function') {
         callback('success');
       }
@@ -107,32 +106,24 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   });
 }
 
-FeederCoordinator.prototype.getDefaultQuantity = function (identifier, callback) {
-  // TODO
-  throw 'Not implemented exception';
-}
-
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'c3d0a10000';
-  this.writeAndExpect(identifier, ResponseBuilder.changeDefaultQuantity(quantity), expectation, (msg) => {
+  var data = ResponseBuilder.changeDefaultQuantity(quantity);
+  var expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
+  this.writeAndExpect(identifier, data, expectation, (msg) => {
     if (typeof callback == 'function') {
       callback(msg);
     }
   });
 }
 
-FeederCoordinator.prototype.getPlanning = function (identifier, callback) {
-  // TODO
-  throw 'Not implemented exception';
-}
-
 FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'c4d0a10000';
-  this.writeAndExpect(identifier, ResponseBuilder.changePlanning(planning), expectation, (msg) => {
+  var data = ResponseBuilder.changePlanning(quantity);
+  var expectation = ResponseBuilder.changePlanningExpectation(identifier);
+  this.writeAndExpect(identifier, data, expectation, (msg) => {
     if (typeof callback == 'function') {
       callback(msg);
     }
@@ -142,8 +133,9 @@ FeederCoordinator.prototype.setPlanning = function (identifier, planning, callba
 FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var expectation = '9da114' + Buffer.from(identifier, 'utf8').toString('hex') + 'a2d0a10000';
-  this.writeAndExpect(identifier, ResponseBuilder.feedNow(quantity), expectation, (msg) => {
+  var data = ResponseBuilder.feedNow(quantity);
+  var expectation = ResponseBuilder.feedNowExpectation(identifier);
+  this.writeAndExpect(identifier, data, expectation, (msg) => {
     if (typeof callback == 'function') {
       callback(msg);
     }
