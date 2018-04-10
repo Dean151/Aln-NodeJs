@@ -107,7 +107,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 }
 
 FeederCoordinator.prototype.getFeeders = function () {
-  var feeders = Object.keys(FeederCoordinator.feeders).reduce(function(previous, current) {
+  return Object.keys(FeederCoordinator.feeders).reduce(function(previous, current) {
     var feeder = FeederCoordinator.feeders[current];
     previous[current] = {
       identifier: feeder._identifier,
