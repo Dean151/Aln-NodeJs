@@ -107,7 +107,7 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 }
 
 FeederCoordinator.prototype.getFeeders = function () {
-  var feeders = this._feeders.map((feeder) => {
+  var feeders = FeederCoordinator.feeders.map((feeder) => {
     return {
       identifier: feeder._identifier,
       lastResponded: feeder._lastResponded.toJSON(),
