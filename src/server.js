@@ -55,6 +55,17 @@ function Server(feederCoordinator, config) {
     }
   });
 
+  .router.route('/feeders')
+  .get(function(req, res) {
+    try {
+      res.json(feederCoordinator.getFeedersStatus());
+    }
+    catch(error) {
+      res.status(400);
+      res.json({ success: false, error: error});
+    }
+  });
+
   router.route('/quantity')
   .post(function(req, res) {
     try {

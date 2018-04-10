@@ -106,6 +106,16 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   });
 }
 
+FeederCoordinator.prototype.getFeeders = function () {
+  var feeders = this._feeders.map((feeder) => {
+    return {
+      identifier: feeder._identifier,
+      lastResponded: feeder._lastResponded.toJSON(),
+      isAvailable: (Math.floor((new Date() - feeder._lastResponded) / 1000) <= 20),
+    };
+  });
+}
+
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
