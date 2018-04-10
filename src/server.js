@@ -57,7 +57,7 @@ function Server(feederCoordinator, config) {
 
   router.route('/feeders').get(function(req, res) {
     try {
-      var feeders = this.feederCoordinator.getFeedersStatus()
+      var feeders = this.feederCoordinator.getFeeders();
       res.json(feeders);
     }
     catch(error) {
