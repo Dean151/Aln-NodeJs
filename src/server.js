@@ -57,7 +57,8 @@ function Server(feederCoordinator, config) {
 
   router.route('/feeders').get(function(req, res) {
     try {
-      res.json(feederCoordinator.getFeedersStatus());
+      var feeders = this.feederCoordinator.getFeedersStatus()
+      res.json(feeders);
     }
     catch(error) {
       res.status(400);
@@ -69,7 +70,7 @@ function Server(feederCoordinator, config) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
+      this.feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
         if (msg == 'success') {
           res.json({ success: true, message: 'Quantity successfully setted!' });
         }
@@ -91,7 +92,7 @@ function Server(feederCoordinator, config) {
       var meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
       const Planning = require("./planning");
       var planning = new Planning(meals);
-      feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
+      this.feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
         if (msg == 'success') {
           res.json({ success: true, message: 'Planning successfully setted!' });
         }
@@ -111,7 +112,7 @@ function Server(feederCoordinator, config) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, function(msg) {
+      this.feederCoordinator.feedNow(req.body.identifier, quantity, function(msg) {
         if (msg == 'success') {
           res.json({ success: true, message: 'Feeding completed!' });
         }
