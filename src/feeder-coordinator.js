@@ -107,13 +107,15 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 }
 
 FeederCoordinator.prototype.getFeeders = function () {
-  var feeders = FeederCoordinator.feeders.map((feeder) => {
-    return {
+  var feeders = Object.keys(FeederCoordinator.feeders).reduce(function(previous, current) {
+    var feeder = FeederCoordinator.feeders[current];
+    previous[current] = {
       identifier: feeder._identifier,
       lastResponded: feeder._lastResponded.toJSON(),
       isAvailable: (Math.floor((new Date() - feeder._lastResponded) / 1000) <= 20),
     };
-  });
+    return previous;
+  }, {});
 }
 
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
