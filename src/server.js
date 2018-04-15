@@ -62,7 +62,7 @@ function Server(feederCoordinator, config) {
     }
     catch(error) {
       res.status(400);
-      res.json({ success: false, error: error});
+      res.json({ success: false, error: error.toString() });
     }
   });
 
@@ -82,7 +82,7 @@ function Server(feederCoordinator, config) {
     }
     catch(error) {
       res.status(400);
-      res.json({ success: false, error: error});
+      res.json({ success: false, error: error.toString() });
     }
   });
 
@@ -104,7 +104,7 @@ function Server(feederCoordinator, config) {
     }
     catch(error) {
       res.status(400);
-      res.json({ success: false, error: error});
+      res.json({ success: false, error: error.toString() });
     }
   });
 
@@ -124,7 +124,7 @@ function Server(feederCoordinator, config) {
     }
     catch(error) {
       res.status(400);
-      res.json({ success: false, error: error});
+      res.json({ success: false, error: error.toString() });
     }
   });
 

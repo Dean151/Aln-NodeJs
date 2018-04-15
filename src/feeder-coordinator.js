@@ -133,7 +133,7 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
 FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var data = ResponseBuilder.changePlanning(quantity);
+  var data = ResponseBuilder.changePlanning(planning);
   var expectation = ResponseBuilder.changePlanningExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
     if (typeof callback == 'function') {
