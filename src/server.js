@@ -24,7 +24,6 @@ function Server(feederCoordinator, config) {
 
   // Create a service (the app object is just a callback).
   var app = express();
-  app.listen(config.server_port);
 
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
