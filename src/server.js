@@ -131,39 +131,7 @@ function Server(feederCoordinator, config) {
   // Use the routes
   app.use('/api', router);
 
-  if (config.use_https) {
-    const fs = require('fs');
-    const minTlsVersion = require('minimum-tls-version');
-    var options = {
-      key: fs.readFileSync(config.certificate_key),
-      cert: fs.readFileSync(config.certificate),
-      ca: fs.readFileSync(config.ca_certificate),
-      secureOptions: minTlsVersion('tlsv11')
-    };
-
-    // Adding HSTS
-    const hsts = require('hsts')
-    app.use(hsts({
-      maxAge: 15552000,        // Must be at least 1 year to be approved
-      includeSubDomains: true, // Must be enabled to be approved
-      preload: true
-    }));
-
-    // Create an HTTPS service identical to the HTTP service.
-    const https = require('https');
-    const server = https.createServer(options, app).listen(config.server_port);
-
-    // Allowing TLS session resume
-    const strongClusterTlsStore = require('strong-cluster-tls-store');
-    strongClusterTlsStore(server);
-  }
-  else {
-    const http = require('http');
-
-    // Create an HTTP service.
-    http.createServer(app).listen(config.server_port);
-  }
-
+  const http = require('http')
+  http.createServer(app).listen(config.local_port, 'localhost');
 }
-
 module.exports = Server;

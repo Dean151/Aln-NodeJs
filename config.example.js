@@ -17,15 +17,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 module.exports = {
-  // Server port. use 80 for HTTP ; and 443 for HTTPS
-  'server_port': 80,
-
-  // HTTPS options
-  'use_https': false,
-  'certificate': 'fullchain.pem',
-  'certificate_key': 'privkey.pem',
-  'ca_certificate': 'chain.pem',
-
+  // Local port to set in nginx reverse proxy
+  'local_port': 3000,
+  
   // API secrets
   'allowed_feeders': ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.
   'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
