@@ -20,18 +20,48 @@ Every incoming request shall have a few headers informations:
 | Content-Type   | application/json            |
 | x-access-token | the-secret-key-in-config.js |
 
+### Getting the current feeder status
+
+Allow to know if the feeder is currently available, and responding threw the network
+
+**URI:** `POST http(s)://myhost/api/feeders`
+
+**Parameters** : `identifier` and `quantity`
+
+*Example:* To get the current status of the feeders
+
+```
+POST http(s)://myhost/api/feeders
+{
+  "identifier": "XXX012345678",
+  "quantity": 10
+}
+```
+
+Could return:
+```
+{
+  "XXX012345678": {
+    "identifier": "XXX012345678",
+    "isAvailable": true,
+    "lastResponded": "2018-07-30T15:14:35.072Z"
+  }
+}
+```
+
+
 ### Setting the default feeding amount
 
 This is the amount of food that will be given when you pressed the manual button on the feeder.
 
-**URI:** `POST http(s)://myhost/api/quantity`
+**URI:** `PUT http(s)://myhost/api/quantity`
 
 **Parameters** : `identifier` and `quantity`
 
 *Example:* To set a default feeding amount of 10 grams.
 
 ```
-POST http(s)://myhost/api/quantity
+PUT http(s)://myhost/api/quantity
 {
   "identifier": "XXX012345678",
   "quantity": 10
@@ -44,14 +74,14 @@ POST http(s)://myhost/api/quantity
 
 You can setup the feeder to trigger regulary up to 10 meals a day with different times and amounts.
 
-**URI:** `POST http(s)://myhost/api/planning`
+**URI:** `PUT http(s)://myhost/api/planning`
 
 **Parameters** : `identifier` and `meals`
 
 *Example:* To set three meals of 20 grams each. The time must be UTC time ; adjust accordingly for your timezone. DST is not yet supported.
 
 ```
-POST http(s)://myhost/api/planning
+PUT http(s)://myhost/api/planning
 {
   "identifier": "XXX012345678",
   "meals": [
@@ -68,14 +98,14 @@ POST http(s)://myhost/api/planning
 
 You can trigger a new meal by doing just one request!
 
-**URI:** `POST http(s)://myhost/api/feed`
+**URI:** `PUT http(s)://myhost/api/feed`
 
 **Parameters** : `identifier` and `quantity`
 
 *Example:* To feed now a meal of 5 grams.
 
 ```
-POST http(s)://myhost/api/feed
+PUT http(s)://myhost/api/feed
 {
   "identifier": "XXX012345678",
   "quantity": 5

@@ -55,7 +55,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feeders').get(function(req, res) {
+  router.route('/feeders').post(function(req, res) {
     try {
       var feeders = feederCoordinator.getFeeders();
       res.json(feeders);
@@ -66,7 +66,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/quantity').post(function(req, res) {
+  router.route('/quantity').put(function(req, res) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
@@ -86,7 +86,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/planning').post(function(req, res) {
+  router.route('/planning').put(function(req, res) {
     try {
       const Meal = require('./meal');
       var meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
@@ -108,7 +108,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feed').post(function(req, res) {
+  router.route('/feed').put(function(req, res) {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
