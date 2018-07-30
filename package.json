@@ -17,15 +17,8 @@
   },
   "homepage": "https://github.com/Dean151/Aln-NodeJs#readme",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
-    "express": "^4.16.3",
-    "hsts": "^2.1.0",
-    "jsonwebtoken": "^8.2.2",
-    "minimum-tls-version": "0.0.3",
-    "node-storage": "0.0.7",
-    "strong-cluster-tls-store": "^1.0.3",
-    "strong-store-cluster": "^1.0.1"
+    "express": "^4.16.3"
   },
   "devDependencies": {
     "jest": "^22.4.4",
