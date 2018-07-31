@@ -23,7 +23,7 @@ ResponseBuilder.time = function() {
   var time = new Time();
 
   // 9d a1 06 01
-  var prefix = new Buffer([157, 161, 6, 1]);
+  var prefix = Buffer.from([157, 161, 6, 1]);
   return Buffer.concat([prefix, time.buffered()]);
 }
 
@@ -34,15 +34,15 @@ ResponseBuilder.changeDefaultQuantity = function(quantity) {
   }
 
   // 9 da1 06 c3
-  var prefix = new Buffer([157, 161, 6, 195]);
+  var prefix = Buffer.from([157, 161, 6, 195]);
   return Buffer.concat([prefix, quantity.buffered()]);
 }
 
 ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = new Buffer([157, 161, 20]);
+  var prefix = Buffer.from([157, 161, 20]);
   // c3 d0 a1 00 00
-  var suffix = new Buffer([195, 208, 161, 0, 0]);
+  var suffix = Buffer.from([195, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
 }
 
@@ -53,15 +53,15 @@ ResponseBuilder.changePlanning = function(planning) {
   }
 
   // 9d a1 2d c4
-  var prefix = new Buffer([157, 161, 45, 196]);
+  var prefix = Buffer.from([157, 161, 45, 196]);
   return Buffer.concat([prefix, planning.buffered()]);
 }
 
 ResponseBuilder.changePlanningExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = new Buffer([157, 161, 20]);
+  var prefix = Buffer.from([157, 161, 20]);
   // c4 d0 a1 00 00
-  var suffix = new Buffer([196, 208, 161, 0, 0]);
+  var suffix = Buffer.from([196, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
 }
 
@@ -72,15 +72,15 @@ ResponseBuilder.feedNow = function(quantity) {
   }
 
   // 9d a1 06 a2
-  var prefix = new Buffer([157, 161, 6, 162]);
+  var prefix = Buffer.from([157, 161, 6, 162]);
   return Buffer.concat([prefix, quantity.buffered()]);
 }
 
 ResponseBuilder.feedNowExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = new Buffer([157, 161, 20]);
+  var prefix = Buffer.from([157, 161, 20]);
   // a2 d0 a1 00 00
-  var suffix = new Buffer([162, 208, 161, 0, 0]);
+  var suffix = Buffer.from([162, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
 }
 

@@ -47,7 +47,7 @@ Quantity.prototype.amount = function() {
  * @return {Buffer} the binary buffer representing the amount of food to give.
  */
 Quantity.prototype.buffered = function() {
-  return new Buffer([0, this.amount()]);
+  return Buffer.from([0, this.amount()]);
 };
 
 module.exports = Quantity;

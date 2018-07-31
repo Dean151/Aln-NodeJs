@@ -31,7 +31,7 @@ Planning.prototype.totalQuantity = function() {
 }
 
 Planning.prototype.buffered = function() {
-  var buffer = new Buffer([this.numberOfMeals()]);
+  var buffer = Buffer.from([this.numberOfMeals()]);
   return this._meals.reduce((buf, meal) => Buffer.concat([buf, meal.buffered()]), buffer);
 }
 

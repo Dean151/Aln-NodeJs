@@ -67,7 +67,7 @@ Time.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   var seconds = this.numberOfMinutes(hours_offset, minutes_offset);
   var b2 = seconds % 256;
   var b1 = (seconds - b2) / 256;
-  return new Buffer([b1, b2]);
+  return Buffer.from([b1, b2]);
 };
 
 module.exports = Time;
