@@ -16,6 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+// Make logs a little bit better
+require('log-timestamp');
+
 // Load configuration
 const config = require("./config");
 
