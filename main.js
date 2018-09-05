@@ -16,6 +16,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+// Load configuration
+const config = require("./config");
+
+
 // Make logs a little bit better
 if (config.debug_mode) {
   require('log-timestamp');
@@ -23,9 +27,6 @@ if (config.debug_mode) {
 else {
   console.log = function() {};
 }
-
-// Load configuration
-const config = require("./config");
 
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
