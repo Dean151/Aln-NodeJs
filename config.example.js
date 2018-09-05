@@ -17,6 +17,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 module.exports = {
+  // Disable or enable console.logs outputs
+  'debug_mode': false,
+
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
