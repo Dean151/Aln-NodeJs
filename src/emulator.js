@@ -34,8 +34,12 @@ function Emulator(identifier) {
     // to make the API knows that the request has been processed
     var hexData = data.toString('hex');
 
+    // Current time from alnpet
+    if (hexData.match(/^9da10601([0-9a-f]+)$/)) {
+      // Do nothing with that...
+    }
     // Setting default amount
-    if (hexData.match(/^9da106c3([0-9a-f]+)$/)) {
+    else if (hexData.match(/^9da106c3([0-9a-f]+)$/)) {
       client.write(ResponseBuilder.changeDefaultQuantityExpectation(identifier));
     }
     // Feeding now
