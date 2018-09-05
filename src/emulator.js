@@ -18,6 +18,24 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 function Emulator(identifier) {
 
+  const ResponseBuilder = require("./response-builder");
+
+  const net = require('net');
+  const client = new net.Socket();
+  client.connect(9999, '47.90.203.137', () => {
+    // Client is suposed to identify itself, in order to get the timestamp from official server
+    setInterval(() => {
+      client.write(ResponseBuilder.feederIdentification(identifier));
+    }, 5000);
+  });
+
+  client.on('data', (data) => {
+    // Client need to respond to differents sets of order
+    // to make the API knows that the request has been processed
+    var hexData = data.toString('hex');
+
+    // TODO: handle different requests
+  });
 }
 
 module.exports = Emulator;
