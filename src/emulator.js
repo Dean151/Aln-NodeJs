@@ -33,7 +33,7 @@ function Emulator(identifier) {
     // Client need to respond to differents sets of order
     // to make the API knows that the request has been processed
     var hexData = data.toString('hex');
-
+    console.log(hexData);
     // TODO: handle different requests
   });
 }
