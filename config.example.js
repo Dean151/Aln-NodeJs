@@ -19,6 +19,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 module.exports = {
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
+  // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
+  'feeder_port': 1032,
   
   // API secrets
   'allowed_feeders': ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.

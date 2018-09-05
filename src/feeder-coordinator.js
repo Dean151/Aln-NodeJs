@@ -18,7 +18,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const Feeder = require("./feeder");
 
-function FeederCoordinator() {
+function FeederCoordinator(config) {
 
   const net = require("net");
   const server = net.createServer((c) => {
@@ -51,7 +51,7 @@ function FeederCoordinator() {
   });
 
   // Listen port 1032 ; that will be called by device
-  server.listen(1032, "127.0.0.1", () => {
+  server.listen(config.feeder_port, "127.0.0.1", () => {
     console.log('Listening to localhost:1032');
   });
 }

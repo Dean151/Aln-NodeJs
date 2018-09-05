@@ -24,7 +24,7 @@ const config = require("./config");
 
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
-var feederCoordinator = new FeederCoordinator();
+var feederCoordinator = new FeederCoordinator(config);
 
 // This will handle the REST API
 const Server = require("./src/server");
