@@ -16,22 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-// Make logs a little bit better
-require('log-timestamp');
+function Emulator(identifier) {
 
-// Load configuration
-const config = require("./config");
-
-// This will handle feeders connexions
-const FeederCoordinator = require("./src/feeder-coordinator");
-var feederCoordinator = new FeederCoordinator();
-
-// This is the emulated part
-if (config.enable_emulator && config.emulator_identifier) {
-  const Emulator = require(".src/emulator");
-  var emulatedFeeder = new Emulator(config.emulator_identifier)
 }
 
-// This will handle the REST API
-const Server = require("./src/server");
-var server = new Server(feederCoordinator, config);
+module.exports = Emulator;
