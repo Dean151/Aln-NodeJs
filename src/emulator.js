@@ -33,8 +33,23 @@ function Emulator(identifier) {
     // Client need to respond to differents sets of order
     // to make the API knows that the request has been processed
     var hexData = data.toString('hex');
-    console.log(hexData);
-    // TODO: handle different requests
+
+    // Setting default amount
+    if (hexData.match(/^9da106c3([0-9a-f]+)$/)) {
+      client.write(ResponseBuilder.changeDefaultQuantityExpectation(identifier));
+    }
+    // Feeding now
+    else if (hexData.match(/^9da106a2([0-9a-f]+)$/)) {
+      client.write(ResponseBuilder.feedNowExpectation(identifier));
+    }
+    // Changing plan
+    else if (hexData.match(/^9da12dc4([0-9a-f]+)$/)) {
+      client.write(ResponseBuilder.changePlanningExpectation(identifier));
+    }
+    else {
+      // Unknown response. Log it
+      console.log('Unknown data received by emulator: ' + hexData);
+    }
   });
 }
 
