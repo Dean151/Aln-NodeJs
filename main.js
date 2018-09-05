@@ -35,3 +35,9 @@ var feederCoordinator = new FeederCoordinator(config);
 // This will handle the REST API
 const Server = require("./src/server");
 var server = new Server(feederCoordinator, config);
+
+// This is the feeder emulator part
+if (config.enable_emulator && config.emulator_identifier) {
+  const Emulator = require("./src/emulator");
+  var emulatedFeeder = new Emulator(config.emulator_identifier)
+}

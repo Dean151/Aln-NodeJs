@@ -27,13 +27,21 @@ ResponseBuilder.time = function() {
   return Buffer.concat([prefix, time.buffered()]);
 }
 
+ResponseBuilder.feederIdentification = function(identifier) {
+  // 9d a1 14
+  var prefix = Buffer.from([157, 161, 20]);
+  // 01 d0 01 00 00
+  var suffix = Buffer.from([1, 208, 1, 0, 0]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
+}
+
 ResponseBuilder.changeDefaultQuantity = function(quantity) {
   var Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
     throw "Wrong argument passed to changeDefaultQuantity()";
   }
 
-  // 9 da1 06 c3
+  // 9d a1 06 c3
   var prefix = Buffer.from([157, 161, 6, 195]);
   return Buffer.concat([prefix, quantity.buffered()]);
 }
