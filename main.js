@@ -19,7 +19,6 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 // Load configuration
 const config = require("./config");
 
-
 // Make logs a little bit better
 if (config.debug_mode) {
   require('log-timestamp');

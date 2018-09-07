@@ -31,7 +31,7 @@ function Server(feederCoordinator, config) {
   // Create the routes for the API
   var router = express.Router();
 
-  router.use(function(req, res, next) {
+  router.use((req, res, next) => {
 
     // Check the request header token to validate we're not messing around
     if (config.api_secret != req.headers['x-access-token']) {
@@ -55,7 +55,7 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feeders').post(function(req, res) {
+  router.route('/feeders').post((req, res) => {
     try {
       var feeders = feederCoordinator.getFeeders();
       res.json(feeders);
@@ -66,11 +66,11 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/quantity').put(function(req, res) {
+  router.route('/quantity').put((req, res) => {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
+      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
         if (msg == 'success') {
           res.json({ success: true, message: 'Quantity successfully setted!' });
         }
@@ -86,13 +86,13 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/planning').put(function(req, res) {
+  router.route('/planning').put((req, res) => {
     try {
       const Meal = require('./meal');
       var meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
       const Planning = require("./planning");
       var planning = new Planning(meals);
-      feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
+      feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
         if (msg == 'success') {
           res.json({ success: true, message: 'Planning successfully setted!' });
         }
@@ -108,11 +108,11 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feed').put(function(req, res) {
+  router.route('/feed').put((req, res) => {
     try {
       const Quantity = require("./quantity");
       var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, function(msg) {
+      feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
         if (msg == 'success') {
           res.json({ success: true, message: 'Feeding completed!' });
         }
