@@ -51,8 +51,8 @@ function FeederCoordinator(config) {
   });
 
   // Listen port 1032 ; that will be called by device
-  server.listen(config.feeder_port, "127.0.0.1", () => {
-    console.log('Listening to localhost:1032');
+  server.listen(config.feeder_port, () => {
+    console.log('Listening to port', config.feeder_port);
   });
 }
 
