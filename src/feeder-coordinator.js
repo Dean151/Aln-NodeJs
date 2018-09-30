@@ -21,7 +21,7 @@ const DataBaseCoordinator = require("./database-coordinator");
 
 function FeederCoordinator(config) {
 
-  this.databaseCoordinator = DataBaseCoordinator(config);
+  this.databaseCoordinator = new DataBaseCoordinator(config);
 
   const net = require("net");
   const server = net.createServer((c) => {
