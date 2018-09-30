@@ -130,6 +130,7 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
   var data = ResponseBuilder.changeDefaultQuantity(quantity);
   var expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
+    this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
     if (typeof callback == 'function') {
       callback(msg);
     }
@@ -154,6 +155,7 @@ FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) 
   var data = ResponseBuilder.feedNow(quantity);
   var expectation = ResponseBuilder.feedNowExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
+    this.databaseCoordinator.recordMeal(identifier, quantity);
     if (typeof callback == 'function') {
       callback(msg);
     }

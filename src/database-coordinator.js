@@ -64,4 +64,26 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
   });
 }
 
+DataBaseCoordinator.prototype.rememberDefaultAmount = function(identifier, quantity) {
+  if (!this.isReady()) {
+    return;
+  }
+
+  this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount(), identifier], (err, result, fields) => {
+    if (err) throw err;
+  });
+}
+
+DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
+  if (!this.isReady()) {
+    return;
+  }
+
+  let date = new Date().toJSON().slice(0, 10);
+  let time = new Date().toJSON().slice(11, 19);
+  this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount()], (err, result, fields) => {
+    if (err) throw err;
+  });
+}
+
 module.exports = DataBaseCoordinator;
