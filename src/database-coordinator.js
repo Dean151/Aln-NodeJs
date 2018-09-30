@@ -38,7 +38,7 @@ function DataBaseCoordinator(config) {
   });
 }
 
-DataBaseCoordinator.prototype.isReady = () => {
+DataBaseCoordinator.prototype.isReady = function() {
   if (!this._isConnected) {
     console.log('Database is not yet ready!');
     return false;
@@ -46,7 +46,7 @@ DataBaseCoordinator.prototype.isReady = () => {
   return true;
 };
 
-DataBaseCoordinator.prototype.registerFeeder = (identifier) => {
+DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
   if (!this.isReady()) {
     return;
   }
