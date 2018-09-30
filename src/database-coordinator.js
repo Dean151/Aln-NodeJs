@@ -61,7 +61,7 @@ DataBaseCoordinator.prototype.registerFeeder = (identifier) => {
         if (err) throw err;
       });
     }
-  }
+  });
 }
 
 module.exports = DataBaseCoordinator;
