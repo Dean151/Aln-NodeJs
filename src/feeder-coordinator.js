@@ -17,8 +17,11 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const Feeder = require("./feeder");
+const DataBaseCoordinator = require("./database-coordinator");
 
 function FeederCoordinator(config) {
+
+  this.databaseCoordinator = DataBaseCoordinator(config);
 
   const net = require("net");
   const server = net.createServer((c) => {
@@ -50,7 +53,7 @@ function FeederCoordinator(config) {
     console.log('Error occurred: ' + err);
   });
 
-  // Listen port 1032 ; that will be called by device
+  // Listen on given port ; that will be called by device
   server.listen(config.feeder_port, () => {
     console.log('Listening to port', config.feeder_port);
   });
@@ -66,6 +69,9 @@ FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
   else {
     FeederCoordinator.feeders[identifier].hasResponded(socket);
   }
+
+  // Register it in database
+  this.databaseCoordinator.registerFeeder(identifier);
 }
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
