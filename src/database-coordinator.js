@@ -52,7 +52,8 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
   }
 
   // We try to update the feeder registry.
-  let date = new Date().toJSON().slice(0, 10);
+  let now = new Date();
+  let date = now.toJSON().replace(0, 10) + ' ' + now.toJSON().slice(11, 19);
   this.con.query('UPDATE feeders SET last_responded = ? WHERE identifier = ?', [date, identifier], (err, result, fields) => {
     if (err) throw err;
     if (result.affectedRows < 1) {
@@ -79,8 +80,9 @@ DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
     return;
   }
 
-  let date = new Date().toJSON().slice(0, 10);
-  let time = new Date().toJSON().slice(11, 19);
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10);
+  let time = now.toJSON().slice(11, 19);
   this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount()], (err, result, fields) => {
     if (err) throw err;
   });
