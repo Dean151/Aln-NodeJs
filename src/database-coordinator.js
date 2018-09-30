@@ -53,7 +53,7 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
 
   // We try to update the feeder registry.
   let now = new Date();
-  let date = now.toJSON().replace(0, 10) + ' ' + now.toJSON().slice(11, 19);
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
   this.con.query('UPDATE feeders SET last_responded = ? WHERE identifier = ?', [date, identifier], (err, result, fields) => {
     if (err) throw err;
     if (result.affectedRows < 1) {
