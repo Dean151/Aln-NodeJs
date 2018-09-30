@@ -22,7 +22,7 @@ function DataBaseCoordinator(config) {
 
   this._isConnected = false;
 
-  const this.con = mysql.createConnection({
+  this.con = mysql.createConnection({
     host: config.mysql_host,
     user: config.mysql_user,
     password: config.mysql_password,
