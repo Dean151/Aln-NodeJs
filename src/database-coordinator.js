@@ -20,7 +20,7 @@ const mysql = require('mysql');
 
 function DataBaseCoordinator(config) {
 
-  var this._isConnected = false;
+  this._isConnected = false;
 
   const this.con = mysql.createConnection({
     host: config.mysql_host,
