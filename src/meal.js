@@ -20,16 +20,16 @@ const Time = require("./time");
 const Quantity = require("./quantity");
 
 /**
- * Instanciate a new Meal object to be used with the feeder
+ * Instantiate a new Meal object to be used with the feeder
  */
 function Meal(time, quantity) {
-  if (time.constructor == Time) {
+  if (time.constructor === Time) {
     this._time = time;
   } else if (time.hours !== undefined && time.minutes !== undefined) {
     this._time = new Time(time.hours, time.minutes);
   }
 
-  if (quantity.constructor == Quantity) {
+  if (quantity.constructor === Quantity) {
     this._quantity = quantity;
   } else {
     this._quantity = new Quantity(quantity);
@@ -50,6 +50,10 @@ Meal.prototype.quantity = function() {
 
 Meal.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), this.quantity().buffered()]);
+};
+
+Meal.prototype.sqled = function(planId) {
+  return [planId, this._time.sqled(), this._quantity.amount()];
 };
 
 module.exports = Meal;

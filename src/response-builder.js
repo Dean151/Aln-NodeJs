@@ -19,77 +19,77 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 function ResponseBuilder() {}
 
 ResponseBuilder.time = function() {
-  var Time = require("./time");
-  var time = new Time();
+  let Time = require("./time");
+  let time = new Time();
 
   // 9d a1 06 01
-  var prefix = Buffer.from([157, 161, 6, 1]);
+  let prefix = Buffer.from([157, 161, 6, 1]);
   return Buffer.concat([prefix, time.buffered()]);
-}
+};
 
 ResponseBuilder.feederIdentification = function(identifier) {
   // 9d a1 14
-  var prefix = Buffer.from([157, 161, 20]);
+  let prefix = Buffer.from([157, 161, 20]);
   // 01 d0 01 00 00
-  var suffix = Buffer.from([1, 208, 1, 0, 0]);
+  let suffix = Buffer.from([1, 208, 1, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-}
+};
 
 ResponseBuilder.changeDefaultQuantity = function(quantity) {
-  var Quantity = require("./quantity");
+  let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
     throw "Wrong argument passed to changeDefaultQuantity()";
   }
 
   // 9d a1 06 c3
-  var prefix = Buffer.from([157, 161, 6, 195]);
+  let prefix = Buffer.from([157, 161, 6, 195]);
   return Buffer.concat([prefix, quantity.buffered()]);
-}
+};
 
 ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = Buffer.from([157, 161, 20]);
+  let prefix = Buffer.from([157, 161, 20]);
   // c3 d0 a1 00 00
-  var suffix = Buffer.from([195, 208, 161, 0, 0]);
+  let suffix = Buffer.from([195, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-}
+};
 
 ResponseBuilder.changePlanning = function(planning) {
-  var Planning = require("./planning");
+  let Planning = require("./planning");
   if (planning.constructor !== Planning) {
     throw "Wrong argument passed to changePlanning()";
   }
 
   // 9d a1 2d c4
-  var prefix = Buffer.from([157, 161, 45, 196]);
+  let prefix = Buffer.from([157, 161, 45, 196]);
   return Buffer.concat([prefix, planning.buffered()]);
-}
+};
 
 ResponseBuilder.changePlanningExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = Buffer.from([157, 161, 20]);
+  let prefix = Buffer.from([157, 161, 20]);
   // c4 d0 a1 00 00
-  var suffix = Buffer.from([196, 208, 161, 0, 0]);
+  let suffix = Buffer.from([196, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-}
+};
 
 ResponseBuilder.feedNow = function(quantity) {
-  var Quantity = require("./quantity");
+  let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
     throw "Wrong argument passed to feedNow()";
   }
 
   // 9d a1 06 a2
-  var prefix = Buffer.from([157, 161, 6, 162]);
+  let prefix = Buffer.from([157, 161, 6, 162]);
   return Buffer.concat([prefix, quantity.buffered()]);
-}
+};
 
 ResponseBuilder.feedNowExpectation = function(identifier) {
   // 9d a1 14
-  var prefix = Buffer.from([157, 161, 20]);
+  let prefix = Buffer.from([157, 161, 20]);
   // a2 d0 a1 00 00
-  var suffix = Buffer.from([162, 208, 161, 0, 0]);
+  let suffix = Buffer.from([162, 208, 161, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-}
+};
 
 module.exports = ResponseBuilder;

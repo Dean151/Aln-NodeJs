@@ -22,17 +22,17 @@ function Emulator(identifier) {
 
   const net = require('net');
   const client = new net.Socket();
-  client.connect(9999, '47.90.203.137', () => {
-    // Client is suposed to identify itself, in order to get the timestamp from official server
+  client.connect(9999, '51.38.185.236', () => {
+    // Client is supposed to identify itself, in order to get the timestamp from official server
     setInterval(() => {
       client.write(ResponseBuilder.feederIdentification(identifier));
     }, 5000);
   });
 
   client.on('data', (data) => {
-    // Client need to respond to differents sets of order
+    // Client need to respond to different sets of order
     // to make the API knows that the request has been processed
-    var hexData = data.toString('hex');
+    let hexData = data.toString('hex');
 
     // Current time from alnpet
     if (hexData.match(/^9da10601([0-9a-f]+)$/)) {

@@ -24,6 +24,12 @@ module.exports = {
   'local_port': 3000,
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
   'feeder_port': 1032,
+
+  // Mysql settings
+  'mysql_host': '',
+  'mysql_user': '',
+  'mysql_password': '',
+  'mysql_database': '',
   
   // API secrets
   'allowed_feeders': ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.

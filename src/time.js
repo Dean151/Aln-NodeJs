@@ -17,7 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 /**
- * Instanciate a new Time object to be used with the feeder
+ * Instantiate a new Time object to be used with the feeder
  * We have to create our own to make it work with the weird expectations of the feeder
  * If you don't provide any parameter, use "now" time to initialize.
  * @param {number} hours [0-23] (optional)
@@ -25,16 +25,16 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 function Time(hours, minutes) {
   if (hours === undefined && minutes === undefined) {
-    var now = new Date();
+    let now = new Date();
     this._hours = now.getUTCHours();
     this._minutes = now.getUTCMinutes();
   } else {
-    var numberHours = Math.floor(+hours);
+    let numberHours = Math.floor(+hours);
     if (numberHours >= 0 && numberHours % 24 === numberHours) {
       this._hours = numberHours;
     }
 
-    var numberMinutes = Math.floor(+minutes);
+    let numberMinutes = Math.floor(+minutes);
     if (numberMinutes >= 0 && numberMinutes % 60 === numberMinutes) {
       this._minutes = numberMinutes;
     }
@@ -52,8 +52,8 @@ function Time(hours, minutes) {
  * @return {number} the number of seconds since offset for this Time instance.
  */
 Time.prototype.numberOfMinutes = function(hours_offset = 16, minutes_offset = 0) {
-  var hours = (this._hours - hours_offset + 24) % 24;
-  var minutes = (this._minutes - minutes_offset + 60) % 60;
+  let hours = (this._hours - hours_offset + 24) % 24;
+  let minutes = (this._minutes - minutes_offset + 60) % 60;
   return hours * 60 + minutes;
 };
 
@@ -64,10 +64,18 @@ Time.prototype.numberOfMinutes = function(hours_offset = 16, minutes_offset = 0)
  * @return {Buffer} the binary buffer representing the number of seconds since offset for this Time instance.
  */
 Time.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
-  var seconds = this.numberOfMinutes(hours_offset, minutes_offset);
-  var b2 = seconds % 256;
-  var b1 = (seconds - b2) / 256;
+  let seconds = this.numberOfMinutes(hours_offset, minutes_offset);
+  let b2 = seconds % 256;
+  let b1 = (seconds - b2) / 256;
   return Buffer.from([b1, b2]);
+};
+
+/**
+ * Returns the time formatted for mysql (example 13:32:12)
+ * @return {string} The time formatted
+ */
+Time.prototype.sqled = function() {
+  return ('0' + this._hours).slice(-2) + ':' + ('0' + this._minutes).slice(-2) + ':00';
 };
 
 module.exports = Time;

@@ -17,36 +17,30 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 function Server(feederCoordinator, config) {
-  this.feederCoordinator = feederCoordinator;
-
   const express = require('express');
   const bodyParser = require('body-parser');
 
   // Create a service (the app object is just a callback).
-  var app = express();
+  let app = express();
 
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
   // Create the routes for the API
-  var router = express.Router();
+  let router = express.Router();
 
-  router.use(function(req, res, next) {
+  router.use((req, res, next) => {
 
     // Check the request header token to validate we're not messing around
-    if (config.api_secret != req.headers['x-access-token']) {
+    if (config.api_secret !== req.headers['x-access-token']) {
       res.status(403);
-      res.json({ success: false, error: 'Authentication needed.'})
-      // We return to prevent to go to next step
-      return;
+      res.json({ success: false, error: 'Authentication needed.'});
     }
 
     // Check that the feeder is in the allowed feeders list
-    else if (typeof req.body.identifier !== 'undefined' && !config.allowed_feeders.includes(req.body.identifier)) {
+    else if (typeof req.body.identifier !== 'undefined' && config.allowed_feeders.length && !config.allowed_feeders.includes(req.body.identifier)) {
       res.status(403);
-      res.json({ success: false, error: 'Non-authorized feeder identifier.'})
-      // We return to prevent to go to next step
-      return;
+      res.json({ success: false, error: 'Non-authorized feeder identifier.'});
     }
 
     // Make sure we go to the next routes and don't stop here
@@ -55,9 +49,9 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feeders').post(function(req, res) {
+  router.route('/feeders').post((req, res) => {
     try {
-      var feeders = feederCoordinator.getFeeders();
+      let feeders = feederCoordinator.getFeeders();
       res.json(feeders);
     }
     catch(error) {
@@ -66,12 +60,12 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/quantity').put(function(req, res) {
+  router.route('/quantity').put((req, res) => {
     try {
       const Quantity = require("./quantity");
-      var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, function(msg) {
-        if (msg == 'success') {
+      let quantity = new Quantity(req.body.quantity);
+      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
+        if (msg === 'success') {
           res.json({ success: true, message: 'Quantity successfully setted!' });
         }
         else {
@@ -86,14 +80,14 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/planning').put(function(req, res) {
+  router.route('/planning').put((req, res) => {
     try {
       const Meal = require('./meal');
-      var meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
+      let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
       const Planning = require("./planning");
-      var planning = new Planning(meals);
-      feederCoordinator.setPlanning(req.body.identifier, planning, function(msg) {
-        if (msg == 'success') {
+      let planning = new Planning(meals);
+      feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
+        if (msg === 'success') {
           res.json({ success: true, message: 'Planning successfully setted!' });
         }
         else {
@@ -108,12 +102,12 @@ function Server(feederCoordinator, config) {
     }
   });
 
-  router.route('/feed').put(function(req, res) {
+  router.route('/feed').put((req, res) => {
     try {
       const Quantity = require("./quantity");
-      var quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, function(msg) {
-        if (msg == 'success') {
+      let quantity = new Quantity(req.body.quantity);
+      feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
+        if (msg === 'success') {
           res.json({ success: true, message: 'Feeding completed!' });
         }
         else {
@@ -131,7 +125,7 @@ function Server(feederCoordinator, config) {
   // Use the routes
   app.use('/api', router);
 
-  const http = require('http')
+  const http = require('http');
   http.createServer(app).listen(config.local_port, 'localhost');
 }
 module.exports = Server;

@@ -16,23 +16,26 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Meal = require("./meal");
-
 function Planning(meals) {
   this._meals = meals;
 }
 
 Planning.prototype.numberOfMeals = function() {
   return this._meals.length;
-}
+};
 
 Planning.prototype.totalQuantity = function() {
   return this._meals.reduce((amount, meal) => amount + meal.quantity().amount(), 0);
-}
+};
 
 Planning.prototype.buffered = function() {
-  var buffer = Buffer.from([this.numberOfMeals()]);
+  let buffer = Buffer.from([this.numberOfMeals()]);
   return this._meals.reduce((buf, meal) => Buffer.concat([buf, meal.buffered()]), buffer);
-}
+};
+
+// Return (planning, time, quantity)
+Planning.prototype.sqled = function(planId) {
+  return this._meals.map((meal) => { return meal.sqled(planId); });
+};
 
 module.exports = Planning;
