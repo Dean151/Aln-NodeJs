@@ -144,4 +144,17 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
 };
 
 
+DataBaseCoordinator.prototype.logUnknownData = function (type, data) {
+  if (!this.isReady()) {
+    return;
+  }
+
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+  this.con.query('INSERT INTO unknown_data(date, type, hex) VALUES (?, ?)', [date, type, data.toString('hex')], (err, result, fields) => {
+    if (err) throw err;
+  });
+};
+
 module.exports = DataBaseCoordinator;

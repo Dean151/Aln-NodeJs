@@ -38,6 +38,7 @@ function FeederCoordinator(config) {
 
         if (config.allowed_feeders.length && !config.allowed_feeders.includes(identifier)) {
           console.log('Unauthorized feeder detected: ' + identifier);
+          this.databaseCoordinator.logUnknownData('unauthorized', data);
           c.destroy();
         }
         else {
@@ -53,6 +54,9 @@ function FeederCoordinator(config) {
           // Maintain the connection with the socket
           c.setKeepAlive(true, 30000);
         }
+      }
+      else {
+        this.databaseCoordinator.logUnknownData('unknown', data);
       }
     });
   });
