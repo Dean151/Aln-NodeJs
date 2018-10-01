@@ -22,7 +22,7 @@ function Emulator(identifier) {
 
   const net = require('net');
   const client = new net.Socket();
-  client.connect(9999, '51.38.185.236', () => {
+  client.connect(9999, '47.90.203.137', () => {
     // Client is supposed to identify itself, in order to get the timestamp from official server
     setInterval(() => {
       client.write(ResponseBuilder.feederIdentification(identifier));
