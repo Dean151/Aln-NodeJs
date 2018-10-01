@@ -117,7 +117,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
       else {
         // We then insert all meals in the table meals
         var meals = planning.sqled(result.insertId);
-        connection.query('INSERT INTO meals(planning, time, quantity) VALUES (?)', meals, (err, result, fields) => {
+        connection.query('INSERT INTO meals(planning, time, quantity) VALUES ?', meals, (err, result, fields) => {
           if (err) {
             return this.con.rollback(() => {
               throw err;
