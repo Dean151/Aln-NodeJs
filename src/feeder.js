@@ -16,9 +16,6 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Quantity = require("./quantity");
-const Planning = require("./planning");
-
 function Feeder(identifier, socket) {
   this._identifier = identifier;
   this.hasResponded(socket);
@@ -27,16 +24,16 @@ function Feeder(identifier, socket) {
 Feeder.prototype.hasResponded = function(socket) {
   this._socket = socket;
   this._lastResponded = new Date();
-}
+};
 
 Feeder.prototype.write = function(data, callback) {
-  var hexData = data.toString('hex');
+  let hexData = data.toString('hex');
   this._socket.write(hexData, 'hex', () => {
     console.log("Data sent: " + hexData);
-    if (typeof callback == "function") {
+    if (typeof callback === "function") {
       callback();
     }
   });
-}
+};
 
 module.exports = Feeder;

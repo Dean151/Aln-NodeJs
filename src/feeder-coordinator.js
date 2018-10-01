@@ -30,16 +30,15 @@ function FeederCoordinator(config) {
       console.log('Client disconnected');
     });
     c.on('data', (data) => {
-      var hexData = data.toString('hex');
+      let hexData = data.toString('hex');
       console.log('Data received: ' + hexData);
       if (hexData.startsWith('9da114') && hexData.endsWith('01d0010000')) {
         // It's an feeder identifier
-        var hexIdentifier = hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
-        var identifier = Buffer.from(hexIdentifier, 'hex').toString();
+        let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
 
         if (config.allowed_feeders.length && !config.allowed_feeders.includes(identifier)) {
           console.log('Unauthorized feeder detected: ' + identifier);
-          c.close();
+          c.destroy();
         }
         else {
           console.log('Feeder identified with: ' + identifier);
@@ -50,6 +49,9 @@ function FeederCoordinator(config) {
           // Send it back the time
           const ResponseBuilder = require("./response-builder");
           this.write(identifier, ResponseBuilder.time());
+
+          // Maintain the connection with the socket
+
         }
       }
     });
@@ -69,8 +71,7 @@ FeederCoordinator.feeders = {};
 
 FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
   if (FeederCoordinator.feeders[identifier] === undefined) {
-    var feeder = new Feeder(identifier, socket);
-    FeederCoordinator.feeders[identifier] = feeder;
+    FeederCoordinator.feeders[identifier] = new Feeder(identifier, socket);
   }
   else {
     FeederCoordinator.feeders[identifier].hasResponded(socket);
@@ -78,30 +79,30 @@ FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
 
   // Register it in database
   this.databaseCoordinator.registerFeeder(identifier);
-}
+};
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
   if (!(identifier in FeederCoordinator.feeders)) {
     throw 'Feeder not found';
   }
   FeederCoordinator.feeders[identifier].write(data, callback);
-}
+};
 
 FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectation, callback) {
   if (!(identifier in FeederCoordinator.feeders)) {
     throw 'Feeder not found';
   }
-  var feeder = FeederCoordinator.feeders[identifier];
+  let feeder = FeederCoordinator.feeders[identifier];
 
   // Prepare a timeout for execution
-  var timeout = setTimeout(() => {
+  let timeout = setTimeout(() => {
     feeder._socket.removeListener('data', expectationListener);
     callback('timeout');
   }, 30000);
 
-  var expectationListener = (data) => {
-    if (data.toString('hex') == expectation.toString('hex')) {
-      if (typeof callback == 'function') {
+  let expectationListener = (data) => {
+    if (data.toString('hex') === expectation.toString('hex')) {
+      if (typeof callback === 'function') {
         callback('success');
       }
       feeder._socket.removeListener('data', expectationListener);
@@ -116,11 +117,11 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   FeederCoordinator.feeders[identifier].write(data, () => {
     console.log('Waiting for expectation ...');
   });
-}
+};
 
 FeederCoordinator.prototype.getFeeders = function () {
   return Object.keys(FeederCoordinator.feeders).reduce(function(previous, current) {
-    var feeder = FeederCoordinator.feeders[current];
+    let feeder = FeederCoordinator.feeders[current];
     previous[current] = {
       identifier: feeder._identifier,
       lastResponded: feeder._lastResponded.toJSON(),
@@ -128,45 +129,45 @@ FeederCoordinator.prototype.getFeeders = function () {
     };
     return previous;
   }, {});
-}
+};
 
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var data = ResponseBuilder.changeDefaultQuantity(quantity);
-  var expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
+  let data = ResponseBuilder.changeDefaultQuantity(quantity);
+  let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
     this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
-    if (typeof callback == 'function') {
+    if (typeof callback === 'function') {
       callback(msg);
     }
   });
-}
+};
 
 FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var data = ResponseBuilder.changePlanning(planning);
-  var expectation = ResponseBuilder.changePlanningExpectation(identifier);
+  let data = ResponseBuilder.changePlanning(planning);
+  let expectation = ResponseBuilder.changePlanningExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
     this.databaseCoordinator.recordPlanning(identifier, planning);
-    if (typeof callback == 'function') {
+    if (typeof callback === 'function') {
       callback(msg);
     }
   });
-}
+};
 
 FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
   const ResponseBuilder = require("./response-builder");
 
-  var data = ResponseBuilder.feedNow(quantity);
-  var expectation = ResponseBuilder.feedNowExpectation(identifier);
+  let data = ResponseBuilder.feedNow(quantity);
+  let expectation = ResponseBuilder.feedNowExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
     this.databaseCoordinator.recordMeal(identifier, quantity);
-    if (typeof callback == 'function') {
+    if (typeof callback === 'function') {
       callback(msg);
     }
   });
-}
+};
 
 module.exports = FeederCoordinator;

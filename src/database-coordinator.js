@@ -65,7 +65,7 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
       });
     }
   });
-}
+};
 
 DataBaseCoordinator.prototype.rememberDefaultAmount = function(identifier, quantity) {
   if (!this.isReady()) {
@@ -75,7 +75,7 @@ DataBaseCoordinator.prototype.rememberDefaultAmount = function(identifier, quant
   this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount(), identifier], (err, result, fields) => {
     if (err) throw err;
   });
-}
+};
 
 DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
   if (!this.isReady()) {
@@ -88,7 +88,7 @@ DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
   this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount()], (err, result, fields) => {
     if (err) throw err;
   });
-}
+};
 
 DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
   if (!this.isReady()) {
@@ -111,7 +111,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
         });
       }
 
-      if (planning.numberOfMeals() == 0) {
+      if (planning.numberOfMeals() === 0) {
         connection.commit((err) => {
           if (err) {
             return connection.rollback(() => {
@@ -122,7 +122,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
       }
       else {
         // We then insert all meals in the table meals
-        var meals = planning.sqled(result.insertId);
+        let meals = planning.sqled(result.insertId);
         connection.query('INSERT INTO meals(planning, time, quantity) VALUES ?', [meals], (err, result, fields) => {
           if (err) {
             return this.con.rollback(() => {
@@ -141,7 +141,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
 
     });
   });
-}
+};
 
 
 module.exports = DataBaseCoordinator;

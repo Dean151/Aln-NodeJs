@@ -17,7 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 /**
- * Instanciate a new Quantity object to be used with the feeder
+ * Instantiate a new Quantity object to be used with the feeder
  * You have to provide a correct amount quantity, in grams.
  * @param {number} amount [5-150] (required)
  */
@@ -26,7 +26,7 @@ function Quantity(amount) {
     throw "Given amount is not a number";
   }
 
-  var numberAmount = Math.floor(+amount);
+  let numberAmount = Math.floor(+amount);
   if (numberAmount < 5 || numberAmount > 150) {
     throw "Given amount is out of bounds (5g to 150g)";
   }
