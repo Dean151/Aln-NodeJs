@@ -54,11 +54,13 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
   }
 
   // We try to update the feeder registry.
-  this.con.query('UPDATE feeders SET last_responded = ? WHERE identifier = ?', [new Date(), identifier], (err, result, fields) => {
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+  this.con.query('UPDATE feeders SET last_responded = ? WHERE identifier = ?', [date, identifier], (err, result, fields) => {
     if (err) throw err;
     if (result.affectedRows < 1) {
       // We insert the new row in the feeder registry.
-      this.con.query('INSERT INTO feeders(identifier, last_responded) VALUES (?, ?)', [identifier, new Date()], (err, result, fields) => {
+      this.con.query('INSERT INTO feeders(identifier, last_responded) VALUES (?, ?)', [identifier, date], (err, result, fields) => {
         if (err) throw err;
       });
     }
@@ -94,11 +96,15 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
   }
 
   let connection = this.con;
+  
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
   connection.beginTransaction((err) => {
     if (err) { throw err; }
 
     // We register the planning in the database
-    connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, new Date()], (err, result, fields) => {
+    connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
       if (err) {
         return connection.rollback(() => {
           throw err;
