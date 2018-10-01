@@ -78,4 +78,11 @@ Time.prototype.sqled = function() {
   return ('0' + this._hours).slice(-2) + ':' + ('0' + this._minutes).slice(-2) + ':00';
 };
 
+Time.prototype.jsoned = function() {
+  return {
+    hours: this._hours,
+    minutes: this._minutes
+  };
+};
+
 module.exports = Time;

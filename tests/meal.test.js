@@ -58,3 +58,11 @@ test("sqled() should send the correct value", () => {
   expect(new Meal({ hours: 11, minutes: 30 }, 10).sqled(5)).toEqual([5, '11:30:00', 10]);
   expect(new Meal({ hours: 15, minutes: 0 }, 11).sqled(5)).toEqual([5, '15:00:00', 11]);
 });
+
+// jsoned()
+test("jsoned() should send the correct value", () => {
+  expect(new Meal({ hours: 0, minutes: 0 }, 5).jsoned()).toEqual({ time: { hours: 0, minutes: 0 }, quantity: 5 });
+  expect(new Meal({ hours: 7, minutes: 30 }, 8).jsoned()).toEqual({ time: { hours: 7, minutes: 30 }, quantity: 8 });
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).jsoned()).toEqual({ time: { hours: 11, minutes: 30 }, quantity: 10 });
+  expect(new Meal({ hours: 15, minutes: 0 }, 11).jsoned()).toEqual({ time: { hours: 15, minutes: 0 }, quantity: 11 });
+});

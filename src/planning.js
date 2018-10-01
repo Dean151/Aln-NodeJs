@@ -38,4 +38,8 @@ Planning.prototype.sqled = function(planId) {
   return this._meals.map((meal) => { return meal.sqled(planId); });
 };
 
+Planning.prototype.jsoned = function() {
+  return this._meals.map((meal) => { return meal.jsoned(); });
+};
+
 module.exports = Planning;

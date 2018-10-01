@@ -56,3 +56,15 @@ test("buffered() should send the correct binary value", () => {
   expect(new Quantity(125).buffered().toString("hex")).toBe("007d");
   expect(new Quantity(150).buffered().toString("hex")).toBe("0096");
 });
+
+// jsoned()
+test("jsoned() should send the correct value", () => {
+  expect(new Quantity(5).jsoned()).toBe(5);
+  expect(new Quantity(10).jsoned()).toBe(10);
+  expect(new Quantity(25).jsoned()).toBe(25);
+  expect(new Quantity(50).jsoned()).toBe(50);
+  expect(new Quantity(75).jsoned()).toBe(75);
+  expect(new Quantity(100).jsoned()).toBe(100);
+  expect(new Quantity(125).jsoned()).toBe(125);
+  expect(new Quantity(150).jsoned()).toBe(150);
+});

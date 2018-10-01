@@ -56,4 +56,11 @@ Meal.prototype.sqled = function(planId) {
   return [planId, this._time.sqled(), this._quantity.amount()];
 };
 
+Meal.prototype.jsoned = function() {
+  return {
+    time: this._time.jsoned(),
+    quantity: this._quantity.jsoned()
+  };
+};
+
 module.exports = Meal;

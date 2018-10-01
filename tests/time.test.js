@@ -89,3 +89,17 @@ test("sqled() should send the correct value", () => {
   expect(new Time(17, 0).sqled()).toBe("17:00:00");
   expect(new Time(19, 30).sqled()).toBe("19:30:00");
 });
+
+// jsoned()
+test("jsoned() should send the correct value", () => {
+  expect(new Time(0, 0).jsoned()).toEqual({hours: 0, minutes: 0 });
+  expect(new Time(4, 30).jsoned()).toEqual({hours: 4, minutes: 30 });
+  expect(new Time(11, 0).jsoned()).toEqual({hours: 11, minutes: 0 });
+  expect(new Time(15, 59).jsoned()).toEqual({hours: 15, minutes: 59 });
+  expect(new Time(16, 0).jsoned()).toEqual({hours: 16, minutes: 0 });
+  expect(new Time(16, 1).jsoned()).toEqual({hours: 16, minutes: 1 });
+  expect(new Time(16, 10).jsoned()).toEqual({hours: 16, minutes: 10 });
+  expect(new Time(16, 16).jsoned()).toEqual({hours: 16, minutes: 16 });
+  expect(new Time(17, 0).jsoned()).toEqual({hours: 17, minutes: 0 });
+  expect(new Time(19, 30).jsoned()).toEqual({hours: 19, minutes: 30 });
+});

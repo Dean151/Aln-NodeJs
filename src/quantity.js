@@ -50,4 +50,8 @@ Quantity.prototype.buffered = function() {
   return Buffer.from([0, this.amount()]);
 };
 
+Quantity.prototype.jsoned = function() {
+  return this._amount;
+}
+
 module.exports = Quantity;

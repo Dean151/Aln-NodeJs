@@ -58,3 +58,13 @@ test('sqled() tests', () => {
   var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).sqled(3)).toEqual([[3, '11:30:00', 10], [3, '17:20:00', 15], [3, '05:00:00', 5]]);
 });
+
+test('jsoned() tests', () => {
+  expect(new Planning([]).jsoned()).toEqual([]);
+  var meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
+  expect(new Planning([meal1]).jsoned()).toEqual([{ time: { hours: 11, minutes: 30 }, quantity: 10 }]);
+  var meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
+  expect(new Planning([meal1, meal2]).jsoned()).toEqual([{ time: { hours: 11, minutes: 30 }, quantity: 10 }, { time: { hours: 17, minutes: 20 }, quantity: 15 }]);
+  var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
+  expect(new Planning([meal1, meal2, meal3]).jsoned()).toEqual([{ time: { hours: 11, minutes: 30 }, quantity: 10 }, { time: { hours: 17, minutes: 20 }, quantity: 15 }, { time: { hours: 5, minutes: 0 }, quantity: 5 }]);
+});
