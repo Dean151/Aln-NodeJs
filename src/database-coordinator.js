@@ -33,8 +33,10 @@ function DataBaseCoordinator(config) {
     if (err) {
       console.log('Could not connect to database: ', err);
     }
-    this._isConnected = true;
-    console.log('Database connection is ready');
+    else {
+      this._isConnected = true;
+      console.log('Database connection is ready');
+    }
   });
 }
 
@@ -103,7 +105,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
         });
       }
 
-      if (meals.length == 0) {
+      if (planning.numberOfMeals() == 0) {
         connection.commit((err) => {
           if (err) {
             return connection.rollback(() => {
