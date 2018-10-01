@@ -37,7 +37,7 @@ function FeederCoordinator(config) {
         var hexIdentifier = hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
         var identifier = Buffer.from(hexIdentifier, 'hex').toString();
 
-        if (allowed_feeders.length && !allowed_feeders.includes(identifier)) {
+        if (config.allowed_feeders.length && !config.allowed_feeders.includes(identifier)) {
           console.log('Unauthorized feeder detected: ' + identifier);
           c.close();
         }
