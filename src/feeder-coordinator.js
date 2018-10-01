@@ -143,6 +143,7 @@ FeederCoordinator.prototype.setPlanning = function (identifier, planning, callba
   var data = ResponseBuilder.changePlanning(planning);
   var expectation = ResponseBuilder.changePlanningExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
+    this.databaseCoordinator.recordPlanning(identifier, planning);
     if (typeof callback == 'function') {
       callback(msg);
     }

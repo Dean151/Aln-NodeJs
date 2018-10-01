@@ -70,4 +70,12 @@ Time.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   return Buffer.from([b1, b2]);
 };
 
+/**
+ * Returns the time formatted for mysql (example 13:32:12)
+ * @return {string} The time formatted
+ */
+Time.prototype.sqled = function() {
+  return ('0' + this._hours).slice(-2) + ':' + ('0' + this._minutes).slice(-2) + ':00';
+}
+
 module.exports = Time;

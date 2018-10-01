@@ -88,4 +88,46 @@ DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
   });
 }
 
+DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
+  if (!this.isReady()) {
+    return;
+  }
+
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+  this.con.beginTransaction(function(err) {
+    if (err) { throw err; }
+
+    // We register the planning in the database
+    this.con.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
+      if (err) {
+      return this.con.rollback(function() {
+          throw err;
+        });
+      }
+
+      // We then insert all meals in the table meals
+      var meals = planning.sqled(result.insertId);
+
+      this.con.query('INSERT INTO meals(planning, time, quantity) VALUES ?', meals, function (err, result, fields) {
+        if (err) {
+          return this.con.rollback(function() {
+            throw err;
+          });
+        }
+        this.con.commit(function(err) {
+          if (err) {
+            return this.con.rollback(function() {
+              throw err;
+            });
+          }
+          // All went well
+        });
+      });
+    });
+  });
+}
+
+
 module.exports = DataBaseCoordinator;

@@ -35,4 +35,9 @@ Planning.prototype.buffered = function() {
   return this._meals.reduce((buf, meal) => Buffer.concat([buf, meal.buffered()]), buffer);
 }
 
+// Return (planning, time, quantity)
+Planning.prototype.sqled = function(planId) {
+  return this._meals.map((meal) => { return [planId, meal.time().sqled(), meal.quantity().amount()]; });
+}
+
 module.exports = Planning;

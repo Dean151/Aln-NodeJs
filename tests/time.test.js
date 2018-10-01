@@ -75,3 +75,17 @@ test("buffered() should send the correct binary value", () => {
   expect(new Time(17, 0).buffered().toString("hex")).toBe("003c");
   expect(new Time(19, 30).buffered().toString("hex")).toBe("00d2");
 });
+
+// sqled()
+test("sqled() should send the correct value", () => {
+  expect(new Time(0, 0).sqled()).toBe("00:00:00");
+  expect(new Time(4, 30).sqled()).toBe("04:30:00");
+  expect(new Time(11, 0).sqled()).toBe("11:00:00");
+  expect(new Time(15, 59).sqled()).toBe("15:59:00");
+  expect(new Time(16, 0).sqled()).toBe("16:00:00");
+  expect(new Time(16, 1).sqled()).toBe("16:01:00");
+  expect(new Time(16, 10).sqled()).toBe("16:10:00");
+  expect(new Time(16, 16).sqled()).toBe("16:16:00");
+  expect(new Time(17, 0).sqled()).toBe("17:00:00");
+  expect(new Time(19, 30).sqled()).toBe("19:30:00");
+});
