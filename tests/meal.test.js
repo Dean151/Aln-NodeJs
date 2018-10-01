@@ -50,3 +50,11 @@ test("buffered() should send the correct binary value", () => {
   expect(new Meal({ hours: 11, minutes: 30 }, 10).buffered().toString("hex")).toBe("0492000a");
   expect(new Meal({ hours: 15, minutes: 0 }, 11).buffered().toString("hex")).toBe("0564000b");
 });
+
+// sqled()
+test("sqled() should send the correct value", () => {
+  expect(new Meal({ hours: 0, minutes: 0 }, 5).sqled(5)).toEqual([5, '00:00:00', 5]);
+  expect(new Meal({ hours: 7, minutes: 30 }, 8).sqled(5)).toEqual([5, '07:30:00', 8]);
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).sqled(5)).toEqual([5, '11:30:00', 10]);
+  expect(new Meal({ hours: 15, minutes: 0 }, 11).sqled(5)).toEqual([5, '15:00:00', 11]);
+});

@@ -52,4 +52,8 @@ Meal.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), this.quantity().buffered()]);
 };
 
+Meal.prototype.sqled = function(planId) {
+  return [planId, this._time.sqled(), this._quantity.amount()];
+}
+
 module.exports = Meal;

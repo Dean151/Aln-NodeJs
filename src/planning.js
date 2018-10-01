@@ -37,7 +37,7 @@ Planning.prototype.buffered = function() {
 
 // Return (planning, time, quantity)
 Planning.prototype.sqled = function(planId) {
-  return this._meals.map((meal) => { return [planId, meal.time().sqled(), meal.quantity().amount()]; });
+  return this._meals.map((meal) => { return meal.sqled(planId); });
 }
 
 module.exports = Planning;

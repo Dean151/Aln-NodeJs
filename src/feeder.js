@@ -24,14 +24,6 @@ function Feeder(identifier, socket) {
   this.hasResponded(socket);
 }
 
-Feeder.prototype.quantity = function() {
-  return this.feederData.quantity;
-}
-
-Feeder.prototype.planning = function() {
-  return this.feederData.planning;
-}
-
 Feeder.prototype.hasResponded = function(socket) {
   this._socket = socket;
   this._lastResponded = new Date();

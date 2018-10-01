@@ -48,3 +48,13 @@ test('buffered() tests', () => {
   var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
   expect(new Planning([meal1, meal2, meal3]).buffered().toString('hex')).toBe("030492000a0050000f030c0005");
 });
+
+test('sqled() tests', () => {
+  expect(new Planning([]).sqled(3)).toEqual([]);
+  var meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
+  expect(new Planning([meal1]).sqled(3)).toEqual([[3, '11:30:00', 10]]);
+  var meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
+  expect(new Planning([meal1, meal2]).sqled(3)).toEqual([[3, '11:30:00', 10], [3, '17:20:00', 15]]);
+  var meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
+  expect(new Planning([meal1, meal2, meal3]).sqled(3)).toEqual([[3, '11:30:00', 10], [3, '17:20:00', 15], [3, '05:00:00', 5]]);
+});
