@@ -51,7 +51,7 @@ function FeederCoordinator(config) {
           this.write(identifier, ResponseBuilder.time());
 
           // Maintain the connection with the socket
-
+          c.setKeepAlive(true, 30000);
         }
       }
     });
