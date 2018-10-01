@@ -38,15 +38,19 @@ function FeederCoordinator(config) {
         var identifier = Buffer.from(hexIdentifier, 'hex').toString();
         console.log('Feeder identified with: ' + identifier);
 
-        // Register it
-        this.registerFeeder(identifier, c);
+        if (allowed_feeders.length && !allowed_feeders.includes(identifier)) {
+          c.close();
+        }
+        else {
+          // Register it
+          this.registerFeeder(identifier, c);
 
-        // Send it back the time
-        const ResponseBuilder = require("./response-builder");
-        this.write(identifier, ResponseBuilder.time());
+          // Send it back the time
+          const ResponseBuilder = require("./response-builder");
+          this.write(identifier, ResponseBuilder.time());
+        }
       }
     });
-    c.pipe(c);
   });
 
   server.on('error', (err) => {

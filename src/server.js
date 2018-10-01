@@ -42,7 +42,7 @@ function Server(feederCoordinator, config) {
     }
 
     // Check that the feeder is in the allowed feeders list
-    else if (typeof req.body.identifier !== 'undefined' && !config.allowed_feeders.includes(req.body.identifier)) {
+    else if (typeof req.body.identifier !== 'undefined' && allowed_feeders.length && !config.allowed_feeders.includes(req.body.identifier)) {
       res.status(403);
       res.json({ success: false, error: 'Non-authorized feeder identifier.'})
       // We return to prevent to go to next step
