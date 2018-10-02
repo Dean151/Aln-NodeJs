@@ -104,6 +104,7 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
   const Meal = require('./meal');
 
   // Get current planning id
+  let connection = this.con;
   connection.query('SELECT p.id as planningId FROM plannings LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1', [identifier], (err, results, fields) => {
     if (results.length === 0) {
       // Identifier not found
