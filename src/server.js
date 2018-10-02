@@ -16,14 +16,17 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const Quantity = require("./quantity");
+const Meal = require('./meal');
+const Planning = require("./planning");
+
 function Server(feederCoordinator, databaseCoordinator, config) {
 
-  const express = require('express');
-  const bodyParser = require('body-parser');
-
   // Create a service (the app object is just a callback).
+  const express = require('express');
   let app = express();
 
+  const bodyParser = require('body-parser');
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
@@ -31,112 +34,83 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   let router = express.Router();
 
   router.use((req, res, next) => {
-
     // Check the request header token to validate we're not messing around
     if (config.api_secret !== req.headers['x-access-token']) {
       res.status(403);
-      res.json({ success: false, error: 'Authentication needed.'});
+      res.json({ success: false, error: 'Authentication token needed.'});
     }
-
-    // Check that the feeder is in the allowed feeders list
-    else if (typeof req.body.identifier !== 'undefined' && config.allowed_feeders.length && !config.allowed_feeders.includes(req.body.identifier)) {
-      res.status(403);
-      res.json({ success: false, error: 'Non-authorized feeder identifier.'});
-    }
-
-    // Make sure we go to the next routes and don't stop here
     else {
       next();
     }
   });
 
+  router.use((req, res, next) => {
+    // Identifier is not an option any more
+    if (typeof req.body.identifier === 'undefined') {
+      throw 'No feeder identifier given'
+    }
+    // We check it's an authorized one
+    if (config.allowed_feeders.length && !config.allowed_feeders.includes(req.body.identifier)) {
+      res.status(403);
+      res.json({ success: false, error: 'Unauthorized feeder identifier.'});
+    }
+    else {
+      next();
+    }
+  });
+
+  router.use((err, req, res, next) => {
+    res.status(500);
+    res.json({ success: false, error: err.toString() });
+  });
+
   router.route('/feeders').post((req, res) => {
-    try {
-      let feeders = feederCoordinator.getFeeders();
-      res.json(feeders);
-    }
-    catch(error) {
-      res.status(400);
-      res.json({ success: false, error: error.toString() });
-    }
+    let feeders = feederCoordinator.getFeeder(req.body.identifier);
+    res.json(feeders);
   });
 
   router.route('/quantity').put((req, res) => {
-    try {
-      const Quantity = require("./quantity");
-      let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
-        if (msg === 'success') {
-          res.json({ success: true, message: 'Quantity successfully setted!' });
-        }
-        else {
-          res.status(400);
-          res.json({ success: false, error: msg });
-        }
-      });
-    }
-    catch(error) {
-      res.status(400);
-      res.json({ success: false, error: error.toString() });
-    }
+    let quantity = new Quantity(req.body.quantity);
+    feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
+      if (msg === 'success') {
+        res.json({ success: true, message: 'Quantity successfully setted!' });
+      }
+      else {
+        res.status(400);
+        res.json({ success: false, error: msg });
+      }
+    });
   });
 
   router.route('/planning').post((req, res) => {
-    try {
-      // Fetch the planning if it's exists
-      databaseCoordinator.getCurrentPlanning(req.body.identifier, (planning) => {
-        if (typeof planning === 'undefined') {
-          throw 'No planning';
-        }
-        res.json({ success: true, meals: planning.jsoned() });
-      });
-    }
-    catch(error) {
-      res.status(400);
-      res.json({ success: false, error: error.toString() });
-    }
+    // Fetch the planning if it's exists
+    databaseCoordinator.getCurrentPlanning(req.body.identifier, (planning) => {
+      if (typeof planning === 'undefined') {
+        throw 'No planning';
+      }
+      res.json({ success: true, meals: planning.jsoned() });
+    });
   });
 
   router.route('/planning').put((req, res) => {
-    try {
-      const Meal = require('./meal');
-      let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
-      const Planning = require("./planning");
-      let planning = new Planning(meals);
-      feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
-        if (msg === 'success') {
-          res.json({ success: true, message: 'Planning successfully setted!' });
-        }
-        else {
-          res.status(400);
-          res.json({ success: false, error: msg });
-        }
-      });
-    }
-    catch(error) {
-      res.status(400);
-      res.json({ success: false, error: error.toString() });
-    }
+    let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
+    let planning = new Planning(meals);
+    feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
+      if (msg !== 'success') {
+        throw msg;
+      }
+      res.json({ success: true, message: 'Planning successfully setted!' });
+    });
   });
 
   router.route('/feed').put((req, res) => {
-    try {
-      const Quantity = require("./quantity");
-      let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
-        if (msg === 'success') {
-          res.json({ success: true, message: 'Feeding completed!' });
-        }
-        else {
-          res.status(400);
-          res.json({ success: false, error: msg });
-        }
-      });
-    }
-    catch(error) {
-      res.status(400);
-      res.json({ success: false, error: error.toString() });
-    }
+    let quantity = new Quantity(req.body.quantity);
+    feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
+      if (msg !== 'success') {
+        throw msg;
+      }
+      res.json({ success: true, message: 'Feeding completed!' });
+    });
   });
 
   // Use the routes

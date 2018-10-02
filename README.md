@@ -26,26 +26,23 @@ Allow to know if the feeder is currently available, and responding threw the net
 
 **URI:** `POST http(s)://myhost/api/feeders`
 
-**Parameters** : `identifier` and `quantity`
+**Parameters** : `identifier`
 
 *Example:* To get the current status of the feeders
 
 ```
 POST http(s)://myhost/api/feeders
 {
-  "identifier": "XXX012345678",
-  "quantity": 10
+  "identifier": "XXX012345678"
 }
 ```
 
-Could return:
+Will return something like:
 ```
 {
-  "XXX012345678": {
-    "identifier": "XXX012345678",
-    "isAvailable": true,
-    "lastResponded": "2018-07-30T15:14:35.072Z"
-  }
+  "identifier": "XXX012345678",
+  "isAvailable": true,
+  "lastResponded": "2018-07-30T15:14:35.072Z"
 }
 ```
 

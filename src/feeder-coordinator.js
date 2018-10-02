@@ -132,16 +132,13 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
   });
 };
 
-FeederCoordinator.prototype.getFeeders = function () {
-  return Object.keys(FeederCoordinator.feeders).reduce(function(previous, current) {
-    let feeder = FeederCoordinator.feeders[current];
-    previous[current] = {
-      identifier: feeder._identifier,
-      lastResponded: feeder._lastResponded.toJSON(),
-      isAvailable: (Math.floor((new Date() - feeder._lastResponded) / 1000) <= 20),
-    };
-    return previous;
-  }, {});
+FeederCoordinator.prototype.getFeeder = function (identifier) {
+  let feeder = FeederCoordinator.feeders[identifier];
+  return {
+    identifier: feeder._identifier,
+    lastResponded: feeder._lastResponded.toJSON(),
+    isAvailable: (Math.floor((new Date() - feeder._lastResponded) / 1000) <= 30),
+  };
 };
 
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
