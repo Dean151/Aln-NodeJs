@@ -104,6 +104,8 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
 
   // Get current planning id
   this.con.query('SELECT time, quantity FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
+    if (err) { throw err; }
+    
     // Parse the meals results
     let meals = results.map((row) => { return new Meal(row.time, row.quantity); });
     completion(new Planning(meals));
