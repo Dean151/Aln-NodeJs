@@ -46,6 +46,26 @@ Will return something like:
 }
 ```
 
+### Feeding
+
+You can trigger a new meal by doing just one request!
+
+**URI:** `PUT http(s)://myhost/api/feed`
+
+**Parameters** : `identifier` and `quantity`
+
+*Example:* To feed now a meal of 5 grams.
+
+```
+PUT http(s)://myhost/api/feed
+{
+  "identifier": "XXX012345678",
+  "quantity": 5
+}
+```
+
+*You can set a quantity from 5 grams to 150 grams.*
+
 
 ### Setting the default feeding amount
 
@@ -116,26 +136,6 @@ might return something like:
   ]
 ```
 
-
-### Feeding
-
-You can trigger a new meal by doing just one request!
-
-**URI:** `PUT http(s)://myhost/api/feed`
-
-**Parameters** : `identifier` and `quantity`
-
-*Example:* To feed now a meal of 5 grams.
-
-```
-PUT http(s)://myhost/api/feed
-{
-  "identifier": "XXX012345678",
-  "quantity": 5
-}
-```
-
-*You can set a quantity from 5 grams to 150 grams.*
 
 ## Installation
 

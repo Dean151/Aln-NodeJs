@@ -72,13 +72,10 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   router.route('/quantity').put((req, res) => {
     let quantity = new Quantity(req.body.quantity);
     feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
-      if (msg === 'success') {
-        res.json({ success: true, message: 'Quantity successfully setted!' });
+      if (msg !== 'success') {
+        throw msg;
       }
-      else {
-        res.status(400);
-        res.json({ success: false, error: msg });
-      }
+      res.json({ success: true });
     });
   });
 
@@ -99,7 +96,7 @@ function Server(feederCoordinator, databaseCoordinator, config) {
       if (msg !== 'success') {
         throw msg;
       }
-      res.json({ success: true, message: 'Planning successfully setted!' });
+      res.json({ success: true });
     });
   });
 
@@ -109,7 +106,7 @@ function Server(feederCoordinator, databaseCoordinator, config) {
       if (msg !== 'success') {
         throw msg;
       }
-      res.json({ success: true, message: 'Feeding completed!' });
+      res.json({ success: true });
     });
   });
 
