@@ -27,6 +27,8 @@ function Meal(time, quantity) {
     this._time = time;
   } else if (time.hours !== undefined && time.minutes !== undefined) {
     this._time = new Time(time.hours, time.minutes);
+  } else {
+    this._time = new Time(time);
   }
 
   if (quantity.constructor === Quantity) {

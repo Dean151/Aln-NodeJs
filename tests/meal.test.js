@@ -28,6 +28,10 @@ test("Meal constructor", () => {
   // Three parameters
   expect(new Meal({ hours: 11, minutes: 30 }, 10).time().numberOfMinutes()).toBe(1170);
   expect(new Meal({ hours: 11, minutes: 30 }, 10).quantity().amount()).toBe(10);
+
+  // SQL row parameters
+  expect(new Meal('11:30:00', '10').time().numberOfMinutes()).toBe(1170);
+  expect(new Meal('11:30:00', '10').quantity().amount()).toBe(10);
 });
 
 // Unvalid constructors
