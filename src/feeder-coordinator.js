@@ -35,18 +35,17 @@ function FeederCoordinator(databaseCoordinator, config) {
       let treatedData = ResponseBuilder.recognize(data);
       switch (treatedData.type) {
         case 'identification':
-          let identifier = treatedData.identifier;
-          if (config.allowed_feeders === undefined || config.allowed_feeders.length === 0 || config.allowed_feeders.includes(identifier)) {
-            this.identifyFeeder(identifier, c);
+          if (config.allowed_feeders === undefined || config.allowed_feeders.length === 0 || config.allowed_feeders.includes(treatedData.identifier)) {
+            this.identifyFeeder(treatedData.identifier, c);
           }
           else {
-            this.denyFeeder(identifier, c);
+            this.denyFeeder(treatedData.identifier, c);
 
             this.databaseCoordinator.logUnknownData('unauthorized', data);
           }
           break;
         case 'expectation':
-          if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(identifier)) {
+          if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {
             this.databaseCoordinator.logUnknownData('unexpected', data);
           }
           break;
