@@ -103,21 +103,10 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
   const Meal = require('./meal');
 
   // Get current planning id
-  let connection = this.con;
-  connection.query('SELECT p.id as planningId FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1', [identifier], (err, results, fields) => {
-    if (err) throw err;
-
-    if (results.length === 0) {
-      // Identifier not found
-      completion(new Planning([]));
-      return;
-    }
-    let planningId = results[0].planningId;
-    connection.query('SELECT time, quantity FROM meals WHERE planning = ?', [planningId], (err, results, fields) => {
-      // Parse the meals results
-      let meals = results.map((row) => { return new Meal(row.time, row.quantity); });
-      completion(new Planning(meals));
-    });
+  this.con.query('SELECT time, quantity FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
+    // Parse the meals results
+    let meals = results.map((row) => { return new Meal(row.time, row.quantity); });
+    completion(new Planning(meals));
   });
 };
 
