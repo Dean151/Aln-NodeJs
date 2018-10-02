@@ -34,8 +34,16 @@ function DataBaseCoordinator(config) {
       console.log('Could not connect to database: ', err);
     }
     else {
-      this._isConnected = true;
-      console.log('Database connection is ready');
+      this.con.query('SHOW TABLES LIKE ?;', ['feeders'], (err, result, fields) => {
+        if (result.length === 0) {
+          // We create the tables, it's the first app start
+          console.log('Tables does not exists. You need to run init.sql file to create them!');
+        }
+        else {
+          this._isConnected = true;
+          console.log('Database connection is ready');
+        }
+      });
     }
   });
 }
