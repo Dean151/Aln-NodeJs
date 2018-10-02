@@ -16,7 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-function Server(feederCoordinator, config) {
+function Server(feederCoordinator, databaseCoordinator, config) {
+
   const express = require('express');
   const bodyParser = require('body-parser');
 
@@ -72,6 +73,23 @@ function Server(feederCoordinator, config) {
           res.status(400);
           res.json({ success: false, error: msg });
         }
+      });
+    }
+    catch(error) {
+      res.status(400);
+      res.json({ success: false, error: error.toString() });
+    }
+  });
+
+  router.route('/planning').post((req, res) => {
+    try {
+      // Fetch the planning if it's exists
+      const Planning = require("./planning");
+      databaseCoordinator.getCurrentPlanning(req.body.identifier, (planning, err) => {
+        if (typeof planning === 'undefined') {
+          throw err;
+        }
+        res.json({ success: true, meals: planning.jsoned() });
       });
     }
     catch(error) {

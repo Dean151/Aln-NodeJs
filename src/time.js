@@ -28,7 +28,14 @@ function Time(hours, minutes) {
     let now = new Date();
     this._hours = now.getUTCHours();
     this._minutes = now.getUTCMinutes();
-  } else {
+  }
+  else {
+    if (typeof hours === 'string' && minutes === undefined) {
+      // hours is like '12:32:12'
+      minutes = hours.slice(3,5); // Get the minutes first, we override hour
+      hours = hours.slice(0,2);
+    }
+
     let numberHours = Math.floor(+hours);
     if (numberHours >= 0 && numberHours % 24 === numberHours) {
       this._hours = numberHours;

@@ -27,16 +27,20 @@ else {
   console.log = function() {};
 }
 
+// This will handle database connexions
+const DataBaseCoordinator = require("./src/database-coordinator");
+let databaseCoordinator = new DataBaseCoordinator(config);
+
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
-var feederCoordinator = new FeederCoordinator(config);
+let feederCoordinator = new FeederCoordinator(databaseCoordinator, config);
 
 // This will handle the REST API
 const Server = require("./src/server");
-var server = new Server(feederCoordinator, config);
+let server = new Server(feederCoordinator, databaseCoordinator, config);
 
 // This is the feeder emulator part
 if (config.enable_emulator && config.emulator_identifier) {
   const Emulator = require("./src/emulator");
-  var emulatedFeeder = new Emulator(config.emulator_identifier)
+  let emulatedFeeder = new Emulator(config.emulator_identifier)
 }

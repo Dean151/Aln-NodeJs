@@ -94,6 +94,32 @@ PUT http(s)://myhost/api/planning
 
 *You can set up to 10 meals, and quantity goes from 5 grams to 150 grams.*
 
+### Getting the last setted planning
+
+
+**URI:** `POST http(s)://myhost/api/planning`
+
+**Parameters** : `identifier`
+
+```
+POST http(s)://myhost/api/planning
+{
+  "identifier": "XXX012345678"
+}
+```
+
+might return something like:
+
+```
+  "success": true,
+  "meals": [
+    {"time":{"hours": 8, "minutes": 0}, "quantity": 20},
+    {"time":{"hours": 13, "minutes": 0}, "quantity": 20},
+    {"time":{"hours": 21, "minutes": 0}, "quantity": 20}
+  ]
+```
+
+
 ### Feeding
 
 You can trigger a new meal by doing just one request!

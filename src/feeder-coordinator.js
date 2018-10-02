@@ -17,11 +17,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const Feeder = require("./feeder");
-const DataBaseCoordinator = require("./database-coordinator");
 
-function FeederCoordinator(config) {
+function FeederCoordinator(databaseCoordinator, config) {
 
-  this.databaseCoordinator = new DataBaseCoordinator(config);
+  this.databaseCoordinator = databaseCoordinator;
 
   const net = require("net");
   const server = net.createServer((c) => {

@@ -26,6 +26,20 @@ test('Time() should be "now" datetime', () => {
   expect(date._minutes).toBe(now.getUTCMinutes());
 });
 
+// Valid constructors for sql
+test("Time() with sql format should work", () => {
+  expect(new Time("00:00:00").sqled()).toBe("00:00:00");
+  expect(new Time("04:30:00").sqled()).toBe("04:30:00");
+  expect(new Time("11:00:00").sqled()).toBe("11:00:00");
+  expect(new Time("15:59:00").sqled()).toBe("15:59:00");
+  expect(new Time("16:00:00").sqled()).toBe("16:00:00");
+  expect(new Time("16:01:00").sqled()).toBe("16:01:00");
+  expect(new Time("16:10:00").sqled()).toBe("16:10:00");
+  expect(new Time("16:16:00").sqled()).toBe("16:16:00");
+  expect(new Time("17:00:00").sqled()).toBe("17:00:00");
+  expect(new Time("19:30:00").sqled()).toBe("19:30:00");
+});
+
 // Unvalid constructors
 test("Time() with unvalid parameters should throw", () => {
   expect(() => new Time(42, 0)).toThrow();
