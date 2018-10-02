@@ -63,19 +63,19 @@ ResponseBuilder.feedNow = function(quantity) {
 ResponseBuilder.recognize = function(data) {
   let hexString = data.toString('hex');
   if (hexString.match(/^9da114([0-9a-f]+)01d0010000$/)) {
-    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
+    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
     return { type: 'identification', 'identifier': identifier };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
-    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
+    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
     return { type: 'expectation', 'identifier': identifier, action: 'changeDefaultQuantity' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c4d0a10000$/)) {
-    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1"), 'hex').toString();
+    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1"), 'hex').toString();
     return { type: 'expectation', 'identifier': identifier, action: 'changePlanning' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)a2d0a10000$/)) {
-    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1"), 'hex').toString();
+    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1"), 'hex').toString();
     return { type: 'expectation', 'identifier': identifier, action: 'feedNow' };
   }
   else {
