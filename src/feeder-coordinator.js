@@ -17,6 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const Feeder = require("./feeder");
+const ResponseBuilder = require("./response-builder");
 
 function FeederCoordinator(databaseCoordinator, config) {
 
@@ -29,33 +30,29 @@ function FeederCoordinator(databaseCoordinator, config) {
       console.log('Client disconnected');
     });
     c.on('data', (data) => {
-      let hexData = data.toString('hex');
-      console.log('Data received: ' + hexData);
-      if (hexData.startsWith('9da114') && hexData.endsWith('01d0010000')) {
-        // It's an feeder identifier
-        let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
+      console.log('Data received: ' + data.toString('hex'));
 
-        if (config.allowed_feeders.length && !config.allowed_feeders.includes(identifier)) {
-          console.log('Unauthorized feeder detected: ' + identifier);
-          this.databaseCoordinator.logUnknownData('unauthorized', data);
-          c.destroy();
-        }
-        else {
-          console.log('Feeder identified with: ' + identifier);
+      let treatedData = ResponseBuilder.recognize(data);
+      switch (treatedData.type) {
+        case 'identification':
+          let identifier = treatedData.identifier;
+          if (config.allowed_feeders === undefined || config.allowed_feeders.length === 0 || config.allowed_feeders.includes(identifier)) {
+            this.identifyFeeder(identifier, c);
+          }
+          else {
+            this.denyFeeder(identifier, c);
 
-          // Register it
-          this.registerFeeder(identifier, c);
-
-          // Send it back the time
-          const ResponseBuilder = require("./response-builder");
-          this.write(identifier, ResponseBuilder.time());
-
-          // Maintain the connection with the socket
-          c.setKeepAlive(true, 30000);
-        }
-      }
-      else {
-        this.databaseCoordinator.logUnknownData('unknown', data);
+            this.databaseCoordinator.logUnknownData('unauthorized', data);
+          }
+          break;
+        case 'expectation':
+          if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(identifier)) {
+            this.databaseCoordinator.logUnknownData('unexpected', data);
+          }
+          break;
+        default:
+          this.databaseCoordinator.logUnknownData('unknown', data);
+          break;
       }
     });
   });
@@ -72,7 +69,9 @@ function FeederCoordinator(databaseCoordinator, config) {
 
 FeederCoordinator.feeders = {};
 
-FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
+FeederCoordinator.prototype.identifyFeeder = function(identifier, socket) {
+  console.log('Feeder identified with: ' + identifier);
+
   if (FeederCoordinator.feeders[identifier] === undefined) {
     FeederCoordinator.feeders[identifier] = new Feeder(identifier, socket);
   }
@@ -80,8 +79,20 @@ FeederCoordinator.prototype.registerFeeder = function(identifier, socket) {
     FeederCoordinator.feeders[identifier].hasResponded(socket);
   }
 
+  // Send it back the time
+  this.write(identifier, ResponseBuilder.time());
+
+  // Maintain the connection with the socket
+  socket.setKeepAlive(true, 30000);
+
   // Register it in database
   this.databaseCoordinator.registerFeeder(identifier);
+};
+
+FeederCoordinator.prototype.denyFeeder = function (identifier, socket) {
+  console.log('Unauthorized feeder detected: ' + identifier);
+
+  socket.destroy();
 };
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
@@ -135,8 +146,6 @@ FeederCoordinator.prototype.getFeeders = function () {
 };
 
 FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
-  const ResponseBuilder = require("./response-builder");
-
   let data = ResponseBuilder.changeDefaultQuantity(quantity);
   let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
@@ -148,8 +157,6 @@ FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity,
 };
 
 FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
-  const ResponseBuilder = require("./response-builder");
-
   let data = ResponseBuilder.changePlanning(planning);
   let expectation = ResponseBuilder.changePlanningExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {
@@ -161,8 +168,6 @@ FeederCoordinator.prototype.setPlanning = function (identifier, planning, callba
 };
 
 FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
-  const ResponseBuilder = require("./response-builder");
-
   let data = ResponseBuilder.feedNow(quantity);
   let expectation = ResponseBuilder.feedNowExpectation(identifier);
   this.writeAndExpect(identifier, data, expectation, (msg) => {

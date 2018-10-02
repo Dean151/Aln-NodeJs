@@ -27,14 +27,6 @@ ResponseBuilder.time = function() {
   return Buffer.concat([prefix, time.buffered()]);
 };
 
-ResponseBuilder.feederIdentification = function(identifier) {
-  // 9d a1 14
-  let prefix = Buffer.from([157, 161, 20]);
-  // 01 d0 01 00 00
-  let suffix = Buffer.from([1, 208, 1, 0, 0]);
-  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-};
-
 ResponseBuilder.changeDefaultQuantity = function(quantity) {
   let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
@@ -44,14 +36,6 @@ ResponseBuilder.changeDefaultQuantity = function(quantity) {
   // 9d a1 06 c3
   let prefix = Buffer.from([157, 161, 6, 195]);
   return Buffer.concat([prefix, quantity.buffered()]);
-};
-
-ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
-  // 9d a1 14
-  let prefix = Buffer.from([157, 161, 20]);
-  // c3 d0 a1 00 00
-  let suffix = Buffer.from([195, 208, 161, 0, 0]);
-  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
 };
 
 ResponseBuilder.changePlanning = function(planning) {
@@ -65,14 +49,6 @@ ResponseBuilder.changePlanning = function(planning) {
   return Buffer.concat([prefix, planning.buffered()]);
 };
 
-ResponseBuilder.changePlanningExpectation = function(identifier) {
-  // 9d a1 14
-  let prefix = Buffer.from([157, 161, 20]);
-  // c4 d0 a1 00 00
-  let suffix = Buffer.from([196, 208, 161, 0, 0]);
-  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
-};
-
 ResponseBuilder.feedNow = function(quantity) {
   let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
@@ -82,6 +58,53 @@ ResponseBuilder.feedNow = function(quantity) {
   // 9d a1 06 a2
   let prefix = Buffer.from([157, 161, 6, 162]);
   return Buffer.concat([prefix, quantity.buffered()]);
+};
+
+ResponseBuilder.recognize = function(data) {
+  let hexString = data.toString('hex');
+  if (hexString.match(/^9da114([0-9a-f]+)01d0010000$/)) {
+    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
+    return { type: 'identification', 'identifier': identifier };
+  }
+  else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
+    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
+    return { type: 'expectation', 'identifier': identifier, action: 'changeDefaultQuantity' };
+  }
+  else if (hexString.match(/^9da114([0-9a-f]+)c4d0a10000$/)) {
+    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1"), 'hex').toString();
+    return { type: 'expectation', 'identifier': identifier, action: 'changePlanning' };
+  }
+  else if (hexString.match(/^9da114([0-9a-f]+)a2d0a10000$/)) {
+    let identifier = Buffer.from(hexData.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1"), 'hex').toString();
+    return { type: 'expectation', 'identifier': identifier, action: 'feedNow' };
+  }
+  else {
+    return { type: 'unknown' };
+  }
+};
+
+ResponseBuilder.feederIdentification = function(identifier) {
+  // 9d a1 14
+  let prefix = Buffer.from([157, 161, 20]);
+  // 01 d0 01 00 00
+  let suffix = Buffer.from([1, 208, 1, 0, 0]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
+};
+
+ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
+  // 9d a1 14
+  let prefix = Buffer.from([157, 161, 20]);
+  // c3 d0 a1 00 00
+  let suffix = Buffer.from([195, 208, 161, 0, 0]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
+};
+
+ResponseBuilder.changePlanningExpectation = function(identifier) {
+  // 9d a1 14
+  let prefix = Buffer.from([157, 161, 20]);
+  // c4 d0 a1 00 00
+  let suffix = Buffer.from([196, 208, 161, 0, 0]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
 };
 
 ResponseBuilder.feedNowExpectation = function(identifier) {
