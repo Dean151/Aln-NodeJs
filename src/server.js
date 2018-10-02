@@ -84,7 +84,6 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   router.route('/planning').post((req, res) => {
     try {
       // Fetch the planning if it's exists
-      const Planning = require("./planning");
       databaseCoordinator.getCurrentPlanning(req.body.identifier, (planning, err) => {
         if (typeof planning === 'undefined') {
           throw err;

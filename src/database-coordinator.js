@@ -41,10 +41,7 @@ function DataBaseCoordinator(config) {
 }
 
 DataBaseCoordinator.prototype.isReady = function() {
-  if (!this._isConnected) {
-    return false;
-  }
-  return true;
+  return this._isConnected;
 };
 
 DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
@@ -100,7 +97,7 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
 
   // Get current planning id
   connection.query('SELECT p.id as planningId FROM plannings LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1', [identifier], (err, results, fields) => {
-    if (results.length == 0) {
+    if (results.length === 0) {
       // Identifier not found
       completion(new Planning([]));
       return;

@@ -32,7 +32,7 @@ module.exports = {
   'mysql_database': '',
   
   // API secrets
-  'allowed_feeders': ['XXX012345678'], // List here the allowed feeded identifiers that can use the API.
+  'allowed_feeders': ['XXX012345678'], // List here the allowed feeders identifiers that can use the API.
   'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
 
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
