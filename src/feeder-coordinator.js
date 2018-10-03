@@ -18,6 +18,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const Feeder = require("./feeder");
 const ResponseBuilder = require("./response-builder");
+const Time = require("./time");
+const Meal = require("./meal");
 
 function FeederCoordinator(databaseCoordinator, config) {
 
@@ -40,9 +42,13 @@ function FeederCoordinator(databaseCoordinator, config) {
           }
           else {
             this.denyFeeder(treatedData.identifier, c);
-
             this.databaseCoordinator.logUnknownData('unauthorized', data);
           }
+          break;
+        case 'manual_meal':
+          let meal = new Meal(new Time(), treatedData.amount);
+          this.databaseCoordinator.recordMeal(treatedData.identifier, meal);
+          this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, meal.quantity());
           break;
         case 'expectation':
           if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {

@@ -66,6 +66,11 @@ ResponseBuilder.recognize = function(data) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
     return { type: 'identification', 'identifier': identifier };
   }
+  else if (hexString.match(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/)) {
+    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/, "$1"), 'hex').toString();
+    let amount = parseInt(hexString.slice(-2), 16);
+    return { type: 'manual_meal', 'identifier': identifier, amount: amount };
+  }
   else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
     return { type: 'expectation', 'identifier': identifier, action: 'changeDefaultQuantity' };
@@ -89,6 +94,14 @@ ResponseBuilder.feederIdentification = function(identifier) {
   // 01 d0 01 00 00
   let suffix = Buffer.from([1, 208, 1, 0, 0]);
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
+};
+
+ResponseBuilder.mealButtonPressed = function(identifier, quantity) {
+  // 9d a1 14
+  let prefix = Buffer.from([157, 161, 20]);
+  // 21 03 84
+  let suffix = Buffer.from([33, 3, 132]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix, quantity.buffered()]);
 };
 
 ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
