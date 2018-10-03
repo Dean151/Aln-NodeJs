@@ -64,24 +64,24 @@ ResponseBuilder.recognize = function(data) {
   let hexString = data.toString('hex');
   if (hexString.match(/^9da114([0-9a-f]+)01d0010000$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
-    return { type: 'identification', 'identifier': identifier };
+    return { type: 'identification', identifier: identifier };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/, "$1"), 'hex').toString();
     let amount = parseInt(hexString.slice(-2), 16);
-    return { type: 'manual_meal', 'identifier': identifier, amount: amount };
+    return { type: 'manual_meal', identifier: identifier, amount: amount };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
-    return { type: 'expectation', 'identifier': identifier, action: 'changeDefaultQuantity' };
+    return { type: 'expectation', identifier: identifier, action: 'change_default_quantity' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c4d0a10000$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1"), 'hex').toString();
-    return { type: 'expectation', 'identifier': identifier, action: 'changePlanning' };
+    return { type: 'expectation', identifier: identifier, action: 'change_planning' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)a2d0a10000$/)) {
     let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1"), 'hex').toString();
-    return { type: 'expectation', 'identifier': identifier, action: 'feedNow' };
+    return { type: 'expectation', identifier: identifier, action: 'feed_now' };
   }
   else {
     return { type: 'unknown' };
