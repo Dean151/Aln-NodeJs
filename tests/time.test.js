@@ -20,8 +20,8 @@ const Time = require("./../src/time");
 
 // Default constructor
 test('Time() should be "now" datetime', () => {
-  var date = new Time();
-  var now = new Date();
+  let date = new Time();
+  let now = new Date();
   expect(date._hours).toBe(now.getUTCHours());
   expect(date._minutes).toBe(now.getUTCMinutes());
 });
