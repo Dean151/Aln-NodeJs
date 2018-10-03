@@ -20,7 +20,8 @@ CREATE TABLE `meals` (
   `planning` int(11) UNSIGNED DEFAULT NULL,
   `date` date DEFAULT NULL,
   `time` time NOT NULL,
-  `quantity` tinyint(3) UNSIGNED NOT NULL
+  `quantity` tinyint(3) UNSIGNED NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE `plannings` (

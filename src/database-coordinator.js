@@ -103,11 +103,11 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
   const Meal = require('./meal');
 
   // Get current planning id
-  this.con.query('SELECT time, quantity FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
+  this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
     if (err) { throw err; }
     
     // Parse the meals results
-    let meals = results.map((row) => { return new Meal(row.time, row.quantity); });
+    let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
     completion(new Planning(meals));
   });
 };
@@ -145,7 +145,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
       else {
         // We then insert all meals in the table meals
         let meals = planning.sqled(result.insertId);
-        connection.query('INSERT INTO meals(planning, time, quantity) VALUES ?', [meals], (err, result, fields) => {
+        connection.query('INSERT INTO meals(planning, time, quantity, enabled) VALUES ?', [meals], (err, result, fields) => {
           if (err) {
             return this.con.rollback(() => {
               throw err;

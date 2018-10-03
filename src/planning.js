@@ -20,20 +20,24 @@ function Planning(meals) {
   this._meals = meals;
 }
 
+Planning.prototype.enabledMeals = function() {
+  return this._meals.filter((meal) => { return meal._enabled; });
+};
+
 Planning.prototype.numberOfMeals = function() {
-  return this._meals.length;
+  return this.enabledMeals().length;
 };
 
 Planning.prototype.totalQuantity = function() {
-  return this._meals.reduce((amount, meal) => amount + meal.quantity().amount(), 0);
+  return this.enabledMeals().reduce((amount, meal) => amount + meal.quantity().amount(), 0);
 };
 
 Planning.prototype.buffered = function() {
   let buffer = Buffer.from([this.numberOfMeals()]);
-  return this._meals.reduce((buf, meal) => Buffer.concat([buf, meal.buffered()]), buffer);
+  return this.enabledMeals().reduce((buf, meal) => Buffer.concat([buf, meal.buffered()]), buffer);
 };
 
-// Return (planning, time, quantity)
+// Return [{planning, time, quantity, enabled}]
 Planning.prototype.sqled = function(planId) {
   return this._meals.map((meal) => { return meal.sqled(planId); });
 };

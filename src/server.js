@@ -90,7 +90,7 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   });
 
   router.route('/planning').put((req, res) => {
-    let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity); });
+    let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
     let planning = new Planning(meals);
     feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
       if (msg !== 'success') {

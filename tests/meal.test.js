@@ -57,16 +57,16 @@ test("buffered() should send the correct binary value", () => {
 
 // sqled()
 test("sqled() should send the correct value", () => {
-  expect(new Meal({ hours: 0, minutes: 0 }, 5).sqled(5)).toEqual([5, '00:00:00', 5]);
-  expect(new Meal({ hours: 7, minutes: 30 }, 8).sqled(5)).toEqual([5, '07:30:00', 8]);
-  expect(new Meal({ hours: 11, minutes: 30 }, 10).sqled(5)).toEqual([5, '11:30:00', 10]);
-  expect(new Meal({ hours: 15, minutes: 0 }, 11).sqled(5)).toEqual([5, '15:00:00', 11]);
+  expect(new Meal({ hours: 0, minutes: 0 }, 5).sqled(5)).toEqual([5, '00:00:00', 5, true]);
+  expect(new Meal({ hours: 7, minutes: 30 }, 8).sqled(5)).toEqual([5, '07:30:00', 8, true]);
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).sqled(5)).toEqual([5, '11:30:00', 10, true]);
+  expect(new Meal({ hours: 15, minutes: 0 }, 11).sqled(5)).toEqual([5, '15:00:00', 11, true]);
 });
 
 // jsoned()
 test("jsoned() should send the correct value", () => {
-  expect(new Meal({ hours: 0, minutes: 0 }, 5).jsoned()).toEqual({ time: { hours: 0, minutes: 0 }, quantity: 5 });
-  expect(new Meal({ hours: 7, minutes: 30 }, 8).jsoned()).toEqual({ time: { hours: 7, minutes: 30 }, quantity: 8 });
-  expect(new Meal({ hours: 11, minutes: 30 }, 10).jsoned()).toEqual({ time: { hours: 11, minutes: 30 }, quantity: 10 });
-  expect(new Meal({ hours: 15, minutes: 0 }, 11).jsoned()).toEqual({ time: { hours: 15, minutes: 0 }, quantity: 11 });
+  expect(new Meal({ hours: 0, minutes: 0 }, 5).jsoned()).toEqual({ time: { hours: 0, minutes: 0 }, quantity: 5, enabled: true });
+  expect(new Meal({ hours: 7, minutes: 30 }, 8).jsoned()).toEqual({ time: { hours: 7, minutes: 30 }, quantity: 8, enabled: true });
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).jsoned()).toEqual({ time: { hours: 11, minutes: 30 }, quantity: 10, enabled: true });
+  expect(new Meal({ hours: 15, minutes: 0 }, 11).jsoned()).toEqual({ time: { hours: 15, minutes: 0 }, quantity: 11, enabled: true });
 });

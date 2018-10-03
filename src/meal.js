@@ -22,7 +22,7 @@ const Quantity = require("./quantity");
 /**
  * Instantiate a new Meal object to be used with the feeder
  */
-function Meal(time, quantity) {
+function Meal(time, quantity, enabled) {
   if (time.constructor === Time) {
     this._time = time;
   } else if (time.hours !== undefined && time.minutes !== undefined) {
@@ -40,6 +40,8 @@ function Meal(time, quantity) {
   if (this._time === undefined || this._quantity === undefined) {
     throw "Wrong arguments in Meal constructor";
   }
+
+  this._enabled = enabled === undefined ? true : enabled;
 }
 
 Meal.prototype.time = function() {
@@ -54,14 +56,16 @@ Meal.prototype.buffered = function(hours_offset = 16, minutes_offset = 0) {
   return Buffer.concat([this.time().buffered(hours_offset, minutes_offset), this.quantity().buffered()]);
 };
 
+// Return {planning, time, quantity, enabled}
 Meal.prototype.sqled = function(planId) {
-  return [planId, this._time.sqled(), this._quantity.amount()];
+  return [planId, this._time.sqled(), this._quantity.amount(), this._enabled];
 };
 
 Meal.prototype.jsoned = function() {
   return {
     time: this._time.jsoned(),
-    quantity: this._quantity.jsoned()
+    quantity: this._quantity.jsoned(),
+    enabled: this._enabled
   };
 };
 
