@@ -18,8 +18,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const Feeder = require("./feeder");
 const ResponseBuilder = require("./response-builder");
-const Time = require("./time");
-const Meal = require("./meal");
+const Quantity = require("./quantity");
 
 function FeederCoordinator(databaseCoordinator, config) {
 
@@ -46,9 +45,9 @@ function FeederCoordinator(databaseCoordinator, config) {
           }
           break;
         case 'manual_meal':
-          let meal = new Meal(new Time(), treatedData.amount);
-          this.databaseCoordinator.recordMeal(treatedData.identifier, meal);
-          this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, meal.quantity());
+          let quantity = new Quantity(treatedData.amount);
+          this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
+          this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
           break;
         case 'expectation':
           if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {
