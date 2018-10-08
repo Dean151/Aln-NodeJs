@@ -41,8 +41,9 @@ function FeederCoordinator(databaseCoordinator, config) {
             this.identifyFeeder(treatedData.identifier, ip, socket);
           }
           else {
-            this.denyFeeder(treatedData.identifier, socket);
+            console.log('Unauthorized feeder detected:',  treatedData.identifier);
             this.databaseCoordinator.logUnknownData('unauthorized', data, ip);
+            socket.destroy();
           }
           break;
         case 'manual_meal':
@@ -53,10 +54,12 @@ function FeederCoordinator(databaseCoordinator, config) {
         case 'expectation':
           if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {
             this.databaseCoordinator.logUnknownData('unexpected', data, ip);
+            socket.destroy();
           }
           break;
         default:
           this.databaseCoordinator.logUnknownData('unknown', data, ip);
+          socket.destroy();
           break;
       }
     });
@@ -92,12 +95,6 @@ FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
 
   // Register it in database
   this.databaseCoordinator.registerFeeder(identifier, ip);
-};
-
-FeederCoordinator.prototype.denyFeeder = function (identifier, socket) {
-  console.log('Unauthorized feeder detected:',  identifier);
-
-  socket.destroy();
 };
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
