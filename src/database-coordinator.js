@@ -60,11 +60,11 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier, ip) {
   // We try to update the feeder registry.
   let now = new Date();
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-  this.con.query('UPDATE feeders SET last_responded = ? WHERE identifier = ?', [date, identifier], (err, result, fields) => {
+  this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
     if (err) throw err;
     if (result.affectedRows < 1) {
       // We insert the new row in the feeder registry.
-      this.con.query('INSERT INTO feeders(identifier, last_responded) VALUES (?, ?)', [identifier, date], (err, result, fields) => {
+      this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
         if (err) throw err;
       });
     }
@@ -173,7 +173,7 @@ DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   let now = new Date();
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
 
-  this.con.query('INSERT INTO unknown_data(date, type, hex) VALUES (?, ?, ?)', [date, type, data.toString('hex')], (err, result, fields) => {
+  this.con.query('INSERT INTO unknown_data(date, type, ip, hex) VALUES (?, ?, ?)', [date, type, ip, data.toString('hex')], (err, result, fields) => {
     if (err) throw err;
   });
 };

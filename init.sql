@@ -10,6 +10,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `feeders` (
   `id` int(11) UNSIGNED NOT NULL,
   `identifier` varchar(16) NOT NULL,
+  `ip` varchar(64) NOT NULL,
   `last_responded` datetime NOT NULL,
   `default_value` tinyint(3) UNSIGNED DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -34,6 +35,7 @@ CREATE TABLE `unknown_data` (
   `id` int(11) UNSIGNED NOT NULL,
   `date` datetime NOT NULL,
   `type` varchar(64) NOT NULL,
+  `ip` varchar(64) NOT NULL,
   `hex` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
