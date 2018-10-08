@@ -25,23 +25,24 @@ function FeederCoordinator(databaseCoordinator, config) {
   this.databaseCoordinator = databaseCoordinator;
 
   const net = require("net");
-  const server = net.createServer((c) => {
-    console.log('Client connected');
-    c.on('end', () => {
-      console.log('Client disconnected');
+  const server = net.createServer((socket) => {
+    let ip = socket.remoteAddress + ":" + socket.remotePort;
+    console.log('Client connected: ', ip);
+    socket.on('end', () => {
+      console.log('Client disconnected: ', ip);
     });
-    c.on('data', (data) => {
-      console.log('Data received: ' + data.toString('hex'));
+    socket.on('data', (data) => {
+      console.log('Data received from ', ip, ' : ', data.toString('hex'));
 
       let treatedData = ResponseBuilder.recognize(data);
       switch (treatedData.type) {
         case 'identification':
           if (config.allowed_feeders === undefined || config.allowed_feeders.length === 0 || config.allowed_feeders.includes(treatedData.identifier)) {
-            this.identifyFeeder(treatedData.identifier, c);
+            this.identifyFeeder(treatedData.identifier, ip, socket);
           }
           else {
-            this.denyFeeder(treatedData.identifier, c);
-            this.databaseCoordinator.logUnknownData('unauthorized', data);
+            this.denyFeeder(treatedData.identifier, socket);
+            this.databaseCoordinator.logUnknownData('unauthorized', data, ip);
           }
           break;
         case 'manual_meal':
@@ -51,11 +52,11 @@ function FeederCoordinator(databaseCoordinator, config) {
           break;
         case 'expectation':
           if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {
-            this.databaseCoordinator.logUnknownData('unexpected', data);
+            this.databaseCoordinator.logUnknownData('unexpected', data, ip);
           }
           break;
         default:
-          this.databaseCoordinator.logUnknownData('unknown', data);
+          this.databaseCoordinator.logUnknownData('unknown', data, ip);
           break;
       }
     });
@@ -73,8 +74,8 @@ function FeederCoordinator(databaseCoordinator, config) {
 
 FeederCoordinator.feeders = {};
 
-FeederCoordinator.prototype.identifyFeeder = function(identifier, socket) {
-  console.log('Feeder identified with: ' + identifier);
+FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
+  console.log('Feeder identified with ', identifier, ' on ', ip);
 
   if (FeederCoordinator.feeders[identifier] === undefined) {
     FeederCoordinator.feeders[identifier] = new Feeder(identifier, socket);
@@ -90,7 +91,7 @@ FeederCoordinator.prototype.identifyFeeder = function(identifier, socket) {
   socket.setKeepAlive(true, 30000);
 
   // Register it in database
-  this.databaseCoordinator.registerFeeder(identifier);
+  this.databaseCoordinator.registerFeeder(identifier, ip);
 };
 
 FeederCoordinator.prototype.denyFeeder = function (identifier, socket) {

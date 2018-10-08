@@ -52,7 +52,7 @@ DataBaseCoordinator.prototype.isReady = function() {
   return this._isConnected;
 };
 
-DataBaseCoordinator.prototype.registerFeeder = function(identifier) {
+DataBaseCoordinator.prototype.registerFeeder = function(identifier, ip) {
   if (!this.isReady()) {
     return;
   }
@@ -165,7 +165,7 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
 };
 
 
-DataBaseCoordinator.prototype.logUnknownData = function (type, data) {
+DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   if (!this.isReady()) {
     return;
   }
