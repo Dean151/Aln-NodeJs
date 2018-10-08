@@ -27,12 +27,12 @@ function FeederCoordinator(databaseCoordinator, config) {
   const net = require("net");
   const server = net.createServer((socket) => {
     let ip = socket.remoteAddress + ":" + socket.remotePort;
-    console.log('Client connected: ', ip);
+    console.log('Client connected:', ip);
     socket.on('end', () => {
-      console.log('Client disconnected: ', ip);
+      console.log('Client disconnected:', ip);
     });
     socket.on('data', (data) => {
-      console.log('Data received from ', ip, ' : ', data.toString('hex'));
+      console.log('Data received from', ip, ':', data.toString('hex'));
 
       let treatedData = ResponseBuilder.recognize(data);
       switch (treatedData.type) {
@@ -75,7 +75,7 @@ function FeederCoordinator(databaseCoordinator, config) {
 FeederCoordinator.feeders = {};
 
 FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
-  console.log('Feeder identified with ', identifier, ' on ', ip);
+  console.log('Feeder identified with', identifier);
 
   if (FeederCoordinator.feeders[identifier] === undefined) {
     FeederCoordinator.feeders[identifier] = new Feeder(identifier, socket);
@@ -95,7 +95,7 @@ FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
 };
 
 FeederCoordinator.prototype.denyFeeder = function (identifier, socket) {
-  console.log('Unauthorized feeder detected: ' + identifier);
+  console.log('Unauthorized feeder detected:',  identifier);
 
   socket.destroy();
 };
