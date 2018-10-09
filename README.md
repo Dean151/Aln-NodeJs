@@ -1,5 +1,11 @@
 # Aln-NodeJs
 
+![GitHub tag](https://img.shields.io/github/tag/Dean151/Aln-NodeJS.svg)
+[![Build Status](https://travis-ci.org/Dean151/Aln-NodeJs.svg?branch=master)](https://travis-ci.org/Dean151/Aln-NodeJs)
+![Libraries.io for GitHub](https://img.shields.io/librariesio/github/Dean151/Aln-NodeJS.svg)
+[![Twitter](https://img.shields.io/badge/twitter-@deanatoire-blue.svg?style=flat)](https://twitter.com/deanatoire)
+
+
 Aln-NodeJs is a replacement API to communicate directly with the HoneyGuaridan S25 API.
 
 The original API is absolutly not secure, so it needed a full replacement. ([How anyone could feed my cat](https://blog.thomasdurand.fr/security/iot/2018/01/31/how-anyone-could-feed-my-cat.html))
