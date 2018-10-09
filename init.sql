@@ -36,7 +36,7 @@ CREATE TABLE `unknown_data` (
   `date` datetime NOT NULL,
   `type` varchar(64) NOT NULL,
   `ip` varchar(64) NOT NULL,
-  `hex` text NOT NULL
+  `data` blob NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
