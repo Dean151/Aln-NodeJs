@@ -49,11 +49,6 @@ function Server(feederCoordinator, databaseCoordinator, config) {
     if (typeof req.body.identifier === 'undefined') {
       throw 'No feeder identifier given'
     }
-    // We check it's an authorized one
-    if (config.allowed_feeders.length && !config.allowed_feeders.includes(req.body.identifier)) {
-      res.status(403);
-      res.json({ success: false, error: 'Unauthorized feeder identifier.'});
-    }
     else {
       next();
     }

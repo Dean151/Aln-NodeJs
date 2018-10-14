@@ -26,6 +26,16 @@ function FeederCoordinator(databaseCoordinator, config) {
 
   const net = require("net");
   const server = net.createServer((socket) => {
+
+    // Depending on the mode, we reject ; or not ; the socket
+    let isInList = config.feeder_list === undefined ? false : config.feeder_list.reduce((carry, item) => {
+      return carry || item === socket.remoteAddress;
+    });
+    if (config.feeder_mode === 'whitelist' && !isInList || config.feeder_mode === 'blacklist' && isInList) {
+      // Do not even attempt to wait something since the ip is unauthorized
+      socket.destroy();
+    }
+
     let ip = socket.remoteAddress + ":" + socket.remotePort;
     console.log('Client connected:', ip);
     socket.on('end', () => {
@@ -37,14 +47,7 @@ function FeederCoordinator(databaseCoordinator, config) {
       let treatedData = ResponseBuilder.recognize(data);
       switch (treatedData.type) {
         case 'identification':
-          if (config.allowed_feeders === undefined || config.allowed_feeders.length === 0 || config.allowed_feeders.includes(treatedData.identifier)) {
-            this.identifyFeeder(treatedData.identifier, ip, socket);
-          }
-          else {
-            console.log('Unauthorized feeder detected:',  treatedData.identifier);
-            this.databaseCoordinator.logUnknownData('unauthorized', data, ip);
-            socket.destroy();
-          }
+          this.identifyFeeder(treatedData.identifier, ip, socket);
           break;
         case 'manual_meal':
           let quantity = new Quantity(treatedData.amount);
@@ -52,10 +55,6 @@ function FeederCoordinator(databaseCoordinator, config) {
           this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
           break;
         case 'expectation':
-          if (config.allowed_feeders !== undefined && config.allowed_feeders.length !== 0 && !config.allowed_feeders.includes(treatedData.identifier)) {
-            this.databaseCoordinator.logUnknownData('unexpected', data, ip);
-            socket.destroy();
-          }
           break;
         default:
           this.databaseCoordinator.logUnknownData('unknown', data, ip);

@@ -22,6 +22,9 @@ module.exports = {
 
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
+
+  'feeder_mode': 'none', // Could be "blacklist" or "whitelist"
+  'feeder_list': [], // The list of IPs that will be blacklisted or whitelisted (ie ::ffff:8.8.8.8)
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
   'feeder_port': 1032,
 
@@ -31,8 +34,7 @@ module.exports = {
   'mysql_password': '',
   'mysql_database': '',
   
-  // API secrets
-  'allowed_feeders': ['XXX012345678'], // List here the allowed feeders identifiers that can use the API.
+  // API secret
   'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
 
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
