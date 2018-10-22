@@ -63,29 +63,42 @@ ResponseBuilder.feedNow = function(quantity) {
 ResponseBuilder.recognize = function(data) {
   let hexString = data.toString('hex');
   if (hexString.match(/^9da114([0-9a-f]+)01d0010000$/)) {
-    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1"), 'hex').toString();
+    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
+    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'identification', identifier: identifier };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/)) {
-    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/, "$1"), 'hex').toString();
+    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/, "$1");
+    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     let amount = parseInt(hexString.slice(-2), 16);
     return { type: 'manual_meal', identifier: identifier, amount: amount };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
-    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1"), 'hex').toString();
+    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)c3d0a10000$/, "$1");
+    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'expectation', identifier: identifier, action: 'change_default_quantity' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c4d0a10000$/)) {
-    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1"), 'hex').toString();
+    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)c4d0a10000$/, "$1");
+    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'expectation', identifier: identifier, action: 'change_planning' };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)a2d0a10000$/)) {
-    let identifier = Buffer.from(hexString.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1"), 'hex').toString();
+    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)a2d0a10000$/, "$1");
+    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'expectation', identifier: identifier, action: 'feed_now' };
   }
   else {
-    return { type: 'unknown' };
+    throw 'Unknown response';
   }
+};
+
+ResponseBuilder.decodeFeederIdentifier = function (hexIdentifier) {
+  let identifier = Buffer.from(hexIdentifier, 'hex').toString();
+  if (!identifier.match(/^[a-z0-9]+$/i)) {
+    throw 'Unvalid character in feeder identifier'
+  }
+  return identifier
 };
 
 ResponseBuilder.feederIdentification = function(identifier) {

@@ -45,22 +45,26 @@ function FeederCoordinator(databaseCoordinator, config) {
     socket.on('data', (data) => {
       console.log('Data received from', ip, ':', data.toString('hex'));
 
-      let treatedData = ResponseBuilder.recognize(data);
-      switch (treatedData.type) {
-        case 'identification':
-          this.identifyFeeder(treatedData.identifier, ip, socket);
-          break;
-        case 'manual_meal':
-          let quantity = new Quantity(treatedData.amount);
-          this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
-          this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
-          break;
-        case 'expectation':
-          break;
-        default:
-          this.databaseCoordinator.logUnknownData('unknown', data, ip);
-          socket.destroy();
-          break;
+      try {
+        let treatedData = ResponseBuilder.recognize(data);
+        switch (treatedData.type) {
+          case 'identification':
+            this.identifyFeeder(treatedData.identifier, ip, socket);
+            break;
+          case 'manual_meal':
+            let quantity = new Quantity(treatedData.amount);
+            this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
+            this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
+            break;
+          case 'expectation':
+            break;
+          default:
+            throw 'Untreated response type';
+        }
+      }
+      catch (e) {
+        this.databaseCoordinator.logUnknownData('unknown', data, ip);
+        socket.destroy();
       }
     });
   });
