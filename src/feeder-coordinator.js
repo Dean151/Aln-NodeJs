@@ -34,6 +34,7 @@ function FeederCoordinator(databaseCoordinator, config) {
     if (config.feeder_mode === 'whitelist' && !isInList || config.feeder_mode === 'blacklist' && isInList) {
       // Do not even attempt to wait something since the ip is unauthorized
       socket.destroy();
+      return;
     }
 
     let ip = socket.remoteAddress + ":" + socket.remotePort;
