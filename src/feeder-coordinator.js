@@ -30,7 +30,7 @@ function FeederCoordinator(databaseCoordinator, config) {
     // Depending on the mode, we reject ; or not ; the socket
     let isInList = config.feeder_list === undefined ? false : config.feeder_list.reduce((carry, item) => {
       return carry || item === socket.remoteAddress;
-    });
+    }, false);
     if (config.feeder_mode === 'whitelist' && !isInList || config.feeder_mode === 'blacklist' && isInList) {
       // Do not even attempt to wait something since the ip is unauthorized
       socket.destroy();
