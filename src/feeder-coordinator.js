@@ -136,6 +136,9 @@ FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectat
 };
 
 FeederCoordinator.prototype.getFeeder = function (identifier) {
+  if (!(identifier in FeederCoordinator.feeders)) {
+    throw 'Feeder not found';
+  }
   let feeder = FeederCoordinator.feeders[identifier];
   return {
     identifier: feeder._identifier,
