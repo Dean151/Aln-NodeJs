@@ -17,7 +17,6 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const Time = require("./../src/time");
-const Quantity = require("./../src/quantity");
 
 // Default constructor
 test('Time() should be "now" datetime', () => {
@@ -48,8 +47,8 @@ test("Time() with unvalid parameters should throw", () => {
   expect(() => new Time(-2, 0)).toThrow();
   expect(() => new Time(5, -6)).toThrow();
   expect(() => new Time(2)).toThrow();
-  expect(() => new Quantity("Hello", "World!")).toThrow();
-  expect(() => new Quantity("8f", "2a")).toThrow();
+  expect(() => new Time("Hello", "World!")).toThrow();
+  expect(() => new Time("8f", "2a")).toThrow();
 });
 
 // numberOfMinutes()
