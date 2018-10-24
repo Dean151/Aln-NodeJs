@@ -37,10 +37,10 @@ let feederCoordinator = new FeederCoordinator(databaseCoordinator, config);
 
 // This will handle the REST API
 const Server = require("./src/server");
-let server = new Server(feederCoordinator, databaseCoordinator, config);
+new Server(feederCoordinator, databaseCoordinator, config);
 
 // This is the feeder emulator part
 if (config.enable_emulator && config.emulator_identifier) {
   const Emulator = require("./src/emulator");
-  let emulatedFeeder = new Emulator(config.emulator_identifier)
+  new Emulator(config.emulator_identifier);
 }

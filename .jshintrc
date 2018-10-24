@@ -1,0 +1,16 @@
+{
+    "esversion": 6,
+    "node": true,
+    "strict": true,
+
+    "indent": 2,
+    "curly": true,
+    "eqeqeq": true,
+    "newcap": true,
+    "noempty": true,
+    "plusplus": false,
+    "trailing": true,
+    "undef": true,
+
+    "predef": ["test", "expect"]
+}

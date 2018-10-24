@@ -96,9 +96,9 @@ ResponseBuilder.recognize = function(data) {
 ResponseBuilder.decodeFeederIdentifier = function (hexIdentifier) {
   let identifier = Buffer.from(hexIdentifier, 'hex').toString();
   if (!identifier.match(/^[a-z0-9]+$/i)) {
-    throw 'Unvalid character in feeder identifier'
+    throw 'Unvalid character in feeder identifier';
   }
-  return identifier
+  return identifier;
 };
 
 ResponseBuilder.feederIdentification = function(identifier) {

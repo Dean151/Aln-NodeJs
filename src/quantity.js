@@ -52,6 +52,6 @@ Quantity.prototype.buffered = function() {
 
 Quantity.prototype.jsoned = function() {
   return this._amount;
-}
+};
 
 module.exports = Quantity;

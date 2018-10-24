@@ -61,11 +61,15 @@ DataBaseCoordinator.prototype.registerFeeder = function(identifier, ip) {
   let now = new Date();
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
   this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
     if (result.affectedRows < 1) {
       // We insert the new row in the feeder registry.
       this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
-        if (err) throw err;
+        if (err) {
+          throw err;
+        }
       });
     }
   });
@@ -77,7 +81,9 @@ DataBaseCoordinator.prototype.rememberDefaultAmount = function(identifier, quant
   }
 
   this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount(), identifier], (err, result, fields) => {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
   });
 };
 
@@ -90,7 +96,9 @@ DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
   let date = now.toJSON().slice(0, 10);
   let time = now.toJSON().slice(11, 19);
   this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount()], (err, result, fields) => {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
   });
 };
 
@@ -174,7 +182,9 @@ DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
 
   this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type, ip, data], (err, result, fields) => {
-    if (err) throw err;
+    if (err) {
+      throw err;
+    }
   });
 };
 

@@ -36,7 +36,7 @@ function Emulator(identifier) {
 
     // Current time from alnpet
     if (hexData.match(/^9da10601([0-9a-f]+)$/)) {
-      // Do nothing with that...
+      console.log('Time received from server', hexData.replace('9da10601', ''));
     }
     // Setting default amount
     else if (hexData.match(/^9da106c3([0-9a-f]+)$/)) {

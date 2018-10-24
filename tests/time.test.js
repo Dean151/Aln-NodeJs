@@ -17,6 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const Time = require("./../src/time");
+const Quantity = require("./../src/quantity");
 
 // Default constructor
 test('Time() should be "now" datetime', () => {

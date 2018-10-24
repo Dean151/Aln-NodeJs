@@ -47,7 +47,7 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   router.use((req, res, next) => {
     // Identifier is not an option any more
     if (typeof req.body.identifier === 'undefined') {
-      throw 'No feeder identifier given'
+      throw 'No feeder identifier given';
     }
     else {
       next();
