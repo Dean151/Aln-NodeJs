@@ -95,6 +95,13 @@ ResponseBuilder.recognize = function(data) {
     let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'expectation', identifier: identifier, action: 'feed_now' };
   }
+  else if (hexString.match(/^9da114([0-9a-f]+)21(0[0-5][0-9a-f]{2})(00[0-9][0-9a-f])$/)) {
+    let regex = /^9da114([0-9a-f]+)21(0[0-5][0-9a-f]{2})(00[0-9][0-9a-f])$/;
+    let matches = regex.exec(hexString);
+    let identifier = ResponseBuilder.decodeFeederIdentifier(matches[1]);
+    // TODO: add quantity & time
+    return { type: 'feeder_empty', identifier: identifier };
+  }
   else {
     throw 'Unknown response';
   }
