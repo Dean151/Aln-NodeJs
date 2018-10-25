@@ -181,7 +181,7 @@ DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   let now = new Date();
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
 
-  this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type, ip, data], (err, result, fields) => {
+  this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type.substring(0, 64), ip, data], (err, result, fields) => {
     if (err) {
       throw err;
     }

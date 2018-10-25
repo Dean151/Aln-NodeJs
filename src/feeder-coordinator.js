@@ -63,7 +63,7 @@ function FeederCoordinator(databaseCoordinator, config) {
         }
       }
       catch (e) {
-        this.databaseCoordinator.logUnknownData('unknown', data, ip);
+        this.databaseCoordinator.logUnknownData(e.message, data, ip);
         socket.destroy();
       }
     });
