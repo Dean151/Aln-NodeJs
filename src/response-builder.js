@@ -63,7 +63,14 @@ ResponseBuilder.feedNow = function(quantity) {
 ResponseBuilder.recognize = function(data) {
   let hexString = data.toString('hex');
   if (hexString.match(/^9da114([0-9a-f]+)01d0010000$/)) {
-    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
+    let hexIdentifier;
+    if (hexString.match(/^(?:9da114([0-9a-f]+)01d0010000){2,}$/)) {
+      // Sometime, identification is given twice in a row. We take care of any of those cases
+      hexIdentifier = hexString.replace(/^(?:9da114([0-9a-f]+)01d0010000){2,}$/, "$1");
+    }
+    else {
+      hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)01d0010000$/, "$1");
+    }
     let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
     return { type: 'identification', identifier: identifier };
   }
