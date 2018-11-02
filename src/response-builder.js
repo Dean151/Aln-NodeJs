@@ -105,7 +105,7 @@ ResponseBuilder.recognize = function(data) {
     // Aln time is weird
     let hours = (((alnMinutes - (alnMinutes % 60)) / 60) + 16) % 24;
     let minutes = (alnMinutes % 60);
-    return { type: 'feeder_empty', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
+    return { type: 'empty_feeder', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
   }
   else {
     throw 'Unknown response';

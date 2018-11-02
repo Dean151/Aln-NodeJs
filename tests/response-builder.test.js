@@ -76,8 +76,8 @@ test('ResponseBuilder.recognize() response is not valid', () => {
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a5958393837363534333231a2d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ZYX987654321', action: 'feed_now' });
 
   // Feeder empty
-  expect(ResponseBuilder.recognize(Buffer.from('9da11441424331323334353637383921037d001e', 'hex'))).toEqual({ type: 'feeder_empty', identifier: 'ABC123456789', hours: 6, minutes: 53, amount: 30 });
-  expect(ResponseBuilder.recognize(Buffer.from('9da1145a59583938373635343332312103850005', 'hex'))).toEqual({ type: 'feeder_empty', identifier: 'ZYX987654321', hours: 7, minutes: 1, amount: 5 });
+  expect(ResponseBuilder.recognize(Buffer.from('9da11441424331323334353637383921037d001e', 'hex'))).toEqual({ type: 'empty_feeder', identifier: 'ABC123456789', hours: 6, minutes: 53, amount: 30 });
+  expect(ResponseBuilder.recognize(Buffer.from('9da1145a59583938373635343332312103850005', 'hex'))).toEqual({ type: 'empty_feeder', identifier: 'ZYX987654321', hours: 7, minutes: 1, amount: 5 });
 
   // TODO text unknown ?
 });

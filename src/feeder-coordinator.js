@@ -56,6 +56,11 @@ function FeederCoordinator(databaseCoordinator, config) {
             this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
             this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
             break;
+          case 'empty_feeder':
+            // TODO: Later, push notification sending?
+            let data = {hours: treatedData.hours, minutes: treatedData.minutes, amount: treatedData.amount};
+            this.databaseCoordinator.logAlert(treatedData.identifier, 'empty', data);
+            break;
           case 'expectation':
             break;
           default:

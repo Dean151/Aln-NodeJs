@@ -172,6 +172,20 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
   });
 };
 
+DataBaseCoordinator.prototype.logAlert = function (identifier, type, data) {
+  if (!this.isReady()) {
+    return;
+  }
+
+  let now = new Date();
+  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+  this.con.query('INSERT INTO alerts(feeder, type, date, data) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, type, date, data], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+  });
+};
 
 DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   if (!this.isReady()) {
