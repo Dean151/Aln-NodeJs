@@ -55,20 +55,29 @@ test('ResponseBuilder.feedNow() response is not valid', () => {
 });
 
 test('ResponseBuilder.recognize() response is not valid', () => {
+  // Identification
   expect(ResponseBuilder.recognize(Buffer.from('9da11441424331323334353637383901d0010000', 'hex'))).toEqual({ type: 'identification', identifier: 'ABC123456789' });
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a595839383736353433323101d0010000', 'hex'))).toEqual({ type: 'identification', identifier: 'ZYX987654321' });
 
+  // Manual meal
   expect(ResponseBuilder.recognize(Buffer.from('9da1144142433132333435363738392103840005', 'hex'))).toEqual({ type: 'manual_meal', identifier: 'ABC123456789', amount: 5 });
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a59583938373635343332312103840018', 'hex'))).toEqual({ type: 'manual_meal', identifier: 'ZYX987654321', amount: 24 });
 
+  // Expectation Amount
   expect(ResponseBuilder.recognize(Buffer.from('9da114414243313233343536373839c3d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ABC123456789', action: 'change_default_quantity' });
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a5958393837363534333231c3d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ZYX987654321', action: 'change_default_quantity' });
 
+  // Expectation Planning
   expect(ResponseBuilder.recognize(Buffer.from('9da114414243313233343536373839c4d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ABC123456789', action: 'change_planning' });
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a5958393837363534333231c4d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ZYX987654321', action: 'change_planning' });
 
+  // Expectation Feed now
   expect(ResponseBuilder.recognize(Buffer.from('9da114414243313233343536373839a2d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ABC123456789', action: 'feed_now' });
   expect(ResponseBuilder.recognize(Buffer.from('9da1145a5958393837363534333231a2d0a10000', 'hex'))).toEqual({ type: 'expectation', identifier: 'ZYX987654321', action: 'feed_now' });
+
+  // Feeder empty
+  expect(ResponseBuilder.recognize(Buffer.from('9da11441424331323334353637383921037d001e', 'hex'))).toEqual({ type: 'feeder_empty', identifier: 'ABC123456789', hours: 6, minutes: 53, amount: 30 });
+  expect(ResponseBuilder.recognize(Buffer.from('9da1145a59583938373635343332312103850005', 'hex'))).toEqual({ type: 'feeder_empty', identifier: 'ZYX987654321', hours: 7, minutes: 1, amount: 5 });
 
   // TODO text unknown ?
 });

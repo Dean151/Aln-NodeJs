@@ -75,9 +75,10 @@ ResponseBuilder.recognize = function(data) {
     return { type: 'identification', identifier: identifier };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/)) {
-    let hexIdentifier = hexString.replace(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/, "$1");
-    let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
-    let amount = parseInt(hexString.slice(-2), 16);
+    let regex = /^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/;
+    let matches = regex.exec(hexString);
+    let identifier = ResponseBuilder.decodeFeederIdentifier(matches[1]);
+    let amount = parseInt(matches[2], 16);
     return { type: 'manual_meal', identifier: identifier, amount: amount };
   }
   else if (hexString.match(/^9da114([0-9a-f]+)c3d0a10000$/)) {
@@ -99,8 +100,12 @@ ResponseBuilder.recognize = function(data) {
     let regex = /^9da114([0-9a-f]+)21(0[0-5][0-9a-f]{2})(00[0-9][0-9a-f])$/;
     let matches = regex.exec(hexString);
     let identifier = ResponseBuilder.decodeFeederIdentifier(matches[1]);
-    // TODO: add quantity & time
-    return { type: 'feeder_empty', identifier: identifier };
+    let amount = parseInt(matches[3], 16);
+    let alnMinutes = parseInt(matches[2], 16);
+    // Aln time is weird
+    let hours = (((alnMinutes - (alnMinutes % 60)) / 60) + 16) % 24;
+    let minutes = (alnMinutes % 60);
+    return { type: 'feeder_empty', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
   }
   else {
     throw 'Unknown response';
