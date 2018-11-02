@@ -178,6 +178,13 @@ DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
     return;
   }
 
+  // Treating the special case of uncomplete data. This happen all the time...
+  // We receive multiple times a week the data 0x9da114414c
+  // We prevent logging that since it does not actually make sence.
+  if (data.toString('hex').match(/^9da114414c$/)) {
+    return;
+  }
+
   let now = new Date();
   let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
 
