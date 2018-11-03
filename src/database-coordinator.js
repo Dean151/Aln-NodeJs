@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const mysql = require('mysql');
+import mysql from 'mysql';
 
 function DataBaseCoordinator(config) {
 

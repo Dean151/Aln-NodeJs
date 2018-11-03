@@ -16,10 +16,13 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+import Time from './time';
+import Quantity from './quantity';
+import Planning from './planning';
+
 function ResponseBuilder() {}
 
 ResponseBuilder.time = function() {
-  let Time = require("./time");
   let time = new Time();
 
   // 9d a1 06 01
@@ -28,7 +31,6 @@ ResponseBuilder.time = function() {
 };
 
 ResponseBuilder.changeDefaultQuantity = function(quantity) {
-  let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
     throw "Wrong argument passed to changeDefaultQuantity()";
   }
@@ -39,7 +41,6 @@ ResponseBuilder.changeDefaultQuantity = function(quantity) {
 };
 
 ResponseBuilder.changePlanning = function(planning) {
-  let Planning = require("./planning");
   if (planning.constructor !== Planning) {
     throw "Wrong argument passed to changePlanning()";
   }
@@ -50,7 +51,6 @@ ResponseBuilder.changePlanning = function(planning) {
 };
 
 ResponseBuilder.feedNow = function(quantity) {
-  let Quantity = require("./quantity");
   if (quantity.constructor !== Quantity) {
     throw "Wrong argument passed to feedNow()";
   }

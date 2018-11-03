@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require("./../src/time");
+import Time from './../src/time';
 
 // Default constructor
 test('Time() should be "now" datetime', () => {

@@ -16,17 +16,19 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Quantity = require("./quantity");
-const Meal = require('./meal');
-const Planning = require("./planning");
+import express from 'express';
+import bodyParser from 'body-parser';
+import http from 'http';
+
+import Quantity from './quantity';
+import Meal from './meal';
+import Planning from './planning';
 
 function Server(feederCoordinator, databaseCoordinator, config) {
 
   // Create a service (the app object is just a callback).
-  const express = require('express');
   let app = express();
 
-  const bodyParser = require('body-parser');
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
@@ -108,7 +110,6 @@ function Server(feederCoordinator, databaseCoordinator, config) {
   // Use the routes
   app.use('/api', router);
 
-  const http = require('http');
   http.createServer(app).listen(config.local_port, 'localhost');
 }
 module.exports = Server;

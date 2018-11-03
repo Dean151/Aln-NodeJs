@@ -16,8 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const ResponseBuilder = require("./../src/response-builder");
-const Quantity = require("./../src/quantity");
+import ResponseBuilder from './../src/response-builder';
+import Quantity from './../src/quantity';
 
 test('ResponseBuilder.time() response is not valid', () => {
   // Time is from 0000 to 05a0
