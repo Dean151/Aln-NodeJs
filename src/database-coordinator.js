@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const mysql = require('mysql');
+import mysql from 'mysql';
 
 function DataBaseCoordinator(config) {
 
@@ -189,6 +189,13 @@ DataBaseCoordinator.prototype.logAlert = function (identifier, type, data) {
 
 DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
   if (!this.isReady()) {
+    return;
+  }
+
+  // Treating the special case of uncomplete data. This happen all the time...
+  // We receive multiple times a week the data 0x9da114414c
+  // We prevent logging that since it does not actually make sence.
+  if (data.toString('hex').match(/^9da114414c$/)) {
     return;
   }
 

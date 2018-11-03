@@ -16,8 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require("./time");
-const Quantity = require("./quantity");
+import Time from './time';
+import Quantity from './quantity';
 
 /**
  * Instantiate a new Meal object to be used with the feeder
