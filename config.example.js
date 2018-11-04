@@ -37,6 +37,9 @@ module.exports = {
   // API secret
   'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
 
+  // OPTIONAL Push notifications, @see https://www.npmjs.com/package/node-pushnotifications
+  'push_notifications': undefined,
+
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
   'emulator_ip': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_port': undefined, // Optional ; To whom should the emulated feeder communicate to

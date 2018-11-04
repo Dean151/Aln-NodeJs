@@ -20,6 +20,7 @@ const net = require('net');
 
 const Feeder = require("./feeder");
 const ResponseBuilder = require("./response-builder");
+const PushCoordinator = require('./push-coordinator');
 const Time = require("./time");
 const Quantity = require("./quantity");
 
@@ -83,6 +84,11 @@ function FeederCoordinator(databaseCoordinator, config) {
   server.listen(config.feeder_port, () => {
     console.log('Listening to port', config.feeder_port);
   });
+
+  // Setup the push notification service
+  if (config.push_notifications) {
+    this.push = new PushCoordinator(config.push_notifications);
+  }
 }
 
 FeederCoordinator.feeders = {};
@@ -110,13 +116,20 @@ FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
 FeederCoordinator.prototype.recordManualMeal = function (identifier, quantity) {
   this.databaseCoordinator.recordMeal(identifier, quantity);
   this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
+
+  if (this.push) {
+    this.push.recordManualMeal(identifier, quantity);
+  }
 };
 
 FeederCoordinator.prototype.recordEmptyFeeder = function (identifier, time, quantity) {
-  // TODO: Later, push notification sending?
   let data = {hours: time._hours, minutes: time._minutes, amount: quantity.amount()};
   this.databaseCoordinator.logAlert(identifier, 'empty', data);
-}
+
+  if (this.push) {
+    this.push.emptyFeederAlert(identifier, time, quantity);
+  }
+};
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
   if (!(identifier in FeederCoordinator.feeders)) {
