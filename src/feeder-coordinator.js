@@ -16,6 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const net = require('net');
+
 const Feeder = require("./feeder");
 const ResponseBuilder = require("./response-builder");
 const Quantity = require("./quantity");
@@ -24,7 +26,6 @@ function FeederCoordinator(databaseCoordinator, config) {
 
   this.databaseCoordinator = databaseCoordinator;
 
-  const net = require("net");
   const server = net.createServer((socket) => {
 
     // Depending on the mode, we reject ; or not ; the socket

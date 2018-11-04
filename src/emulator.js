@@ -16,11 +16,12 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const net = require('net');
+
+const ResponseBuilder = require('./response-builder');
+
 function Emulator(identifier) {
 
-  const ResponseBuilder = require("./response-builder");
-
-  const net = require('net');
   const client = new net.Socket();
   client.connect(9999, '47.90.203.137', () => {
     // Client is supposed to identify itself, in order to get the timestamp from official server
