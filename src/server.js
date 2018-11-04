@@ -39,7 +39,7 @@ function Server(feederCoordinator, databaseCoordinator, config) {
     // Check the request header token to validate we're not messing around
     if (config.api_secret !== req.headers['x-access-token']) {
       res.status(403);
-      res.json({ success: false, error: 'Authentication token needed.'});
+      res.json({ success: false, error: 'Authentication token required.'});
     }
     else {
       next();
@@ -106,6 +106,49 @@ function Server(feederCoordinator, databaseCoordinator, config) {
       res.json({ success: true });
     });
   });
+
+  router.route('/push_token')
+    .post((req, res) => {
+      if (!req.body.type) {
+        res.status(400);
+        res.json({ success: false, error: 'Push notification type required.'});
+      }
+      else if (!req.body.token) {
+        res.status(400);
+        res.json({ success: false, error: 'Push notification token required.'});
+      }
+      else {
+        databaseCoordinator.registerPushToken(req.body.identifier, req.body.type, req.body.token, () => {
+          res.json({ success: true });
+        });
+      }
+    })
+    .put((req, res) => {
+      if (!req.body.old_token) {
+        res.status(400);
+        res.json({ success: false, error: 'Push notification old token required.'});
+      }
+      else if (!req.body.token) {
+        res.status(400);
+        res.json({ success: false, error: 'Push notification token required.'});
+      }
+      else {
+        databaseCoordinator.updatePushToken(req.body.old_token, req.body.token, () => {
+          res.json({ success: true });
+        });
+      }
+    })
+    .delete((req, res) => {
+      if (!req.body.type) {
+        res.status(400);
+        res.json({ success: false, error: 'Push notification type required.'});
+      }
+      else {
+        databaseCoordinator.deletePushTokens(req.body.identifier, req.body.type, () => {
+          res.json({ success: true });
+        });
+      }
+    });
 
   // Use the routes
   app.use('/api', router);

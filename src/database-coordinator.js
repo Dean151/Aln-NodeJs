@@ -172,6 +172,33 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
   });
 };
 
+DataBaseCoordinator.prototype.registerPushToken = function (identifier, type, token, completion) {
+  this.con.query('INSERT INTO push_tokens(feeder, type, token) VALUES((SELECT id FROM feeders WHERE identifier = ?), ?, ?)', [identifier, type, token], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+    completion();
+  });
+};
+
+DataBaseCoordinator.prototype.updatePushToken = function (oldToken, newToken, completion) {
+  this.con.query('UPDATE push_tokens SET token = ? WHERE token = ?', [newToken, oldToken], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+    completion();
+  });
+};
+
+DataBaseCoordinator.prototype.deletePushTokens = function (identifier, type, completion) {
+  this.con.query('DELETE FROM push_tokens WHERE feeder = (SELECT id FROM feeders WHERE identifier = ?) AND type = ?', [identifier, type], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+    completion();
+  });
+};
+
 DataBaseCoordinator.prototype.logAlert = function (identifier, type, data) {
   if (!this.isReady()) {
     return;

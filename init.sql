@@ -39,6 +39,13 @@ CREATE TABLE `plannings` (
   `date` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `push_tokens` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `type` varchar(16) NOT NULL,
+  `feeder` int(11) UNSIGNED NOT NULL,
+  `token` varchar(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `unknown_data` (
   `id` int(11) UNSIGNED NOT NULL,
   `date` datetime NOT NULL,
@@ -65,8 +72,13 @@ ALTER TABLE `plannings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `feeder` (`feeder`);
 
+ALTER TABLE `push_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `feeder` (`feeder`);
+
 ALTER TABLE `unknown_data`
   ADD PRIMARY KEY (`id`);
+
 
 ALTER TABLE `alerts`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
@@ -75,6 +87,8 @@ ALTER TABLE `feeders`
 ALTER TABLE `meals`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `plannings`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `push_tokens`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `unknown_data`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
@@ -88,6 +102,9 @@ ALTER TABLE `meals`
 
 ALTER TABLE `plannings`
   ADD CONSTRAINT `feeder` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `push_tokens`
+  ADD CONSTRAINT `token_feeder` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
