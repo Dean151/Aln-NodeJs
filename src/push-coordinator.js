@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import PushNotifications from 'node-pushnotifications';
+const PushNotifications = require('node-pushnotifications');
 
 function PushCoordinator(settings) {
     this.push = new PushNotifications(settings);
