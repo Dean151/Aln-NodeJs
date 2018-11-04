@@ -20,9 +20,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import http from 'http';
 
-import Quantity from './quantity';
-import Meal from './meal';
-import Planning from './planning';
+const Quantity = require("./quantity");
+const Meal = require("./meal");
+const Planning = require("./planning");
 
 function Server(feederCoordinator, databaseCoordinator, config) {
 

@@ -16,8 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import Meal from './../src/meal';
-import Planning from './../src/planning';
+const Meal = require("./../src/meal");
+const Planning = require("./../src/planning");
 
 test("numberOfMeals() tests", () => {
   expect(new Planning([]).numberOfMeals()).toBe(0);

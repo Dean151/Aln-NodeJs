@@ -16,9 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import Feeder from './feeder';
-import ResponseBuilder from './response-builder';
-import Quantity from './quantity';
+const Feeder = require("./feeder");
+const ResponseBuilder = require("./response-builder");
+const Quantity = require("./quantity");
 
 function FeederCoordinator(databaseCoordinator, config) {
 

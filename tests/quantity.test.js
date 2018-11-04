@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import Quantity from './../src/quantity';
+const Quantity = require("./../src/quantity");
 
 // amount()
 test("amount() should send the correct integer value", () => {
