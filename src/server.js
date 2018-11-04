@@ -139,12 +139,12 @@ function Server(feederCoordinator, databaseCoordinator, config) {
       }
     })
     .delete((req, res) => {
-      if (!req.body.type) {
+      if (!req.body.token) {
         res.status(400);
-        res.json({ success: false, error: 'Push notification type required.'});
+        res.json({ success: false, error: 'Push notification token required.'});
       }
       else {
-        databaseCoordinator.deletePushTokens(req.body.identifier, req.body.type, () => {
+        databaseCoordinator.deletePushToken(req.body.token, () => {
           res.json({ success: true });
         });
       }

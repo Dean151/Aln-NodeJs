@@ -190,8 +190,8 @@ DataBaseCoordinator.prototype.updatePushToken = function (oldToken, newToken, co
   });
 };
 
-DataBaseCoordinator.prototype.deletePushTokens = function (identifier, type, completion) {
-  this.con.query('DELETE FROM push_tokens WHERE feeder = (SELECT id FROM feeders WHERE identifier = ?) AND type = ?', [identifier, type], (err, result, fields) => {
+DataBaseCoordinator.prototype.deletePushToken = function (token, completion) {
+  this.con.query('DELETE FROM push_tokens WHERE token = ?', [token], (err, result, fields) => {
     if (err) {
       throw err;
     }
