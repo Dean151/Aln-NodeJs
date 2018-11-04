@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import net from 'net';
+const net = require('net');
 
 const Feeder = require("./feeder");
 const ResponseBuilder = require("./response-builder");

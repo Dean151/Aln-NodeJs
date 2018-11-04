@@ -16,9 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import express from 'express';
-import bodyParser from 'body-parser';
-import http from 'http';
+const express = require('express');
+const bodyParser = require('body-parser');
+const http = require('http');
 
 const Quantity = require("./quantity");
 const Meal = require("./meal");

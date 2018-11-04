@@ -16,14 +16,15 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import ResponseBuilder from './response-builder';
-import Quantity from './quantity';
+const net = require('net');
+
+const ResponseBuilder = require('./response-builder');
+const Quantity = require('./quantity');
 
 function Emulator(config) {
 
   const identifier = config.emulator_identifier;
-
-  const net = require('net');
+  
   const client = new net.Socket();
   client.connect(config.emulator_port ? config.emulator_port : 9999, config.emulator_ip ? config.emulator_ip : '47.90.203.137', () => {
     // Client is supposed to identify itself, in order to get the timestamp from official server
