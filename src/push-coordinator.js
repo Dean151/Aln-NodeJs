@@ -22,11 +22,25 @@ function PushCoordinator(settings) {
     this.push = new PushNotifications(settings);
 }
 
-PushCoordinator.prototype.manualMealAlert = function (identifier, quantity) {
-
+PushCoordinator.prototype.manualMealAlert = function (tokens, quantity) {
+    
+    const data = {
+        topic: 'Manual meal',
+        alert: {
+            title: 'Manual meal',
+            body: 'A manual meal was just triggered'
+        },
+        category: 'meal',
+    };
+    
+    this.push.send(tokens, data, (err, result) => {
+        if (err) {
+            throw err;
+        }
+    });
 };
 
-PushCoordinator.prototype.emptyFeederAlert = function (identifier, time, quantity) {
+PushCoordinator.prototype.emptyFeederAlert = function (tokens, time, quantity) {
 
 };
 

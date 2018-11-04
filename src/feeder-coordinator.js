@@ -118,7 +118,14 @@ FeederCoordinator.prototype.recordManualMeal = function (identifier, quantity) {
   this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
 
   if (this.push) {
-    this.push.recordManualMeal(identifier, quantity);
+    try {
+      this.databaseCoordinator.getPushTokens(identifier, (tokens) => {
+        this.push.manualMealAlert(tokens, quantity);
+      });
+    } 
+    catch (error) {
+      console.log('Push notification was not sended:', error);
+    }
   }
 };
 
@@ -127,7 +134,14 @@ FeederCoordinator.prototype.recordEmptyFeeder = function (identifier, time, quan
   this.databaseCoordinator.logAlert(identifier, 'empty', data);
 
   if (this.push) {
-    this.push.emptyFeederAlert(identifier, time, quantity);
+    try {
+      this.databaseCoordinator.getPushTokens(identifier, (tokens) => {
+        this.push.emptyFeederAlert(tokens, time, quantity);
+      });
+    } 
+    catch (error) {
+      console.log('Push notification was not sended:', error);
+    }
   }
 };
 

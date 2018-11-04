@@ -172,6 +172,18 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
   });
 };
 
+DataBaseCoordinator.prototype.getPushTokens = function (identifier, completion) {
+  if (!this.isReady()) {
+    throw 'Database is not ready';
+  }
+
+  this.con.query('SELECT token FROM push_tokens WHERE feeder = (SELECT id FROM feeders  WHERE identifier = ?)', [identifier], (err, results, fields) => {
+    if (err) { throw err; }
+    let tokens = results.map((row) => { return row.token; });
+    completion(tokens);
+  });
+};
+
 DataBaseCoordinator.prototype.registerPushToken = function (identifier, type, token, completion) {
   this.con.query('INSERT INTO push_tokens(feeder, type, token) VALUES((SELECT id FROM feeders WHERE identifier = ?), ?, ?)', [identifier, type, token], (err, result, fields) => {
     if (err) {
