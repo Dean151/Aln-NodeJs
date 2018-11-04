@@ -16,13 +16,16 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-function Emulator(identifier) {
+import ResponseBuilder from './response-builder';
+import Quantity from './quantity';
 
-  const ResponseBuilder = require("./response-builder");
+function Emulator(config) {
+
+  const identifier = config.emulator_identifier;
 
   const net = require('net');
   const client = new net.Socket();
-  client.connect(9999, '47.90.203.137', () => {
+  client.connect(config.emulator_port ? config.emulator_port : 9999, config.emulator_ip ? config.emulator_ip : '47.90.203.137', () => {
     // Client is supposed to identify itself, in order to get the timestamp from official server
     setInterval(() => {
       client.write(ResponseBuilder.feederIdentification(identifier));
@@ -45,13 +48,20 @@ function Emulator(identifier) {
     // Feeding now
     else if (hexData.match(/^9da106a2([0-9a-f]+)$/)) {
       client.write(ResponseBuilder.feedNowExpectation(identifier));
+      if (config.empty_emulator) {
+        let amount = parseInt(hexData.replace(/^9da106a2/, ''), 16);
+        let quantity = new Quantity(amount);
+        setTimeout(() => {
+          client.write(ResponseBuilder.emptyFeederSignal(identifier, quantity));
+        }, 3000);
+      }
     }
     // Changing plan
     else if (hexData.match(/^9da12dc4([0-9a-f]+)$/)) {
       client.write(ResponseBuilder.changePlanningExpectation(identifier));
     }
+    // Unknown response. Log it
     else {
-      // Unknown response. Log it
       console.log('Unknown data received by emulator: ' + hexData);
     }
   });

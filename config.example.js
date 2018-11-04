@@ -29,14 +29,17 @@ module.exports = {
   'feeder_port': 1032,
 
   // OPTIONAL Mysql settings
-  'mysql_host': '',
-  'mysql_user': '',
-  'mysql_password': '',
-  'mysql_database': '',
+  'mysql_host': undefined,
+  'mysql_user': undefined,
+  'mysql_password': undefined,
+  'mysql_database': undefined,
   
   // API secret
   'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
 
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
+  'emulator_ip': undefined, // Optional ; To whom should the emulated feeder communicate to
+  'emulator_port': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_identifier': 'XXX012345678', // The identifier that will be used for the emulated feeder. Emulation allow to use the original app with a fake feeder.
+  'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any food.
 };

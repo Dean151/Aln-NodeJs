@@ -136,6 +136,15 @@ ResponseBuilder.mealButtonPressed = function(identifier, quantity) {
   return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix, quantity.buffered()]);
 };
 
+ResponseBuilder.emptyFeederSignal = function (identifier, quantity) {
+  let time = new Time();
+  // 9d a1 14
+  let prefix = Buffer.from([157, 161, 20]);
+  // 21
+  let suffix = Buffer.from([33]);
+  return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix, time.buffered(), quantity.buffered()]);
+};
+
 ResponseBuilder.changeDefaultQuantityExpectation = function(identifier) {
   // 9d a1 14
   let prefix = Buffer.from([157, 161, 20]);
