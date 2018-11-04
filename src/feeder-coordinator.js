@@ -16,15 +16,17 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+import net from 'net';
+
 import Feeder from './feeder';
 import ResponseBuilder from './response-builder';
+import Time from './time';
 import Quantity from './quantity';
 
 function FeederCoordinator(databaseCoordinator, config) {
 
   this.databaseCoordinator = databaseCoordinator;
 
-  const net = require("net");
   const server = net.createServer((socket) => {
 
     // Depending on the mode, we reject ; or not ; the socket
@@ -53,13 +55,12 @@ function FeederCoordinator(databaseCoordinator, config) {
             break;
           case 'manual_meal':
             let quantity = new Quantity(treatedData.amount);
-            this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
-            this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
+            this.recordManualMeal(treatedData.identifier, quantity);
             break;
           case 'empty_feeder':
-            // TODO: Later, push notification sending?
-            let data = {hours: treatedData.hours, minutes: treatedData.minutes, amount: treatedData.amount};
-            this.databaseCoordinator.logAlert(treatedData.identifier, 'empty', data);
+            let time = new Time(treatedData.hours, treatedData.minutes);
+            let plannedQuantity = new Quantity(treatedData.amount);
+            this.recordEmptyFeeder(treatedData.identifier, time, plannedQuantity);
             break;
           case 'expectation':
             break;
@@ -105,6 +106,17 @@ FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
   // Register it in database
   this.databaseCoordinator.registerFeeder(identifier, ip);
 };
+
+FeederCoordinator.prototype.recordManualMeal = function (identifier, quantity) {
+  this.databaseCoordinator.recordMeal(identifier, quantity);
+  this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
+};
+
+FeederCoordinator.prototype.recordEmptyFeeder = function (identifier, time, quantity) {
+  // TODO: Later, push notification sending?
+  let data = {hours: time._hours, minutes: time._minutes, amount: quantity.amount()};
+  this.databaseCoordinator.logAlert(identifier, 'empty', data);
+}
 
 FeederCoordinator.prototype.write = function (identifier, data, callback) {
   if (!(identifier in FeederCoordinator.feeders)) {
