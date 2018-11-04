@@ -16,9 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-import Time from './../src/time';
-import Quantity from './../src/quantity';
-import Meal from './../src/meal';
+const Time = require("./../src/time");
+const Quantity = require("./../src/quantity");
+const Meal = require("./../src/meal");
 
 test("Meal constructor", () => {
   // Two parameters

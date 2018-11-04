@@ -17,7 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 // Load configuration
-import config from './config';
+const config = require("./config");
 
 // Make logs a little bit better
 if (config.debug_mode) {
@@ -28,15 +28,15 @@ else {
 }
 
 // This will handle database connexions
-import DataBaseCoordinator from './src/database-coordinator';
+const DataBaseCoordinator = require("./src/database-coordinator");
 let databaseCoordinator = new DataBaseCoordinator(config);
 
 // This will handle feeders connexions
-import FeederCoordinator from './src/feeder-coordinator';
+const FeederCoordinator = require("./src/feeder-coordinator");
 let feederCoordinator = new FeederCoordinator(databaseCoordinator, config);
 
 // This will handle the REST API
-import Server from './src/server';
+const Server = require("./src/server");
 new Server(feederCoordinator, databaseCoordinator, config);
 
 // This is the feeder emulator part

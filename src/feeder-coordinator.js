@@ -18,10 +18,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 import net from 'net';
 
-import Feeder from './feeder';
-import ResponseBuilder from './response-builder';
-import Time from './time';
-import Quantity from './quantity';
+const Feeder = require("./feeder");
+const ResponseBuilder = require("./response-builder");
+const Time = require("./time");
+const Quantity = require("./quantity");
 
 function FeederCoordinator(databaseCoordinator, config) {
 
