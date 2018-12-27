@@ -16,9 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require("./time");
-const Quantity = require("./quantity");
-const Planning = require("./planning");
+const Time = require("./models/time");
+const Quantity = require("./models/quantity");
+const Planning = require("./models/planning");
 
 function ResponseBuilder() {}
 

@@ -18,9 +18,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const net = require('net');
 
-const Feeder = require("./feeder");
+const Feeder = require("./models/feeder");
 const ResponseBuilder = require("./response-builder");
-const Quantity = require("./quantity");
+const Quantity = require("./models/quantity");
 
 function FeederCoordinator(databaseCoordinator, config) {
 
@@ -146,9 +146,9 @@ FeederCoordinator.prototype.getFeeder = function (identifier) {
   }
   let feeder = FeederCoordinator.feeders[identifier];
   return {
-    identifier: feeder._identifier,
-    lastResponded: feeder._lastResponded.toJSON(),
-    isAvailable: (Math.floor((new Date() - feeder._lastResponded) / 1000) <= 30),
+    identifier: feeder.identifier,
+    lastResponded: feeder.lastResponded.toJSON(),
+    isAvailable: (Math.floor((new Date() - feeder.lastResponded) / 1000) <= 30),
   };
 };
 

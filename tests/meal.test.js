@@ -16,22 +16,22 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require("./../src/time");
-const Quantity = require("./../src/quantity");
-const Meal = require("./../src/meal");
+const Time = require("../src/models/time");
+const Quantity = require("../src/models/quantity");
+const Meal = require("../src/models/meal");
 
 test("Meal constructor", () => {
   // Two parameters
-  expect(new Meal(new Time(11, 30), new Quantity(10)).time().numberOfMinutes()).toBe(1170);
-  expect(new Meal(new Time(11, 30), new Quantity(10)).quantity().amount()).toBe(10);
+  expect(new Meal(new Time(11, 30), new Quantity(10)).time.numberOfMinutes()).toBe(1170);
+  expect(new Meal(new Time(11, 30), new Quantity(10)).quantity.amount).toBe(10);
 
   // Three parameters
-  expect(new Meal({ hours: 11, minutes: 30 }, 10).time().numberOfMinutes()).toBe(1170);
-  expect(new Meal({ hours: 11, minutes: 30 }, 10).quantity().amount()).toBe(10);
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).time.numberOfMinutes()).toBe(1170);
+  expect(new Meal({ hours: 11, minutes: 30 }, 10).quantity.amount).toBe(10);
 
   // SQL row parameters
-  expect(new Meal('11:30:00', '10').time().numberOfMinutes()).toBe(1170);
-  expect(new Meal('11:30:00', '10').quantity().amount()).toBe(10);
+  expect(new Meal('11:30:00', '10').time.numberOfMinutes()).toBe(1170);
+  expect(new Meal('11:30:00', '10').quantity.amount).toBe(10);
 });
 
 // Unvalid constructors

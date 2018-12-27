@@ -16,22 +16,22 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Quantity = require("./../src/quantity");
+const Quantity = require("../src/models/quantity");
 
 // amount()
 test("amount() should send the correct integer value", () => {
-  expect(new Quantity(5).amount()).toBe(5);
-  expect(new Quantity(10).amount()).toBe(10);
-  expect(new Quantity(25).amount()).toBe(25);
-  expect(new Quantity(75).amount()).toBe(75);
-  expect(new Quantity(100).amount()).toBe(100);
-  expect(new Quantity(150).amount()).toBe(150);
+  expect(new Quantity(5).amount).toBe(5);
+  expect(new Quantity(10).amount).toBe(10);
+  expect(new Quantity(25).amount).toBe(25);
+  expect(new Quantity(75).amount).toBe(75);
+  expect(new Quantity(100).amount).toBe(100);
+  expect(new Quantity(150).amount).toBe(150);
 
   // Particularities
-  expect(new Quantity(5.25).amount()).toBe(5);
-  expect(new Quantity(10.9).amount()).toBe(10);
-  expect(new Quantity("05").amount()).toBe(5);
-  expect(new Quantity("100").amount()).toBe(100);
+  expect(new Quantity(5.25).amount).toBe(5);
+  expect(new Quantity(10.9).amount).toBe(10);
+  expect(new Quantity("05").amount).toBe(5);
+  expect(new Quantity("100").amount).toBe(100);
 });
 
 // Unvalid constructors

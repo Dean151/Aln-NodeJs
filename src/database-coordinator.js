@@ -107,8 +107,8 @@ DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, complet
     throw 'Database is not ready';
   }
 
-  const Planning = require('./planning');
-  const Meal = require('./meal');
+  const Planning = require('./models/planning');
+  const Meal = require('./models/meal');
 
   // Get current planning id
   this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {

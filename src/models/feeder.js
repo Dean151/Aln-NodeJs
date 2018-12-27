@@ -16,24 +16,39 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-function Feeder(identifier, socket) {
-  this._identifier = identifier;
-  this.hasResponded(socket);
+class Feeder {
+
+  /**
+   *
+   * @param {string} identifier
+   * @param {net.Socket|null} socket
+   */
+  constructor(identifier, socket) {
+    this.identifier = identifier;
+    this.hasResponded(socket);
+  }
+
+  /**
+   * @param {net.Socket} socket
+   */
+  hasResponded (socket) {
+    this.socket = socket;
+    this.lastResponded = new Date();
+  }
+
+  /**
+   * @param {Buffer} data
+   * @param {function | null} callback
+   */
+  write (data, callback = null) {
+    this.socket.write(data, () => {
+      console.log("Data sent: " + data.toString('hex'));
+      if (typeof callback === 'function') {
+        callback();
+      }
+    });
+  }
+
 }
-
-Feeder.prototype.hasResponded = function(socket) {
-  this._socket = socket;
-  this._lastResponded = new Date();
-};
-
-Feeder.prototype.write = function(data, callback) {
-  let hexData = data.toString('hex');
-  this._socket.write(hexData, 'hex', () => {
-    console.log("Data sent: " + hexData);
-    if (typeof callback === "function") {
-      callback();
-    }
-  });
-};
 
 module.exports = Feeder;

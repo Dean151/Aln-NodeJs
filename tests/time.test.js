@@ -16,14 +16,14 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Time = require("./../src/time");
+const Time = require("../src/models/time");
 
 // Default constructor
 test('Time() should be "now" datetime', () => {
   let date = new Time();
   let now = new Date();
-  expect(date._hours).toBe(now.getUTCHours());
-  expect(date._minutes).toBe(now.getUTCMinutes());
+  expect(date.hours).toBe(now.getUTCHours());
+  expect(date.minutes).toBe(now.getUTCMinutes());
 });
 
 // Valid constructors for sql

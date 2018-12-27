@@ -20,9 +20,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const http = require('http');
 
-const Quantity = require("./quantity");
-const Meal = require("./meal");
-const Planning = require("./planning");
+const Quantity = require("./models/quantity");
+const Meal = require("./models/meal");
+const Planning = require("./models/planning");
 
 function Server(feederCoordinator, databaseCoordinator, config) {
 

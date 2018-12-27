@@ -16,19 +16,19 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const Meal = require("./../src/meal");
-const Planning = require("./../src/planning");
+const Meal = require("../src/models/meal");
+const Planning = require("../src/models/planning");
 
 test("numberOfMeals() tests", () => {
-  expect(new Planning([]).numberOfMeals()).toBe(0);
+  expect(new Planning([]).mealsCount()).toBe(0);
   let meal1 = new Meal({ hours: 11, minutes: 30 }, 10);
-  expect(new Planning([meal1]).numberOfMeals()).toBe(1);
+  expect(new Planning([meal1]).mealsCount()).toBe(1);
   let meal2 = new Meal({ hours: 17, minutes: 20 }, 15);
-  expect(new Planning([meal1, meal2]).numberOfMeals()).toBe(2);
+  expect(new Planning([meal1, meal2]).mealsCount()).toBe(2);
   let meal3 = new Meal({ hours: 5, minutes: 0 }, 5);
-  expect(new Planning([meal1, meal2, meal3]).numberOfMeals()).toBe(3);
+  expect(new Planning([meal1, meal2, meal3]).mealsCount()).toBe(3);
   let meal4 = new Meal({ hours: 12, minutes: 45}, 40, false);
-  expect(new Planning([meal1, meal2, meal4]).numberOfMeals()).toBe(2);
+  expect(new Planning([meal1, meal2, meal4]).mealsCount()).toBe(2);
 });
 
 test('totalQuantity() tests', () => {
