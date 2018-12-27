@@ -37,18 +37,30 @@ class Feeder {
   }
 
   /**
-   * @param {Buffer} data
-   * @param {function | null} callback
+   * @returns {{identifier: string, isAvailable: boolean, lastResponded: string}}
    */
-  write (data, callback = null) {
+  jsoned () {
+    return {
+      identifier: this.identifier,
+      lastResponded: this.lastResponded.toJSON(),
+      isAvailable: (Math.floor((new Date() - this.lastResponded) / 1000) <= 30),
+    };
+  }
+
+  /**
+   * @param {Buffer} data
+   * @param {Feeder~sendCallback} callback
+   */
+  send (data, callback) {
     this.socket.write(data, () => {
       console.log("Data sent: " + data.toString('hex'));
-      if (typeof callback === 'function') {
-        callback();
-      }
+      callback();
     });
   }
 
+  /**
+   * @callback Feeder~sendCallback
+   */
 }
 
 module.exports = Feeder;

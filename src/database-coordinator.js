@@ -18,147 +18,169 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const mysql = require('mysql');
 
-function DataBaseCoordinator(config) {
+class DataBaseCoordinator {
 
-  this._isConnected = false;
+  /**
+   * @param {{mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
+   */
+  constructor (config) {
+    this.isConnected = false;
 
-  this.con = mysql.createConnection({
-    host: config.mysql_host,
-    user: config.mysql_user,
-    password: config.mysql_password,
-    database: config.mysql_database
-  });
+    this.con = mysql.createConnection({
+      host: config.mysql_host,
+      user: config.mysql_user,
+      password: config.mysql_password,
+      database: config.mysql_database
+    });
 
-  this.con.connect((err) => {
-    if (err) {
-      console.log('Could not connect to database: ', err);
-    }
-    else {
-      this.con.query('SHOW TABLES LIKE ?;', ['feeders'], (err, result, fields) => {
-        if (result.length === 0) {
-          // We create the tables, it's the first app start
-          console.log('Tables does not exists. You need to run init.sql file to create them!');
-        }
-        else {
-          this._isConnected = true;
-          console.log('Database connection is ready');
-        }
-      });
-    }
-  });
-}
-
-DataBaseCoordinator.prototype.isReady = function() {
-  return this._isConnected;
-};
-
-DataBaseCoordinator.prototype.registerFeeder = function(identifier, ip) {
-  if (!this.isReady()) {
-    return;
-  }
-
-  // We try to update the feeder registry.
-  let now = new Date();
-  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-  this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
-    if (err) {
-      throw err;
-    }
-    if (result.affectedRows < 1) {
-      // We insert the new row in the feeder registry.
-      this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
-        if (err) {
-          throw err;
-        }
-      });
-    }
-  });
-};
-
-DataBaseCoordinator.prototype.rememberDefaultAmount = function(identifier, quantity) {
-  if (!this.isReady()) {
-    return;
-  }
-
-  this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount(), identifier], (err, result, fields) => {
-    if (err) {
-      throw err;
-    }
-  });
-};
-
-DataBaseCoordinator.prototype.recordMeal = function(identifier, quantity) {
-  if (!this.isReady()) {
-    return;
-  }
-
-  let now = new Date();
-  let date = now.toJSON().slice(0, 10);
-  let time = now.toJSON().slice(11, 19);
-  this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount()], (err, result, fields) => {
-    if (err) {
-      throw err;
-    }
-  });
-};
-
-DataBaseCoordinator.prototype.getCurrentPlanning = function (identifier, completion) {
-  if (!this.isReady()) {
-    throw 'Database is not ready';
-  }
-
-  const Planning = require('./models/planning');
-  const Meal = require('./models/meal');
-
-  // Get current planning id
-  this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
-    if (err) { throw err; }
-    
-    // Parse the meals results
-    let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
-    completion(new Planning(meals));
-  });
-};
-
-DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
-  if (!this.isReady()) {
-    return;
-  }
-
-  let connection = this.con;
-  
-  let now = new Date();
-  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-
-  connection.beginTransaction((err) => {
-    if (err) { throw err; }
-
-    // We register the planning in the database
-    connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
+    this.con.connect((err) => {
       if (err) {
-        return connection.rollback(() => {
-          throw err;
-        });
-      }
-
-      if (planning.numberOfMeals() === 0) {
-        connection.commit((err) => {
-          if (err) {
-            return connection.rollback(() => {
-              throw err;
-            });
-          }
-        });
+        console.log('Could not connect to database: ', err);
       }
       else {
-        // We then insert all meals in the table meals
-        let meals = planning.sqled(result.insertId);
-        connection.query('INSERT INTO meals(planning, time, quantity, enabled) VALUES ?', [meals], (err, result, fields) => {
-          if (err) {
-            return this.con.rollback(() => {
-              throw err;
-            });
+        this.con.query('SHOW TABLES LIKE ?;', ['feeders'], (err, result, fields) => {
+          if (result.length === 0) {
+            // We create the tables, it's the first app start
+            console.log('Tables does not exists. You need to run init.sql file to create them!');
           }
+          else {
+            this.isConnected = true;
+            console.log('Database connection is ready');
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * @returns {boolean}
+   */
+  isReady() {
+    return this.isConnected;
+  }
+
+  /**
+   * @param {string} identifier
+   * @param {string} ip
+   * @throws
+   */
+  registerFeeder(identifier, ip) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    // We try to update the feeder registry.
+    let now = new Date();
+    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+    this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+      if (result.affectedRows < 1) {
+        // We insert the new row in the feeder registry.
+        this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
+          if (err) {
+            throw err;
+          }
+        });
+      }
+    });
+  }
+
+  /**
+   * @param {string} identifier
+   * @param {Quantity} quantity
+   * @throws
+   */
+  rememberDefaultAmount(identifier, quantity) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount, identifier], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
+
+  /**
+   * @param {string} identifier
+   * @param {Quantity} quantity
+   * @throws
+   */
+  recordMeal (identifier, quantity) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    let now = new Date();
+    let date = now.toJSON().slice(0, 10);
+    let time = now.toJSON().slice(11, 19);
+    this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
+
+  /**
+   * @callback DataBaseCoordinator~getPlanningCallback
+   * @param {Planning} planning
+   * @throws
+   */
+
+  /**
+   * @param {string} identifier
+   * @param {DataBaseCoordinator~getPlanningCallback} callback
+   * @throws
+   */
+  getCurrentPlanning (identifier, callback) {
+    if (!this.isReady()) {
+      throw 'Database is not ready';
+    }
+
+    const Planning = require('./models/planning');
+    const Meal = require('./models/meal');
+
+    // Get current planning id
+    this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
+      if (err) { throw err; }
+
+      // Parse the meals results
+      let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
+      callback(new Planning(meals));
+    });
+  }
+
+
+  /**
+   * @param {string} identifier
+   * @param {Planning} planning
+   * @throws
+   */
+  recordPlanning (identifier, planning) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    let connection = this.con;
+
+    let now = new Date();
+    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+    connection.beginTransaction((err) => {
+      if (err) { throw err; }
+
+      // We register the planning in the database
+      connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
+        if (err) {
+          return connection.rollback(() => {
+            throw err;
+          });
+        }
+
+        if (planning.mealsCount() === 0) {
           connection.commit((err) => {
             if (err) {
               return connection.rollback(() => {
@@ -166,33 +188,56 @@ DataBaseCoordinator.prototype.recordPlanning = function (identifier, planning) {
               });
             }
           });
-        });
+        }
+        else {
+          // We then insert all meals in the table meals
+          let meals = planning.sqled(result.insertId);
+          connection.query('INSERT INTO meals(planning, time, quantity, enabled) VALUES ?', [meals], (err, result, fields) => {
+            if (err) {
+              return this.con.rollback(() => {
+                throw err;
+              });
+            }
+            connection.commit((err) => {
+              if (err) {
+                return connection.rollback(() => {
+                  throw err;
+                });
+              }
+            });
+          });
+        }
+      });
+    });
+  }
+
+  /**
+   * @param {string} type
+   * @param {Buffer} data
+   * @param {string} ip
+   * @throws
+   */
+  logUnknownData (type, data, ip) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    // Treating the special case of uncomplete data. This happen all the time...
+    // We receive multiple times a week the data 0x9da114414c
+    // We prevent logging that since it does not actually make sence.
+    if (data.toString('hex').match(/^9da114414c$/)) {
+      return;
+    }
+
+    let now = new Date();
+    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+    this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type.substring(0, 64), ip, data], (err, result, fields) => {
+      if (err) {
+        throw err;
       }
     });
-  });
-};
-
-
-DataBaseCoordinator.prototype.logUnknownData = function (type, data, ip) {
-  if (!this.isReady()) {
-    return;
   }
-
-  // Treating the special case of uncomplete data. This happen all the time...
-  // We receive multiple times a week the data 0x9da114414c
-  // We prevent logging that since it does not actually make sence.
-  if (data.toString('hex').match(/^9da114414c$/)) {
-    return;
-  }
-
-  let now = new Date();
-  let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-
-  this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type.substring(0, 64), ip, data], (err, result, fields) => {
-    if (err) {
-      throw err;
-    }
-  });
-};
+}
 
 module.exports = DataBaseCoordinator;

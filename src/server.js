@@ -24,92 +24,113 @@ const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
 const Planning = require("./models/planning");
 
-function Server(feederCoordinator, databaseCoordinator, config) {
+class Server {
 
-  // Create a service (the app object is just a callback).
-  let app = express();
+  /**
+   * @param {{local_port: number, api_secret: string}} config
+   * @param {FeederCoordinator} feederCoordinator
+   * @param {DataBaseCoordinator} database
+   */
+  constructor(config, feederCoordinator, database) {
 
-  app.use(bodyParser.urlencoded({ extended: true }));
-  app.use(bodyParser.json());
+    // Create a service (the app object is just a callback).
+    let app = express();
 
-  // Create the routes for the API
-  let router = express.Router();
+    // Create the routes for the API
+    let api = this.createApiRouter(config, feederCoordinator, database);
 
-  router.use((req, res, next) => {
-    // Check the request header token to validate we're not messing around
-    if (config.api_secret !== req.headers['x-access-token']) {
-      res.status(403);
-      res.json({ success: false, error: 'Authentication token needed.'});
-    }
-    else {
-      next();
-    }
-  });
+    // Use the routes
+    app.use('/api', api);
 
-  router.use((req, res, next) => {
-    // Identifier is not an option any more
-    if (typeof req.body.identifier === 'undefined') {
-      throw 'No feeder identifier given';
-    }
-    else {
-      next();
-    }
-  });
+    http.createServer(app).listen(config.local_port, 'localhost');
+  }
 
-  router.use((err, req, res, next) => {
-    res.status(500);
-    res.json({ success: false, error: err.toString() });
-  });
+  /**
+   * @param {{api_secret: string}} config
+   * @param {FeederCoordinator} feederCoordinator
+   * @param {DataBaseCoordinator} database
+   * @return {express.Router}
+   */
+  createApiRouter(config, feederCoordinator, database) {
+    let api = express.Router();
 
-  router.route('/feeders').post((req, res) => {
-    let feeders = feederCoordinator.getFeeder(req.body.identifier);
-    res.json(feeders);
-  });
+    api.use(bodyParser.urlencoded({ extended: true }));
+    api.use(bodyParser.json());
 
-  router.route('/quantity').put((req, res) => {
-    let quantity = new Quantity(req.body.quantity);
-    feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
-      if (msg !== 'success') {
-        throw msg;
+    api.use((req, res, next) => {
+      // Check the request header token to validate we're not messing around
+      if (config.api_secret !== req.headers['x-access-token']) {
+        res.status(403);
+        res.json({ success: false, error: 'Authentication token needed.'});
       }
-      res.json({ success: true });
-    });
-  });
-
-  router.route('/planning').post((req, res) => {
-    // Fetch the planning if it's exists
-    databaseCoordinator.getCurrentPlanning(req.body.identifier, (planning) => {
-      if (typeof planning === 'undefined') {
-        throw 'No planning';
+      else {
+        next();
       }
-      res.json({ success: true, meals: planning.jsoned() });
     });
-  });
 
-  router.route('/planning').put((req, res) => {
-    let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
-    let planning = new Planning(meals);
-    feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
-      if (msg !== 'success') {
-        throw msg;
+    api.use((req, res, next) => {
+      // Identifier is not an option any more
+      if (typeof req.body.identifier === 'undefined') {
+        throw 'No feeder identifier given';
       }
-      res.json({ success: true });
-    });
-  });
-
-  router.route('/feed').put((req, res) => {
-    let quantity = new Quantity(req.body.quantity);
-    feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
-      if (msg !== 'success') {
-        throw msg;
+      else {
+        next();
       }
-      res.json({ success: true });
     });
-  });
 
-  // Use the routes
-  app.use('/api', router);
+    api.use((err, req, res, next) => {
+      res.status(500);
+      res.json({ success: false, error: err.toString() });
+    });
 
-  http.createServer(app).listen(config.local_port, 'localhost');
+    api.route('/feeders').post((req, res) => {
+      let feeders = feederCoordinator.getFeeder(req.body.identifier);
+      res.json(feeders);
+    });
+
+    api.route('/quantity').put((req, res) => {
+      let quantity = new Quantity(req.body.quantity);
+      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
+        if (msg !== 'success') {
+          throw msg;
+        }
+        res.json({ success: true });
+      });
+    });
+
+    api.route('/planning').post((req, res) => {
+      // Fetch the planning if it's exists
+      database.getCurrentPlanning(req.body.identifier, (planning) => {
+        if (typeof planning === 'undefined') {
+          throw 'No planning';
+        }
+        res.json({ success: true, meals: planning.jsoned() });
+      });
+    });
+
+    api.route('/planning').put((req, res) => {
+      let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
+      let planning = new Planning(meals);
+      feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
+        if (msg !== 'success') {
+          throw msg;
+        }
+        res.json({ success: true });
+      });
+    });
+
+    api.route('/feed').put((req, res) => {
+      let quantity = new Quantity(req.body.quantity);
+      feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
+        if (msg !== 'success') {
+          throw msg;
+        }
+        res.json({ success: true });
+      });
+    });
+
+    return api;
+  }
 }
+
 module.exports = Server;

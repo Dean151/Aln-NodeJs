@@ -22,12 +22,40 @@ const Feeder = require("./models/feeder");
 const ResponseBuilder = require("./response-builder");
 const Quantity = require("./models/quantity");
 
-function FeederCoordinator(databaseCoordinator, config) {
+class FeederCoordinator {
 
-  this.databaseCoordinator = databaseCoordinator;
+  /**
+   * @param {{feeder_port: number, feeder_list: string[]|undefined, feeder_mode: string|undefined}} config
+   * @param {DataBaseCoordinator} database
+   */
+  constructor(config, database) {
 
-  const server = net.createServer((socket) => {
+    /**
+     * @type {Object.<string, Feeder>}
+     */
+    this.feeders = {};
+    this.database = database;
 
+    const server = net.createServer((socket) => {
+      this.handleSocketConnection(socket, config);
+    });
+
+    server.on('error', (err) => {
+      console.log('Error occurred: ' + err);
+    });
+
+    // Listen on given port ; that will be called by device
+    server.listen(config.feeder_port, () => {
+      console.log('Listening to port', config.feeder_port);
+    });
+
+  }
+
+  /**
+   * @param {net.Socket} socket
+   * @param {{feeder_list: string[]|undefined, feeder_mode: string|undefined}} config
+   */
+  handleSocketConnection (socket, config) {
     // Depending on the mode, we reject ; or not ; the socket
     let isInList = config.feeder_list === undefined ? false : config.feeder_list.reduce((carry, item) => {
       return carry || item === socket.remoteAddress;
@@ -44,145 +72,184 @@ function FeederCoordinator(databaseCoordinator, config) {
       console.log('Client disconnected:', ip);
     });
     socket.on('data', (data) => {
-      console.log('Data received from', ip, ':', data.toString('hex'));
-
-      try {
-        let treatedData = ResponseBuilder.recognize(data);
-        switch (treatedData.type) {
-          case 'identification':
-            this.identifyFeeder(treatedData.identifier, ip, socket);
-            break;
-          case 'manual_meal':
-            let quantity = new Quantity(treatedData.amount);
-            this.databaseCoordinator.recordMeal(treatedData.identifier, quantity);
-            this.databaseCoordinator.rememberDefaultAmount(treatedData.identifier, quantity);
-            break;
-          case 'expectation':
-            break;
-          default:
-            throw 'Untreated response type';
-        }
-      }
-      catch (e) {
-        this.databaseCoordinator.logUnknownData(e.message, data, ip);
-        socket.destroy();
-      }
+      this.socketDataRetreived(data, ip, socket);
     });
-  });
-
-  server.on('error', (err) => {
-    console.log('Error occurred: ' + err);
-  });
-
-  // Listen on given port ; that will be called by device
-  server.listen(config.feeder_port, () => {
-    console.log('Listening to port', config.feeder_port);
-  });
-}
-
-FeederCoordinator.feeders = {};
-
-FeederCoordinator.prototype.identifyFeeder = function(identifier, ip, socket) {
-  console.log('Feeder identified with', identifier);
-
-  if (FeederCoordinator.feeders[identifier] === undefined) {
-    FeederCoordinator.feeders[identifier] = new Feeder(identifier, socket);
-  }
-  else {
-    FeederCoordinator.feeders[identifier].hasResponded(socket);
   }
 
-  // Send it back the time
-  this.write(identifier, ResponseBuilder.time());
+  /**
+   * @param {Buffer} data
+   * @param {string} ip
+   * @param {net.Socket} socket
+   */
+  socketDataRetreived (data, ip, socket) {
+    console.log('Data received from', ip, ':', data.toString('hex'));
 
-  // Maintain the connection with the socket
-  socket.setKeepAlive(true, 30000);
-
-  // Register it in database
-  this.databaseCoordinator.registerFeeder(identifier, ip);
-};
-
-FeederCoordinator.prototype.write = function (identifier, data, callback) {
-  if (!(identifier in FeederCoordinator.feeders)) {
-    throw 'Feeder not found';
-  }
-  FeederCoordinator.feeders[identifier].write(data, callback);
-};
-
-FeederCoordinator.prototype.writeAndExpect = function(identifier, data, expectation, callback) {
-  if (!(identifier in FeederCoordinator.feeders)) {
-    throw 'Feeder not found';
-  }
-  let feeder = FeederCoordinator.feeders[identifier];
-
-  // Prepare a timeout for execution
-  let timeout = setTimeout(() => {
-    feeder._socket.removeListener('data', expectationListener);
-    callback('timeout');
-  }, 30000);
-
-  let expectationListener = (data) => {
-    if (data.toString('hex') === expectation.toString('hex')) {
-      if (typeof callback === 'function') {
-        callback('success');
+    try {
+      let treatedData = ResponseBuilder.recognize(data);
+      switch (treatedData.type) {
+        case 'identification':
+          this.identifyFeeder(treatedData.identifier, ip, socket);
+          break;
+        case 'manual_meal':
+          let quantity = new Quantity(treatedData.amount);
+          this.database.recordMeal(treatedData.identifier, quantity);
+          this.database.rememberDefaultAmount(treatedData.identifier, quantity);
+          break;
+        case 'expectation':
+          break;
+        default:
+          throw 'Untreated response type';
       }
-      feeder._socket.removeListener('data', expectationListener);
-      clearTimeout(timeout);
     }
-  };
-
-  // Listen for the expectation
-  feeder._socket.on('data', expectationListener);
-
-  // Write to the feeder
-  FeederCoordinator.feeders[identifier].write(data, () => {
-    console.log('Waiting for expectation ...');
-  });
-};
-
-FeederCoordinator.prototype.getFeeder = function (identifier) {
-  if (!(identifier in FeederCoordinator.feeders)) {
-    throw 'Feeder not found';
+    catch (e) {
+      this.database.logUnknownData(e.message, data, ip);
+      socket.destroy();
+    }
   }
-  let feeder = FeederCoordinator.feeders[identifier];
-  return {
-    identifier: feeder.identifier,
-    lastResponded: feeder.lastResponded.toJSON(),
-    isAvailable: (Math.floor((new Date() - feeder.lastResponded) / 1000) <= 30),
-  };
-};
 
-FeederCoordinator.prototype.setDefaultQuantity = function (identifier, quantity, callback) {
-  let data = ResponseBuilder.changeDefaultQuantity(quantity);
-  let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
-  this.writeAndExpect(identifier, data, expectation, (msg) => {
-    this.databaseCoordinator.rememberDefaultAmount(identifier, quantity);
-    if (typeof callback === 'function') {
-      callback(msg);
-    }
-  });
-};
+  /**
+   * @param {string} identifier
+   * @param {string} ip
+   * @param {net.Socket} socket
+   * @throws
+   */
+  identifyFeeder (identifier, ip, socket) {
+    console.log('Feeder identified with', identifier);
 
-FeederCoordinator.prototype.setPlanning = function (identifier, planning, callback) {
-  let data = ResponseBuilder.changePlanning(planning);
-  let expectation = ResponseBuilder.changePlanningExpectation(identifier);
-  this.writeAndExpect(identifier, data, expectation, (msg) => {
-    this.databaseCoordinator.recordPlanning(identifier, planning);
-    if (typeof callback === 'function') {
-      callback(msg);
+    if (this.feeders[identifier] === undefined) {
+      this.feeders[identifier] = new Feeder(identifier, socket);
     }
-  });
-};
+    else {
+      this.feeders[identifier].hasResponded(socket);
+    }
 
-FeederCoordinator.prototype.feedNow = function (identifier, quantity, callback) {
-  let data = ResponseBuilder.feedNow(quantity);
-  let expectation = ResponseBuilder.feedNowExpectation(identifier);
-  this.writeAndExpect(identifier, data, expectation, (msg) => {
-    this.databaseCoordinator.recordMeal(identifier, quantity);
-    if (typeof callback === 'function') {
-      callback(msg);
+    // Send it back the time
+    this.send(identifier, ResponseBuilder.time(), () => {});
+
+    // Maintain the connection with the socket
+    socket.setKeepAlive(true, 30000);
+
+    // Register it in database
+    this.database.registerFeeder(identifier, ip);
+  }
+
+
+  /**
+   * @param {string} identifier
+   * @param {Buffer} data
+   * @param {Feeder~sendCallback} callback
+   * @throws
+   */
+  send (identifier, data, callback) {
+    if (!(identifier in this.feeders)) {
+      throw 'Feeder not found';
     }
-  });
-};
+    this.feeders[identifier].send(data, callback);
+  }
+
+  /**
+   * @param {string} identifier
+   * @param {Buffer} data
+   * @param {Buffer} expectation
+   * @param {FeederCoordinator~sendAndExpectCallback} callback
+   * @throws
+   */
+  sendAndExpect (identifier, data, expectation, callback) {
+    if (!(identifier in this.feeders)) {
+      throw 'Feeder not found';
+    }
+    let feeder = this.feeders[identifier];
+
+    // Prepare a timeout for execution
+    let timeout = setTimeout(() => {
+      feeder.socket.removeListener('data', expectationListener);
+      callback('timeout');
+    }, 30000);
+
+    let expectationListener = (data) => {
+      if (data.toString('hex') === expectation.toString('hex')) {
+        if (typeof callback === 'function') {
+          callback('success');
+        }
+        feeder.socket.removeListener('data', expectationListener);
+        clearTimeout(timeout);
+      }
+    };
+
+    // Listen for the expectation
+    feeder.socket.on('data', expectationListener);
+
+    // Write to the feeder
+    feeder.send(data, () => {
+      console.log('Waiting for expectation ...');
+    });
+  }
+
+  /**
+   * @param {string} identifier
+   * @throws
+   * @returns {{identifier: string, isAvailable: boolean, lastResponded: string}}
+   */
+  getFeeder (identifier) {
+    if (!(identifier in FeederCoordinator.feeders)) {
+      throw 'Feeder not found';
+    }
+    return this.feeders[identifier].jsoned();
+  }
+
+  /**
+   * @param {String} identifier
+   * @param {Quantity} quantity
+   * @param {FeederCoordinator~sendAndExpectCallback} callback
+   * @throws
+   */
+  setDefaultQuantity (identifier, quantity, callback) {
+    let data = ResponseBuilder.changeDefaultQuantity(quantity);
+    let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
+
+    this.sendAndExpect(identifier, data, expectation, (msg) => {
+      this.database.rememberDefaultAmount(identifier, quantity);
+      callback(msg);
+    });
+  }
+
+
+  /**
+   * @param {String} identifier
+   * @param {Planning} planning
+   * @param {FeederCoordinator~sendAndExpectCallback} callback
+   * @throws
+   */
+  setPlanning (identifier, planning, callback) {
+    let data = ResponseBuilder.changePlanning(planning);
+    let expectation = ResponseBuilder.changePlanningExpectation(identifier);
+
+    this.sendAndExpect(identifier, data, expectation, (msg) => {
+      this.database.recordPlanning(identifier, planning);
+      callback(msg);
+    });
+  }
+
+  /**
+   * @param {String} identifier
+   * @param {Quantity} quantity
+   * @param {FeederCoordinator~sendAndExpectCallback} callback
+   * @throws
+   */
+  feedNow (identifier, quantity, callback) {
+    let data = ResponseBuilder.feedNow(quantity);
+    let expectation = ResponseBuilder.feedNowExpectation(identifier);
+
+    this.sendAndExpect(identifier, data, expectation, (msg) => {
+      this.database.recordMeal(identifier, quantity);
+      callback(msg);
+    });
+  }
+
+  /**
+   * @callback FeederCoordinator~sendAndExpectCallback
+   * @param {string} msg
+   */
+}
 
 module.exports = FeederCoordinator;

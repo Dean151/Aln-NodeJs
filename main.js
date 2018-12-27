@@ -29,18 +29,18 @@ else {
 
 // This will handle database connexions
 const DataBaseCoordinator = require("./src/database-coordinator");
-let databaseCoordinator = new DataBaseCoordinator(config);
+let database = new DataBaseCoordinator(config);
 
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
-let feederCoordinator = new FeederCoordinator(databaseCoordinator, config);
+let feederCoordinator = new FeederCoordinator(config, database);
 
 // This will handle the REST API
 const Server = require("./src/server");
-new Server(feederCoordinator, databaseCoordinator, config);
+new Server(config, feederCoordinator, database);
 
 // This is the feeder emulator part
 if (config.enable_emulator && config.emulator_identifier) {
   const Emulator = require("./src/models/emulator");
-  new Emulator(config.emulator_identifier, '47.90.203.137', 9999);
+  new Emulator(config.emulator_identifier, '127.0.0.1', 9999);
 }
