@@ -20,6 +20,7 @@ const net = require('net');
 
 const Feeder = require("./models/feeder");
 const ResponseBuilder = require("./response-builder");
+const Time = require("./models/time");
 const Quantity = require("./models/quantity");
 
 class FeederCoordinator {
@@ -92,8 +93,12 @@ class FeederCoordinator {
           break;
         case 'manual_meal':
           let quantity = new Quantity(treatedData.amount);
-          this.database.recordMeal(treatedData.identifier, quantity);
-          this.database.rememberDefaultAmount(treatedData.identifier, quantity);
+          this.recordManualMeal(treatedData.identifier, quantity);
+          break;
+        case 'empty_feeder':
+          let time = new Time(treatedData.hours, treatedData.minutes);
+          let plannedQuantity = new Quantity(treatedData.amount);
+          this.recordEmptyFeeder(treatedData.identifier, time, plannedQuantity);
           break;
         case 'expectation':
           break;
@@ -133,6 +138,31 @@ class FeederCoordinator {
     this.database.registerFeeder(identifier, ip);
   }
 
+  /**
+   * @param {String} identifier
+   * @param {Quantity} quantity
+   * @throws
+   */
+  recordManualMeal (identifier, quantity) {
+    this.database.recordMeal(identifier, quantity);
+    this.database.rememberDefaultAmount(identifier, quantity);
+  }
+
+  /**
+   * @param {String} identifier
+   * @param {Time} time
+   * @param {Quantity} quantity
+   * @throws
+   */
+  recordEmptyFeeder (identifier, time, quantity) {
+    // TODO: Later, push notification sending?
+    let data = {
+      hours: time.hours,
+      minutes: time.minutes,
+      amount: quantity.amount
+    };
+    this.database.logAlert(identifier, 'empty', data);
+  }
 
   /**
    * @param {string} identifier

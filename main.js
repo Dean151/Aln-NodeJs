@@ -42,5 +42,5 @@ new Server(config, feederCoordinator, database);
 // This is the feeder emulator part
 if (config.enable_emulator && config.emulator_identifier) {
   const Emulator = require("./src/models/emulator");
-  new Emulator(config.emulator_identifier, '127.0.0.1', 9999);
+  new Emulator(config.emulator_identifier, config.emulator_ip ? config.emulator_ip : '47.90.203.137', config.emulator_port ? config.emulator_port : 9999);
 }

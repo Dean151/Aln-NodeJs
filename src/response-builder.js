@@ -118,6 +118,24 @@ class ResponseBuilder {
       let identifier = ResponseBuilder.decodeFeederIdentifier(hexIdentifier);
       return { type: 'expectation', identifier: identifier, action: 'feed_now' };
     }
+    else if (hexString.match(/^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/)) {
+      let regex = /^9da114([0-9a-f]+)21038400([0-9a-f]{2})$/;
+      let matches = regex.exec(hexString);
+      let identifier = ResponseBuilder.decodeFeederIdentifier(matches[1]);
+      let amount = parseInt(matches[2], 16);
+      return {type: 'manual_meal', identifier: identifier, amount: amount};
+    }
+    else if (hexString.match(/^9da114([0-9a-f]+)21(0[0-5][0-9a-f]{2})(00[0-9][0-9a-f])$/)) {
+      let regex = /^9da114([0-9a-f]+)21(0[0-5][0-9a-f]{2})(00[0-9][0-9a-f])$/;
+      let matches = regex.exec(hexString);
+      let identifier = ResponseBuilder.decodeFeederIdentifier(matches[1]);
+      let amount = parseInt(matches[3], 16);
+      let alnMinutes = parseInt(matches[2], 16);
+      // Aln time is weird
+      let hours = (((alnMinutes - (alnMinutes % 60)) / 60) + 16) % 24;
+      let minutes = (alnMinutes % 60);
+      return { type: 'empty_feeder', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
+    }
     else {
       throw 'Unknown response';
     }
@@ -163,6 +181,21 @@ class ResponseBuilder {
 
   /**
    * @param {string} identifier
+   * @param {Quantity} quantity
+   * @returns {Buffer}
+   */
+  static emptyFeederSignal (identifier, quantity) {
+    let time = new Time();
+    // 9d a1 14
+    let prefix = Buffer.from([157, 161, 20]);
+    // 21
+    let suffix = Buffer.from([33]);
+    return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix, time.buffered(), quantity.buffered()]);
+  }
+
+
+  /**
+   * @param {string} identifier
    * @returns {Buffer}
    */
   static changeDefaultQuantityExpectation (identifier) {
@@ -196,6 +229,7 @@ class ResponseBuilder {
     let suffix = Buffer.from([162, 208, 161, 0, 0]);
     return Buffer.concat([prefix, Buffer.from(identifier, 'utf8'), suffix]);
   }
+
 }
 
 module.exports = ResponseBuilder;

@@ -19,11 +19,13 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 const net = require('net');
 
 const ResponseBuilder = require('../response-builder');
+const Quantity = require("./quantity");
 
 class Emulator {
 
-  constructor (identifier, host, port) {
+  constructor (identifier, host, port, isEmpty = false) {
 
+    this.isEmpty = isEmpty;
     const client = new net.Socket();
 
     client.connect(port, host, () => {
@@ -49,6 +51,13 @@ class Emulator {
       // Feeding now
       else if (hexData.match(/^9da106a2([0-9a-f]+)$/)) {
         client.write(ResponseBuilder.feedNowExpectation(identifier));
+        if (this.isEmpty) {
+          let amount = parseInt(hexData.replace(/^9da106a2/, ''), 16);
+          let quantity = new Quantity(amount);
+          setTimeout(() => {
+            client.write(ResponseBuilder.emptyFeederSignal(identifier, quantity));
+          }, 3000);
+        }
       }
       // Changing plan
       else if (hexData.match(/^9da12dc4([0-9a-f]+)$/)) {

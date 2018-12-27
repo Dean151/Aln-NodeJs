@@ -7,6 +7,14 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 
+CREATE TABLE `alerts` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `feeder` int(11) UNSIGNED NOT NULL,
+  `type` varchar(64) NOT NULL,
+  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `data` blob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE `feeders` (
   `id` int(11) UNSIGNED NOT NULL,
   `identifier` varchar(16) NOT NULL,
@@ -40,6 +48,10 @@ CREATE TABLE `unknown_data` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+ALTER TABLE `alerts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `feeder` (`feeder`);
+
 ALTER TABLE `feeders`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `identifier` (`identifier`);
@@ -56,7 +68,8 @@ ALTER TABLE `plannings`
 ALTER TABLE `unknown_data`
   ADD PRIMARY KEY (`id`);
 
-
+ALTER TABLE `alerts`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `feeders`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `meals`
@@ -65,6 +78,9 @@ ALTER TABLE `plannings`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `unknown_data`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `alerts`
+  ADD CONSTRAINT `alert_feeder` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `meals`
   ADD CONSTRAINT `feeder_ref` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

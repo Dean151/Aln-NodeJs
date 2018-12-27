@@ -212,6 +212,28 @@ class DataBaseCoordinator {
   }
 
   /**
+   * @param {string} identifier
+   * @param {string} type
+   * @param {*} data
+   * @throws
+   */
+  logAlert (identifier, type, data) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    let now = new Date();
+    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+    let json = Buffer.from(JSON.stringify(data));
+
+    this.con.query('INSERT INTO alerts(feeder, type, date, data) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, type, date, json], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
+
+  /**
    * @param {string} type
    * @param {Buffer} data
    * @param {string} ip
