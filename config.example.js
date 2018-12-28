@@ -46,9 +46,6 @@ module.exports = {
 
   /* DEPRECATED SETTINGS BELOW */
 
-  // API settings: DEPRECATED!
-  'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
-
   // Feeder filters DEPRECATED
   'feeder_mode': 'none', // Could be "blacklist" or "whitelist"
   'feeder_list': [], // The list of IPs that will be blacklisted or whitelisted (ie ::ffff:8.8.8.8)

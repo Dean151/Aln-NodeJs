@@ -229,10 +229,18 @@ class Server {
       if (typeof req.body.identifier === 'undefined') {
         res.status(500);
         res.json({ success: false, error: 'No feeder identifier given' });
-      } else {
-        // TODO: check feeder <-> user association
-        next();
+        return;
       }
+
+      database.checkFeederAssociation(req.body.identifier, req.session.user.id, (allowed) => {
+        if (!allowed) {
+          res.status(403);
+          res.json({ success: false, error: 'Feeder not found' });
+          return;
+        }
+        
+        next();
+      });
     });
 
     api.route('/feeder/status').post((req, res) => {
