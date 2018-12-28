@@ -96,8 +96,8 @@ class Server {
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/register', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.email || !req.body.password) {
-        throw 'Missing email or password';
+      if (!req.body.email) {
+        throw 'Missing email';
       }
 
       if (!validator.isEmail(req.body.email)) {
@@ -115,35 +115,25 @@ class Server {
           return;
         }
 
-        // FIXME: bcrypt is less safe than scrypt.
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
-          if (err) {
+        database.createUser({
+          email: email,
+          hash: 'not-an-hash',
+        }, (success) => {
+          if (!success) {
             res.status((500));
-            res.json({ success: false, error: err.toString() });
+            res.json({ success: false, error: 'Registration failed' });
             return;
           }
 
-          database.createUser({
-            email: email,
-            hash: hash,
-          }, (success) => {
-            if (!success) {
+          database.getUser(email, (user) => {
+            if (typeof user === 'undefined') {
               res.status((500));
               res.json({ success: false, error: 'Registration failed' });
               return;
             }
 
-            database.getUser(email, (user) => {
-              if (typeof user === 'undefined') {
-                res.status((500));
-                res.json({ success: false, error: 'Registration failed' });
-                return;
-              }
-
-              // Auto-connexion
-              req.session.user = user.jsoned();
-              res.json({ success: true, user: req.session.user });
-            });
+            user.sendResetPassMail(true);
+            res.json({ success: true });
           });
         });
       });
@@ -161,7 +151,6 @@ class Server {
           return;
         }
 
-        // FIXME: bcrypt is less safe than scrypt.
         bcrypt.compare(req.body.password, user.password, (err, success) => {
           if (!success) {
             res.status(401);
@@ -169,10 +158,28 @@ class Server {
             return;
           }
 
+          database.loggedUser(user.id);
           req.session.user = user.jsoned();
           res.json({ success: true, user: req.session.user });
         });
       });
+    });
+
+    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res, next) => {
+      if (!req.body.email) {
+        throw 'Missing email or password';
+      }
+      let email = validator.normalizeEmail(req.body.email);
+      database.getUser(email, (user) => {
+        if (typeof user !== 'undefined') {
+          user.sendResetPassMail(false);
+        }
+        res.json({ success: true });
+      });
+    });
+
+    api.post('/user/password_reset', requiresNotLoggedIn, (req, res, next) => {
+      // TODO: connect user using link & generate password change token
     });
 
     // Every endpoint below requires login-in
@@ -183,6 +190,21 @@ class Server {
       } else {
         next();
       }
+    });
+
+    api.put('/user/edit', (req, res, next) => {
+      // TODO: profile edition (email / password change)
+      // email/password change will need current password
+      // password may be changed with password change token
+      /*
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+          if (err) {
+            res.status((500));
+            res.json({ success: false, error: err.toString() });
+            return;
+          }
+        });
+       */
     });
 
     // Logging out

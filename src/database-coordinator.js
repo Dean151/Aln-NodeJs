@@ -87,6 +87,21 @@ class DataBaseCoordinator {
     });
   }
 
+  /**
+   * @param {number} user_id
+   */
+  loggedUser(user_id) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    // We try to update the feeder registry.
+    this.con.query('UPDATE users SET login = CURRENT_TIMESTAMP where id = ?', [user_id], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
 
   /**
    * @callback DataBaseCoordinator~createUserCallback

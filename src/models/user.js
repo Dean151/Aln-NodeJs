@@ -25,6 +25,15 @@ class User {
     this.id = row.id;
     this.email = row.email;
     this.password = row.password;
+    this.register = row.register;
+    this.login = row.login;
+  }
+
+  /**
+   * @param {boolean} registration
+   */
+  sendResetPassMail(registration) {
+    // TODO!
   }
 
   /**
@@ -33,7 +42,9 @@ class User {
   jsoned () {
     return {
       id: this.id,
-      email: this.email
+      email: this.email,
+      register: this.register,
+      login: this.login,
     };
   }
 
