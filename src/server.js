@@ -20,6 +20,8 @@ const http = require('http');
 const express = require('express');
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -28,7 +30,7 @@ const Planning = require("./models/planning");
 class Server {
 
   /**
-   * @param {{local_port: number, api_secret: string}} config
+   * @param {{local_port: number, session_name: string, session_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -39,6 +41,20 @@ class Server {
 
     // Use helmet for better security & obfuscation settings
     app.use(helmet());
+
+    // And the session mechanism
+    app.use(session({
+      key: config.session_name,
+      secret: config.session_secret,
+      store: new MySQLStore({
+        host: config.mysql_host,
+        user: config.mysql_user,
+        password: config.mysql_password,
+        database: config.mysql_database
+      }),
+      resave: false,
+      saveUninitialized: false
+    }));
 
     // Create the routes for the API
     let api = this.createApiRouter(config, feederCoordinator, database);

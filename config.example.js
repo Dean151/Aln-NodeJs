@@ -17,29 +17,39 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 module.exports = {
+
   // Disable or enable console.logs outputs
   'debug_mode': false,
 
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
-
-  'feeder_mode': 'none', // Could be "blacklist" or "whitelist"
-  'feeder_list': [], // The list of IPs that will be blacklisted or whitelisted (ie ::ffff:8.8.8.8)
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
-  'feeder_port': 1032,
+  'feeder_port': 9999,
 
-  // OPTIONAL Mysql settings
-  'mysql_host': undefined,
-  'mysql_user': undefined,
-  'mysql_password': undefined,
-  'mysql_database': undefined,
-  
-  // API secret
-  'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
+  // Mysql settings
+  'mysql_host': 'localhost',
+  'mysql_port': 3306,
+  'mysql_user': 'alnpet',
+  'mysql_password': 'Password1234!',
+  'mysql_database': 'alnpet',
 
+  // Session settings
+  'session_name': 'connect.sid',
+  'session_secret': '',
+
+  // Feeder emulator settings
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
   'emulator_ip': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_port': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_identifier': 'XXX012345678', // The identifier that will be used for the emulated feeder. Emulation allow to use the original app with a fake feeder.
   'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any food.
+
+  /* DEPRECATED SETTINGS BELOW */
+
+  // API settings: DEPRECATED!
+  'api_secret': '', // Generate here a random ; and strong (at least 256bits) string that should not be given to anyone!
+
+  // Feeder filters DEPRECATED
+  'feeder_mode': 'none', // Could be "blacklist" or "whitelist"
+  'feeder_list': [], // The list of IPs that will be blacklisted or whitelisted (ie ::ffff:8.8.8.8)
 };
