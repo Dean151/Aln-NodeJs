@@ -90,7 +90,7 @@ class Server {
         throw 'Missing email or password';
       }
       database.getUser(req.body.email, (user) => {
-        if (!user || !user.id) {
+        if (typeof user === 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Wrong email/password' });
         } else {
@@ -109,7 +109,30 @@ class Server {
     });
 
     api.post('/user/register', Server.requiresNotLoggedIn, (req, res, next) => {
-      // TODO: register mechanism
+      if (!req.body.email || !req.body.password) {
+        throw 'Missing email or password';
+      }
+
+      // Check if the user already exists
+      database.getUser(req.body.email, (user) => {
+        if (typeof user !== 'undefined') {
+          res.status(401);
+          res.json({ success: false, error: 'Email already in use' });
+        } else {
+          // TODO create user and register it
+
+          database.getUser(req.body.email, (user) => {
+            if (typeof user === 'undefined') {
+              res.status(500);
+              res.json({ success: false, error: 'Registration failed' });
+            } else {
+              // Auto-connexion
+              req.session.user = user.jsoned();
+              res.json({ success: true, user: req.session.user });
+            }
+          });
+        }
+      });
     });
 
     // Logging out
@@ -156,7 +179,8 @@ class Server {
         // Fetch the planning if it's exists
         database.getCurrentPlanning(req.body.identifier, (planning) => {
           if (typeof planning === 'undefined') {
-            throw 'No planning';
+            res.status(500);
+            res.json({ success: false, error: 'No planning' });
           }
           res.json({ success: true, meals: planning.jsoned() });
         });
