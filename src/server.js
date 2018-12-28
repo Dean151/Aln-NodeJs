@@ -23,7 +23,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const bcrypt = require('bcrypt');
-const csrf = require('csurf')
+const csrf = require('csurf');
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -105,20 +105,40 @@ class Server {
         if (typeof user !== 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Email already in use' });
-        } else {
-          // TODO create user and register it
+          return;
+        }
 
-          database.getUser(req.body.email, (user) => {
-            if (typeof user === 'undefined') {
+        // FIXME: bcrypt is less safe than scrypt.
+        bcrypt.hash(req.body.password, 10, (err, hash) => {
+          if (err) {
+            res.status((500));
+            res.json({ success: false, error: err.toString() });
+            return;
+          }
+
+          database.createUser({
+            email: req.body.email,
+            hash: hash,
+          }, (success) => {
+            if (!success) {
               res.status((500));
               res.json({ success: false, error: 'Registration failed' });
-            } else {
+              return;
+            }
+
+            database.getUser(req.body.email, (user) => {
+              if (typeof user === 'undefined') {
+                res.status((500));
+                res.json({ success: false, error: 'Registration failed' });
+                return;
+              }
+
               // Auto-connexion
               req.session.user = user.jsoned();
               res.json({ success: true, user: req.session.user, token: req.csrfToken() });
-            }
+            });
           });
-        }
+        });
       });
     });
 
@@ -126,22 +146,25 @@ class Server {
       if (!req.body.email || !req.body.password) {
         throw 'Missing email or password';
       }
+
       database.getUser(req.body.email, (user) => {
         if (typeof user === 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Wrong email/password' });
-        } else {
-          // FIXME: bcrypt is less safe than scrypt.
-          bcrypt.compare(req.body.password, user.password, (err, res) => {
-            if (!res) {
-              res.status(401);
-              res.json({ success: false, error: 'Wrong email/password' });
-            } else {
-              req.session.user = user.jsoned();
-              res.json({ success: true, user: req.session.user, token: req.csrfToken() });
-            }
-          });
+          return;
         }
+
+        // FIXME: bcrypt is less safe than scrypt.
+        bcrypt.compare(req.body.password, user.password, (err, res) => {
+          if (!res) {
+            res.status(401);
+            res.json({ success: false, error: 'Wrong email/password' });
+            return;
+          }
+
+          req.session.user = user.jsoned();
+          res.json({ success: true, user: req.session.user, token: req.csrfToken() });
+        });
       });
     });
 

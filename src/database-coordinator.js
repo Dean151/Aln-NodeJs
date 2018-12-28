@@ -87,6 +87,30 @@ class DataBaseCoordinator {
     });
   }
 
+
+  /**
+   * @callback DataBaseCoordinator~createUserCallback
+   * @param {boolean} success
+   * @throws
+   */
+
+  /**
+   * @param {{email: string, hash: string}} data
+   * @param {DataBaseCoordinator~createUserCallback} callback
+   */
+  createUser(data, callback) {
+    if (!this.isReady()) {
+      throw 'Database is not ready';
+    }
+
+    this.con.query('INSERT INTO users (email, password) VALUES (?, ?)', [data.email, data.hash], (err, result, fields) => {
+      if (err) {
+        callback(false);
+      }
+      callback(true);
+    });
+  }
+
   /**
    * @param {string} identifier
    * @param {string} ip
