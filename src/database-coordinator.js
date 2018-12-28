@@ -82,7 +82,7 @@ class DataBaseCoordinator {
       if (err) { throw err; }
 
       // Parse the meals results
-      let user = results.length ? new User(results.first) : undefined;
+      let user = results.length ? new User(results[0]) : undefined;
       callback(user);
     });
   }

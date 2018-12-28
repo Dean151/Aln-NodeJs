@@ -23,7 +23,6 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const bcrypt = require('bcrypt');
-const csrf = require('csurf');
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -135,7 +134,7 @@ class Server {
 
               // Auto-connexion
               req.session.user = user.jsoned();
-              res.json({ success: true, user: req.session.user, token: req.csrfToken() });
+              res.json({ success: true, user: req.session.user });
             });
           });
         });
@@ -155,15 +154,15 @@ class Server {
         }
 
         // FIXME: bcrypt is less safe than scrypt.
-        bcrypt.compare(req.body.password, user.password, (err, res) => {
-          if (!res) {
+        bcrypt.compare(req.body.password, user.password, (err, success) => {
+          if (!success) {
             res.status(401);
             res.json({ success: false, error: 'Wrong email/password' });
             return;
           }
 
           req.session.user = user.jsoned();
-          res.json({ success: true, user: req.session.user, token: req.csrfToken() });
+          res.json({ success: true, user: req.session.user });
         });
       });
     });
@@ -177,9 +176,6 @@ class Server {
         next();
       }
     });
-
-    // ... And CSRF protection
-    api.use(csrf({}));
 
     // Logging out
     api.post('/user/logout', (req, res, next) => {
