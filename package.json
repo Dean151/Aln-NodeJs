@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Dean151/Aln-NodeJs#readme",
   "dependencies": {
+    "bcrypt": "^3.0.3",
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "express-mysql-session": "^2.1.0",

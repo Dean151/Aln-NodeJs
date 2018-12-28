@@ -22,6 +22,7 @@ const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
+const bcrypt = require('bcrypt');
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -85,12 +86,26 @@ class Server {
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/login', Server.requiresNotLoggedIn, (req, res, next) => {
-      // TODO: authentication mechanism
-      req.session.user = {
-        id: 1,
-        username: 'thomas'
-      };
-      res.json({ success: true });
+      if (!req.body.email || !req.body.password) {
+        throw 'Missing email or password';
+      }
+      database.getUser(req.body.email, (user) => {
+        if (!user || !user.id) {
+          res.status(401);
+          res.json({ success: false, error: 'Wrong email/password' });
+        } else {
+          // FIXME: bcrypt is less safe than scrypt.
+          bcrypt.compare(req.body.password, user.password, (err, res) => {
+            if (!res) {
+              res.status(401);
+              res.json({ success: false, error: 'Wrong email/password' });
+            } else {
+              req.session.user = user.jsoned();
+              res.json({ success: true, user: req.session.user });
+            }
+          });
+        }
+      });
     });
 
     api.post('/user/register', Server.requiresNotLoggedIn, (req, res, next) => {
@@ -163,7 +178,7 @@ class Server {
   static requiresNotLoggedIn (req, res, next) {
     if (req.session && req.session.user) {
       res.status(401);
-      res.json({ success: false, error: 'Already logged-in as ' + req.session.username });
+      res.json({ success: false, error: 'Already logged-in as ' + req.session.user.email });
     } else {
       next();
     }

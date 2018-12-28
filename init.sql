@@ -47,6 +47,12 @@ CREATE TABLE `unknown_data` (
   `data` blob NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `users` (
+  `id` int(11) UNSIGNED NOT NULL,
+  `email` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `password` varchar(256) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `alerts`
   ADD PRIMARY KEY (`id`),
@@ -68,6 +74,10 @@ ALTER TABLE `plannings`
 ALTER TABLE `unknown_data`
   ADD PRIMARY KEY (`id`);
 
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
 ALTER TABLE `alerts`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `feeders`
@@ -77,6 +87,8 @@ ALTER TABLE `meals`
 ALTER TABLE `plannings`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 ALTER TABLE `unknown_data`
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
+ALTER TABLE `users`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `alerts`
