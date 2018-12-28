@@ -16,9 +16,10 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const express = require('express');
-const bodyParser = require('body-parser');
 const http = require('http');
+const express = require('express');
+const helmet = require('helmet');
+const bodyParser = require('body-parser');
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -35,6 +36,9 @@ class Server {
 
     // Create a service (the app object is just a callback).
     let app = express();
+
+    // Use helmet for better security & obfuscation settings
+    app.use(helmet());
 
     // Create the routes for the API
     let api = this.createApiRouter(config, feederCoordinator, database);

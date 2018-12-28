@@ -19,10 +19,15 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
+    "helmet": "^3.15.0",
+    "http": "0.0.0",
     "log-timestamp": "^0.2.1",
-    "mysql": "^2.16.0"
+    "mysql": "^2.16.0",
+    "net": "^1.0.2",
+    "require.js": "^1.0.0"
   },
   "devDependencies": {
+    "@types/node": "^10.12.18",
     "jest": "^23.6.0",
     "jshint": "^2.9.7",
     "merge": ">=1.2.1"
