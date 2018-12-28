@@ -53,11 +53,12 @@ class Server {
         database: config.mysql_database
       }),
       resave: false,
-      saveUninitialized: false
+      saveUninitialized: false,
+      cookie: { secure: 'auto' }
     }));
 
     // Create the routes for the API
-    let api = this.createApiRouter(config, feederCoordinator, database);
+    let api = Server.createApiRouter(feederCoordinator, database);
 
     // Use the routes
     app.use('/api', api);
@@ -66,80 +67,56 @@ class Server {
   }
 
   /**
-   * @param {{api_secret: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    * @return {express.Router}
    */
-  createApiRouter(config, feederCoordinator, database) {
+  static createApiRouter(feederCoordinator, database) {
     let api = express.Router();
 
     api.use(bodyParser.urlencoded({ extended: true }));
     api.use(bodyParser.json());
-
-    api.use((req, res, next) => {
-      // Check the request header token to validate we're not messing around
-      if (config.api_secret !== req.headers['x-access-token']) {
-        res.status(403);
-        res.json({ success: false, error: 'Authentication token needed.'});
-      }
-      else {
-        next();
-      }
-    });
-
-    api.use((req, res, next) => {
-      // Identifier is not an option any more
-      if (typeof req.body.identifier === 'undefined') {
-        throw 'No feeder identifier given';
-      }
-      else {
-        next();
-      }
-    });
 
     api.use((err, req, res, next) => {
       res.status(500);
       res.json({ success: false, error: err.toString() });
     });
 
-    api.route('/feeders').post((req, res) => {
+    /** AUTHENTICATION MECHANISMS **/
+
+    api.post('/user/login', Server.requiresNotLoggedIn, (req, res, next) => {
+      // TODO: authentication mechanism
+      req.session.user = {
+        id: 1,
+        username: 'thomas'
+      };
+      res.json({ success: true });
+    });
+
+    api.post('/user/register', Server.requiresNotLoggedIn, (req, res, next) => {
+      // TODO: register mechanism
+    });
+
+    // Logging out
+    api.post('/user/logout', Server.requiresLogin, (req, res, next) => {
+      // delete session object
+      req.session.destroy(function(err) {
+        if(err) {
+          throw err;
+        }
+        res.json({ success: true });
+      });
+    });
+
+
+    /** FEEDER HANDLING **/
+
+    api.route('/feeder/status').post(Server.requiresLogin, Server.checkFeederAssociation, (req, res) => {
       let feeders = feederCoordinator.getFeeder(req.body.identifier);
       res.json(feeders);
     });
 
-    api.route('/quantity').put((req, res) => {
-      let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
-        if (msg !== 'success') {
-          throw msg;
-        }
-        res.json({ success: true });
-      });
-    });
-
-    api.route('/planning').post((req, res) => {
-      // Fetch the planning if it's exists
-      database.getCurrentPlanning(req.body.identifier, (planning) => {
-        if (typeof planning === 'undefined') {
-          throw 'No planning';
-        }
-        res.json({ success: true, meals: planning.jsoned() });
-      });
-    });
-
-    api.route('/planning').put((req, res) => {
-      let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
-      let planning = new Planning(meals);
-      feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
-        if (msg !== 'success') {
-          throw msg;
-        }
-        res.json({ success: true });
-      });
-    });
-
-    api.route('/feed').put((req, res) => {
+    api.route('/feeder/feed').put(Server.requiresLogin, Server.checkFeederAssociation, (req, res) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
         if (msg !== 'success') {
@@ -149,7 +126,66 @@ class Server {
       });
     });
 
+    api.route('/feeder/quantity').put(Server.requiresLogin, Server.checkFeederAssociation, (req, res) => {
+      let quantity = new Quantity(req.body.quantity);
+      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
+        if (msg !== 'success') {
+          throw msg;
+        }
+        res.json({ success: true });
+      });
+    });
+
+    api.route('/feeder/planning')
+      .post(Server.requiresLogin, Server.checkFeederAssociation, (req, res) => {
+        // Fetch the planning if it's exists
+        database.getCurrentPlanning(req.body.identifier, (planning) => {
+          if (typeof planning === 'undefined') {
+            throw 'No planning';
+          }
+          res.json({ success: true, meals: planning.jsoned() });
+        });
+      })
+      .put(Server.requiresLogin, Server.checkFeederAssociation, (req, res) => {
+        let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
+        let planning = new Planning(meals);
+        feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
+          if (msg !== 'success') {
+            throw msg;
+          }
+          res.json({ success: true });
+        });
+      });
+
     return api;
+  }
+
+  static requiresNotLoggedIn (req, res, next) {
+    if (req.session && req.session.user) {
+      res.status(401);
+      res.json({ success: false, error: 'Already logged-in as ' + req.session.username });
+    } else {
+      next();
+    }
+  }
+
+  static requiresLogin (req, res, next) {
+    if (!req.session || !req.session.user) {
+      res.status(403);
+      res.json({ success: false, error: 'Not logged-in' });
+    } else {
+      next();
+    }
+  }
+
+  static checkFeederAssociation (req, res, next) {
+    if (typeof req.body.identifier === 'undefined') {
+      res.status(500);
+      res.json({ success: false, error: 'No feeder identifier given' });
+    } else {
+      // TODO: check feeder <-> user association
+      next();
+    }
   }
 }
 
