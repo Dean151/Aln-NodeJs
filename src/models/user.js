@@ -16,6 +16,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const CryptoHelper = require('./crypto-helper');
+
 class User {
 
   /**
@@ -33,6 +35,9 @@ class User {
    * @param {boolean} registration
    */
   sendResetPassMail(registration) {
+    // generate token
+    let timestamp = Math.round(new Date().getTime()/1000);
+    let hash = CryptoHelper.hashBase64([timestamp, this.login, this.id, this.password].join(':'));
     // TODO!
   }
 

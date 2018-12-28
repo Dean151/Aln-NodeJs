@@ -66,11 +66,33 @@ class DataBaseCoordinator {
    */
 
   /**
+   * @param {number} id
+   * @param {DataBaseCoordinator~getUserCallback} callback
+   * @throws
+   */
+  getUserById(id, callback) {
+    if (!this.isReady()) {
+      throw 'Database is not ready';
+    }
+
+    const User = require('./models/user');
+
+    // Get current planning id
+    this.con.query('SELECT * FROM users WHERE id = ?', [id], (err, results, fields) => {
+      if (err) { throw err; }
+
+      // Parse the meals results
+      let user = results.length ? new User(results[0]) : undefined;
+      callback(user);
+    });
+  }
+
+  /**
    * @param {string} email
    * @param {DataBaseCoordinator~getUserCallback} callback
    * @throws
    */
-  getUser(email, callback) {
+  getUserByEmail(email, callback) {
     if (!this.isReady()) {
       throw 'Database is not ready';
     }

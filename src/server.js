@@ -18,13 +18,14 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const http = require('http');
 const express = require('express');
-const helmet = require('helmet');
-const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
-const bcrypt = require('bcrypt');
+const helmet = require('helmet');
+const bodyParser = require('body-parser');
+
 const validator = require('validator');
 
+const CryptoHelper = require('./crypto-helper');
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
 const Planning = require("./models/planning");
@@ -108,7 +109,7 @@ class Server {
 
       // Check if the user already exists
       let email = validator.normalizeEmail(req.body.email);
-      database.getUser(email, (user) => {
+      database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Email already in use' });
@@ -125,7 +126,7 @@ class Server {
             return;
           }
 
-          database.getUser(email, (user) => {
+          database.getUserByEmail(email, (user) => {
             if (typeof user === 'undefined') {
               res.status((500));
               res.json({ success: false, error: 'Registration failed' });
@@ -144,14 +145,14 @@ class Server {
         throw 'Missing email or password';
       }
       let email = validator.normalizeEmail(req.body.email);
-      database.getUser(email, (user) => {
+      database.getUserByEmail(email, (user) => {
         if (typeof user === 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Wrong email/password' });
           return;
         }
 
-        bcrypt.compare(req.body.password, user.password, (err, success) => {
+        CryptoHelper.comparePassword(req.body.password, user.password, (err, success) => {
           if (!success) {
             res.status(401);
             res.json({ success: false, error: 'Wrong email/password' });
@@ -170,7 +171,7 @@ class Server {
         throw 'Missing email or password';
       }
       let email = validator.normalizeEmail(req.body.email);
-      database.getUser(email, (user) => {
+      database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
           user.sendResetPassMail(false);
         }
@@ -179,7 +180,37 @@ class Server {
     });
 
     api.post('/user/password_reset', requiresNotLoggedIn, (req, res, next) => {
-      // TODO: connect user using link & generate password change token
+      if (!req.body.user_id || !req.body.timestamp || !req.body.token) {
+        throw 'Missing parameter';
+      }
+
+      database.getUserById(req.body.user_id, (user) => {
+        if (typeof user === 'undefined') {
+          res.status(403);
+          res.json({ success: false, error: 'Wrong parameter' });
+          return;
+        }
+        
+        // First login does not expires. Other expires after 24 hours
+        if (user.login > 0 && req.body.timestamp > Math.round(new Date().getTime()/1000) - 24*3600) {
+          res.status(403);
+          res.json({ success: false, error: 'Wrong parameter' });
+          return;
+        }
+
+        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'))) {
+          res.status(403);
+          res.json({ success: false, error: 'Wrong parameter' });
+          return;
+        }
+
+        let passwordToken = CryptoHelper.randomKeyBase64(64);
+        req.session.passworkToken = passwordToken;
+
+        database.loggedUser(user.id);
+        req.session.user = user.jsoned();
+        res.json({ success: true, user: req.session.user, token: passwordToken });
+      });
     });
 
     // Every endpoint below requires login-in
@@ -197,7 +228,7 @@ class Server {
       // email/password change will need current password
       // password may be changed with password change token
       /*
-        bcrypt.hash(req.body.password, 10, (err, hash) => {
+        CryptoHelper.hashPassword(req.body.password, (err, hash) => {
           if (err) {
             res.status((500));
             res.json({ success: false, error: err.toString() });
