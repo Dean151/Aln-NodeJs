@@ -128,7 +128,7 @@ class DataBaseCoordinator {
       return;
     }
 
-    this.con.query('UPDATE feeders SET owner = ? WHERE identifier = ? AND ip LIKE ?', [user_id, identifier, '%:' + ip + ':%'], (err, result, fields) => {
+    this.con.query('UPDATE feeders SET owner = ? WHERE owner IS NULL AND identifier = ? AND ip LIKE ?', [user_id, identifier, '%:' + ip + ':%'], (err, result, fields) => {
       if (err) {
         throw err;
       }
