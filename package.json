@@ -27,7 +27,8 @@
     "log-timestamp": "^0.2.1",
     "mysql": "^2.16.0",
     "net": "^1.0.2",
-    "require.js": "^1.0.0"
+    "require.js": "^1.0.0",
+    "validator": "^10.10.0"
   },
   "devDependencies": {
     "@types/node": "^10.12.18",

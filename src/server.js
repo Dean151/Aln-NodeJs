@@ -23,6 +23,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
@@ -99,8 +100,15 @@ class Server {
         throw 'Missing email or password';
       }
 
+      if (!validator.isEmail(req.body.email)) {
+        res.status(401);
+        res.json({ success: false, error: 'Not an email' });
+        return;
+      }
+
       // Check if the user already exists
-      database.getUser(req.body.email, (user) => {
+      let email = validator.normalizeEmail(req.body.email);
+      database.getUser(email, (user) => {
         if (typeof user !== 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Email already in use' });
@@ -116,7 +124,7 @@ class Server {
           }
 
           database.createUser({
-            email: req.body.email,
+            email: email,
             hash: hash,
           }, (success) => {
             if (!success) {
@@ -125,7 +133,7 @@ class Server {
               return;
             }
 
-            database.getUser(req.body.email, (user) => {
+            database.getUser(email, (user) => {
               if (typeof user === 'undefined') {
                 res.status((500));
                 res.json({ success: false, error: 'Registration failed' });
@@ -145,8 +153,8 @@ class Server {
       if (!req.body.email || !req.body.password) {
         throw 'Missing email or password';
       }
-
-      database.getUser(req.body.email, (user) => {
+      let email = validator.normalizeEmail(req.body.email);
+      database.getUser(email, (user) => {
         if (typeof user === 'undefined') {
           res.status(401);
           res.json({ success: false, error: 'Wrong email/password' });
