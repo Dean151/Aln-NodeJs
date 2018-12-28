@@ -18,6 +18,7 @@ CREATE TABLE `alerts` (
 CREATE TABLE `feeders` (
   `id` int(11) UNSIGNED NOT NULL,
   `identifier` varchar(16) NOT NULL,
+  `owner` int(11) UNSIGNED DEFAULT NULL,
   `ip` varchar(64) NOT NULL,
   `last_responded` datetime NOT NULL,
   `default_value` tinyint(3) UNSIGNED DEFAULT NULL
@@ -60,7 +61,8 @@ ALTER TABLE `alerts`
 
 ALTER TABLE `feeders`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `identifier` (`identifier`);
+  ADD UNIQUE KEY `identifier` (`identifier`),
+  ADD KEY `feeder_owner` (`owner`);
 
 ALTER TABLE `meals`
   ADD PRIMARY KEY (`id`),
@@ -93,6 +95,9 @@ ALTER TABLE `users`
 
 ALTER TABLE `alerts`
   ADD CONSTRAINT `alert_feeder` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+ALTER TABLE `feeders`
+  ADD CONSTRAINT `feeder_owner` FOREIGN KEY (`owner`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE SET NULL;
 
 ALTER TABLE `meals`
   ADD CONSTRAINT `feeder_ref` FOREIGN KEY (`feeder`) REFERENCES `feeders` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,

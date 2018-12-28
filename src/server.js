@@ -199,6 +199,31 @@ class Server {
 
     /** FEEDER HANDLING **/
 
+    api.route('/feeder/claim')
+      .post((req, res, next) => {
+        if (typeof req.body.identifier === 'undefined') {
+          res.status(500);
+          res.json({ success: false, error: 'No feeder identifier given' });
+          return;
+        }
+
+        let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        if (!validator.isIP(ip)) {
+          res.status(401);
+          res.json({ success: false, error: 'Feeder not found' });
+          return;
+        }
+
+        database.claimFeeder(req.body.identifier, req.session.user.id, ip, (success) => {
+          if (!success) {
+            res.status(401);
+            res.json({ success: false, error: 'Feeder not found' });
+          } else {
+            res.json({ success: true });
+          }
+        });
+      });
+
     // We now need to check feeder association
     api.use((req, res, next) => {
       if (typeof req.body.identifier === 'undefined') {

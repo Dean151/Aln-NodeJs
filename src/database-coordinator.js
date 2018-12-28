@@ -112,6 +112,31 @@ class DataBaseCoordinator {
   }
 
   /**
+   * @callback DataBaseCoordinator~claimFeederCallback
+   * @param {boolean} success
+   * @throws
+   */
+
+  /**
+   * @param {string} identifier
+   * @param {number} user_id
+   * @param {string} ip
+   * @param {DataBaseCoordinator~claimFeederCallback} callback
+   */
+  claimFeeder(identifier, user_id, ip, callback) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    this.con.query('UPDATE feeders SET owner = ? WHERE identifier = ? AND ip LIKE ?', [user_id, identifier, '%:' + ip + ':%'], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+      callback(result.affectedRows >= 1);
+    });
+  }
+
+  /**
    * @param {string} identifier
    * @param {string} ip
    * @throws
