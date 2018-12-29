@@ -23,7 +23,7 @@ module.exports = {
 
   // The base url of the website
   'base_url': 'http://localhost:3000',
-  
+
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
@@ -47,11 +47,6 @@ module.exports = {
   'emulator_ip': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_port': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_identifier': 'XXX012345678', // The identifier that will be used for the emulated feeder. Emulation allow to use the original app with a fake feeder.
-  'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any food.
-
-  /* DEPRECATED SETTINGS BELOW */
-
-  // Feeder filters DEPRECATED
-  'feeder_mode': 'none', // Could be "blacklist" or "whitelist"
-  'feeder_list': [], // The list of IPs that will be blacklisted or whitelisted (ie ::ffff:8.8.8.8)
+  'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any foo
+  
 };

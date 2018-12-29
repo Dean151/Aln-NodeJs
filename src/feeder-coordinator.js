@@ -57,15 +57,8 @@ class FeederCoordinator {
    * @param {{feeder_list: string[]|undefined, feeder_mode: string|undefined}} config
    */
   handleSocketConnection (socket, config) {
-    // Depending on the mode, we reject ; or not ; the socket
-    let isInList = config.feeder_list === undefined ? false : config.feeder_list.reduce((carry, item) => {
-      return carry || item === socket.remoteAddress;
-    }, false);
-    if (config.feeder_mode === 'whitelist' && !isInList || config.feeder_mode === 'blacklist' && isInList) {
-      // Do not even attempt to wait something since the ip is unauthorized
-      socket.destroy();
-      return;
-    }
+    
+    // TODO: filter only with IP from registering process
 
     let ip = socket.remoteAddress + ":" + socket.remotePort;
     console.log('Client connected:', ip);
