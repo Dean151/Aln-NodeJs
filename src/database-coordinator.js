@@ -148,6 +148,18 @@ class DataBaseCoordinator {
     });
   }
 
+  updateUser(user) {
+    if (!this.isReady()) {
+      return;
+    }
+    
+    this.con.query('UPDATE users SET email = ?, password = ? WHERE id = ?', [user.email, user.password, user.id], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
+
   /**
    * @callback DataBaseCoordinator~claimFeederCallback
    * @param {boolean} success

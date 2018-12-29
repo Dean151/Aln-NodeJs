@@ -236,19 +236,77 @@ class Server {
       }
     });
 
-    api.put('/user/edit', (req, res, next) => {
-      // TODO: profile edition (email / password change)
-      // email/password change will need current password
-      // password may be changed with password change token
-      /*
-        CryptoHelper.hashPassword(req.body.password, (err, hash) => {
-          if (err) {
-            res.status((500));
-            res.json({ success: false, error: err.toString() });
+    api.put('/user/\d+/edit', (req, res, next) => {
+      let id = req.path.split('/')[2];
+      database.getUserById(id, (user) => {
+        // Check we're the current user...
+        if (typeof user === 'undefined' || user.id !== req.session.user.id) {
+          res.status(403);
+          res.json({ success: false, error: 'Forbidden' });
+          return;
+        }
+
+        if (req.body.email && user.email !== req.body.email) {
+          // We're trying to change the email. 
+          // We can only do so if it's valid, non used at other place
+          // And if there is a valid password to validate the operation.
+          // TODO! (need also a new mail validation mechanism.)
+        }
+
+        if (req.body.new_pass) {
+          // We either need to validate the password (length, strongness...)
+          // And also check if we have a valid hash, or a valid current password
+          if (req.body.pass_token && req.body.pass_token === req.session.passworkToken) {
+            // Validation has been done. We change the password
+            CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
+              if (err) {
+                res.status((500));
+                res.json({ success: false, error: err.toString() });
+                return;
+              }
+
+              // Save the new hash
+              user.password = hash;
+              database.updateUser(user);
+
+              res.json({ success: true });
+            });   
             return;
           }
-        });
-       */
+          if (req.body.current_pass) {
+            // Check current pass.
+            CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
+              if (!success) {
+                res.status(403);
+                res.json({ success: false, error: 'Changing password requires current password' });
+              }
+
+              // Validation has been done. We change the password
+              CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
+                if (err) {
+                  res.status((500));
+                  res.json({ success: false, error: err.toString() });
+                  return;
+                }
+
+                // Save the new hash
+                user.password = hash;
+                database.updateUser(user);
+
+                res.json({ success: true });
+              });   
+            });
+            return;
+          }
+
+          res.status(403);
+          res.json({ success: false, error: 'Changing password requires current password' });
+          return; 
+        }
+
+        // Nothing happened
+        res.json({ success: true });
+      });
     });
 
     // Logging out
