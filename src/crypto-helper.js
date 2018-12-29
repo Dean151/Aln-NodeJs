@@ -41,11 +41,11 @@ class CryptoHelper {
 
     /**
      * @param {string} data 
+     * @param {string} key
      * @return {string}
-     * @see drupal_hash_base64()
      */
-    hashBase64(data) {
-        const hasher = crypto.createHash('sha256');
+    hashBase64(data, key) {
+        const hasher = crypto.createHmac('sha256', key);
         hasher.update(data);
         // Modify the hash so it's safe to use in URLs.
         return hasher.digest('base64').replace('+', '-').replace('/', '_').replace('=', '');
@@ -54,9 +54,11 @@ class CryptoHelper {
     /**
      * @param {string} data 
      * @param {string} hash 
+     * @param {string} key
+     * @return {boolean}
      */
-    checkBase64Hash(data, hash) {
-        return hash === hashBase64(data);
+    checkBase64Hash(data, hash, key) {
+        return hash === hashBase64(data, key);
     }
 
     /**

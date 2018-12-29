@@ -34,10 +34,10 @@ class User {
   /**
    * @param {boolean} registration
    */
-  sendResetPassMail(registration) {
+  sendResetPassMail(registration, key) {
     // generate token
     let timestamp = Math.round(new Date().getTime()/1000);
-    let hash = CryptoHelper.hashBase64([timestamp, this.login, this.id, this.password].join(':'));
+    let hash = CryptoHelper.hashBase64([timestamp, this.login, this.id, this.password].join(':'), key);
     // TODO!
   }
 

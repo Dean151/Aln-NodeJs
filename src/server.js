@@ -33,7 +33,7 @@ const Planning = require("./models/planning");
 class Server {
 
   /**
-   * @param {{local_port: number, session_name: string, session_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
+   * @param {{local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -61,7 +61,7 @@ class Server {
     }));
 
     // Create the routes for the API
-    let api = Server.createApiRouter(feederCoordinator, database);
+    let api = Server.createApiRouter(feederCoordinator, database, config);
 
     // Use the routes
     app.use('/api', api);
@@ -72,9 +72,10 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
+   * @param {{hmac_secret: string}} config
    * @return {express.Router}
    */
-  static createApiRouter(feederCoordinator, database) {
+  static createApiRouter(feederCoordinator, database, config) {
     let api = express.Router();
 
     api.use(bodyParser.urlencoded({ extended: true }));
@@ -133,7 +134,7 @@ class Server {
               return;
             }
 
-            user.sendResetPassMail(true);
+            user.sendResetPassMail(true, config.hmac_secret);
             res.json({ success: true });
           });
         });
@@ -173,7 +174,7 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
-          user.sendResetPassMail(false);
+          user.sendResetPassMail(false, config.hmac_secret);
         }
         res.json({ success: true });
       });
@@ -198,7 +199,7 @@ class Server {
           return;
         }
 
-        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'))) {
+        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'), config.hmac_secret)) {
           res.status(403);
           res.json({ success: false, error: 'Wrong parameter' });
           return;

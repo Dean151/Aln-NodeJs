@@ -37,6 +37,8 @@ module.exports = {
   'session_name': 'connect.sid',
   'session_secret': '',
 
+  'hmac_secret': '',
+
   // Feeder emulator settings
   'enable_emulator': false, // If we want to emulate a feeder to use with the original API.
   'emulator_ip': undefined, // Optional ; To whom should the emulated feeder communicate to
