@@ -62,11 +62,23 @@ class Server {
 
     // Create the routes for the API
     let api = Server.createApiRouter(feederCoordinator, database, config);
-
-    // Use the routes
     app.use('/api', api);
 
+    let web = Server.createWebRouter();
+    app.use('/', web);
+
     http.createServer(app).listen(config.local_port, 'localhost');
+  }
+
+  static createWebRouter() {
+    let web = express.Router();
+
+    web.route('/user/reset_password/\d+/\d+/[a-zA-Z0-9\-_]+').get((req, res, next) => {
+      // TODO: show a page that would redirect to the application.
+      // Or eventually explain to open the link on the iOS device.
+    });
+
+    return web;
   }
 
   /**
@@ -134,7 +146,7 @@ class Server {
               return;
             }
 
-            user.sendResetPassMail(true, config.hmac_secret);
+            user.sendResetPassMail(true, config);
             res.json({ success: true });
           });
         });
@@ -174,13 +186,13 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
-          user.sendResetPassMail(false, config.hmac_secret);
+          user.sendResetPassMail(false, config);
         }
         res.json({ success: true });
       });
     });
 
-    api.post('/user/password_reset', requiresNotLoggedIn, (req, res, next) => {
+    api.post(['/user/create_password', '/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.user_id || !req.body.timestamp || !req.body.token) {
         throw 'Missing parameter';
       }
