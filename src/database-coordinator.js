@@ -71,20 +71,7 @@ class DataBaseCoordinator {
    * @throws
    */
   getUserById(id, callback) {
-    if (!this.isReady()) {
-      throw 'Database is not ready';
-    }
-
-    const User = require('./models/user');
-
-    // Get current planning id
-    this.con.query('SELECT * FROM users WHERE id = ?', [id], (err, results, fields) => {
-      if (err) { throw err; }
-
-      // Parse the meals results
-      let user = results.length ? new User(results[0]) : undefined;
-      callback(user);
-    });
+    getUserBy('id', id, callback);
   }
 
   /**
@@ -93,6 +80,15 @@ class DataBaseCoordinator {
    * @throws
    */
   getUserByEmail(email, callback) {
+    getUserBy('email', email, callback);
+  }
+
+  /**
+   * @param {string} column 
+   * @param {string|number} value 
+   * @param {DataBaseCoordinator~getUserCallback} callback 
+   */
+  getUserBy(column, value, callback) {
     if (!this.isReady()) {
       throw 'Database is not ready';
     }
@@ -100,7 +96,7 @@ class DataBaseCoordinator {
     const User = require('./models/user');
 
     // Get current planning id
-    this.con.query('SELECT * FROM users WHERE email = ?', [email], (err, results, fields) => {
+    this.con.query('SELECT u.*, GROUP_CONCAT(f.identifier) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE ' + column + ' = ?', [value], (err, results, fields) => {
       if (err) { throw err; }
 
       // Parse the meals results

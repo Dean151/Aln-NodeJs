@@ -26,7 +26,7 @@ class CryptoHelper {
      * @param {string} password 
      * @param {callback} callback 
      */
-    hashPassword(password, callback) {
+    static hashPassword(password, callback) {
         bcrypt.hash(password, 10, callback);
     }
 
@@ -35,7 +35,7 @@ class CryptoHelper {
      * @param {string} hash 
      * @param {callback} callback 
      */
-    comparePassword(password, hash, callback) {
+    static comparePassword(password, hash, callback) {
         bcrypt.compare(password, hash, callback);
     }
 
@@ -44,7 +44,7 @@ class CryptoHelper {
      * @param {string} key
      * @return {string}
      */
-    hashBase64(data, key) {
+    static hashBase64(data, key) {
         const hasher = crypto.createHmac('sha256', key);
         hasher.update(data);
         // Modify the hash so it's safe to use in URLs.
@@ -57,15 +57,17 @@ class CryptoHelper {
      * @param {string} key
      * @return {boolean}
      */
-    checkBase64Hash(data, hash, key) {
+    static checkBase64Hash(data, hash, key) {
         return hash === hashBase64(data, key);
     }
 
     /**
      * @param {number} bytes 
      */
-    randomKeyBase64(bytes) {
+    static randomKeyBase64(bytes) {
         return secureRandom.randomBuffer(bytes).toString('base64').replace('+', '-').replace('/', '_').replace('=', '');
     }
 
 }
+
+module.exports = CryptoHelper;

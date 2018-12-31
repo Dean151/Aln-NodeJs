@@ -29,6 +29,8 @@ class User {
     this.password = row.password;
     this.register = row.register;
     this.login = row.login;
+
+    this.feeders = row.feeders.split(',');
   }
 
   /**
@@ -53,6 +55,7 @@ class User {
       email: this.email,
       register: this.register,
       login: this.login,
+      feeders: this.feeders,
     };
   }
 
