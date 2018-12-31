@@ -100,7 +100,7 @@ class Server {
 
     let requiresNotLoggedIn = (req, res, next) => {
       if (req.session && req.session.user) {
-        res.status(401);
+        res.status(403);
         res.json({ success: false, error: 'Already logged-in as ' + req.session.user.email });
       } else {
         next();
