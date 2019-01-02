@@ -21,7 +21,7 @@ const CryptoHelper = require('../crypto-helper');
 class User {
 
   /**
-   * @param {{id: number, email: string, password: string}} row
+   * @param {{id: number, email: string, password: string, register: string, login: string, feeders: string|null}} row
    */
   constructor (row) {
     this.id = row.id;
@@ -30,7 +30,7 @@ class User {
     this.register = row.register;
     this.login = row.login;
 
-    this.feeders = row.feeders.split(',');
+    this.feeders = row.feeders ? row.feeders.split(',') : [];
   }
 
   /**
