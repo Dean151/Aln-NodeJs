@@ -30,7 +30,15 @@ class User {
     this.register = row.register;
     this.login = row.login;
 
-    this.feeders = row.feeders ? row.feeders.split(',') : [];
+    if (row.feeders) {
+      this.feeders = row.feeders.split(',').reduce(function (carry, identifier) {
+        carry[identifier] = identifier;
+        return carry;
+      }, {});
+    }
+    else {
+      this.feeders = undefined;
+    }
   }
 
   /**
