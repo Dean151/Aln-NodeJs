@@ -67,6 +67,9 @@ class Server {
     let web = Server.createWebRouter();
     app.use('/', web);
 
+    // We also have a static folder
+    app.use(express.static('public'));
+
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 

@@ -1,0 +1,16 @@
+{
+    "webcredentials": {
+       "apps": [
+           "V7M5Z5JGCB.fr.Dean.CatFeeder"
+        ]
+    }
+    "applinks": {
+        "apps": [],
+        "details": [
+            {
+                "appID": "V7M5Z5JGCB.fr.Dean.CatFeeder",
+                "paths":["/user/create_password/*", "/user/reset_password/*"]
+            }
+        ]
+    }
+}
