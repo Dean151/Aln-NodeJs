@@ -71,7 +71,7 @@ class DataBaseCoordinator {
    * @throws
    */
   getUserById(id, callback) {
-    getUserBy('id', id, callback);
+    this.getUserBy('id', id, callback);
   }
 
   /**
@@ -80,7 +80,7 @@ class DataBaseCoordinator {
    * @throws
    */
   getUserByEmail(email, callback) {
-    getUserBy('email', email, callback);
+    this.getUserBy('email', email, callback);
   }
 
   /**
