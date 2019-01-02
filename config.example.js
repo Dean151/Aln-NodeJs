@@ -48,5 +48,6 @@ module.exports = {
   'emulator_port': undefined, // Optional ; To whom should the emulated feeder communicate to
   'emulator_identifier': 'XXX012345678', // The identifier that will be used for the emulated feeder. Emulation allow to use the original app with a fake feeder.
   'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any foo
-  
+
+  'ios_appname': '',
 };

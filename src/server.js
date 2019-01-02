@@ -64,22 +64,41 @@ class Server {
     let api = Server.createApiRouter(feederCoordinator, database, config);
     app.use('/api', api);
 
-    let web = Server.createWebRouter();
+    let web = Server.createWebRouter(config);
     app.use('/', web);
 
-    // We also have a static folder
     app.use(express.static('public'));
 
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 
-  static createWebRouter() {
+  static createWebRouter(config) {
     let web = express.Router();
 
     web.route(['/user/create_password/\d+/\d+/[a-zA-Z0-9\-_]+', '/user/reset_password/\d+/\d+/[a-zA-Z0-9\-_]+']).get((req, res, next) => {
       // TODO: show a page that would redirect to the application.
       // Or eventually explain to open the link on the iOS device.
     });
+
+    if (config.ios_app_name) {
+      // We also have an apple-app-site-association application
+      let json = {
+        webcredentials: {
+          apps: [config.ios_app_name]
+        },
+        applinks: {
+          apps: [],
+          details: [{
+            appID: config.ios_app_name,
+            paths:['/user/create_password/*', '/user/reset_password/*']
+          }]
+        }
+      };
+      
+      web.all('apple-app-site-association', (req, res, next) => {
+        res.json(json);
+      });
+    }
 
     return web;
   }
