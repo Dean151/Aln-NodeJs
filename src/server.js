@@ -80,21 +80,21 @@ class Server {
       // Or eventually explain to open the link on the iOS device.
     });
 
-    if (config.ios_app_name) {
+    if (config.ios_appname) {
       // We also have an apple-app-site-association application
       let json = {
         webcredentials: {
-          apps: [config.ios_app_name]
+          apps: [config.ios_appname]
         },
         applinks: {
           apps: [],
           details: [{
-            appID: config.ios_app_name,
+            appID: config.ios_appname,
             paths:['/user/create_password/*', '/user/reset_password/*']
           }]
         }
       };
-      
+
       web.all('apple-app-site-association', (req, res, next) => {
         res.json(json);
       });
