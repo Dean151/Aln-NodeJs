@@ -62,9 +62,9 @@ class User {
     return {
       id: this.id,
       email: this.email,
-      register: this.register,
-      login: this.login.toJSON(),
-      feeders: this.feeders.toJSON(),
+      register: this.register ? this.register.toJSON() : null,
+      login: this.login ? this.login.toJSON() : null,
+      feeders: this.feeders,
     };
   }
 
