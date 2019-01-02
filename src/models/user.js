@@ -63,8 +63,8 @@ class User {
       id: this.id,
       email: this.email,
       register: this.register,
-      login: this.login,
-      feeders: this.feeders,
+      login: this.login.toJSON(),
+      feeders: this.feeders.toJSON(),
     };
   }
 
