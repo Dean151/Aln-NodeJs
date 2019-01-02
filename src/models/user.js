@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const CryptoHelper = require('./crypto-helper');
+const CryptoHelper = require('../crypto-helper');
 
 class User {
 
