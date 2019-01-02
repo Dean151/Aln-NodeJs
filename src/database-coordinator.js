@@ -96,7 +96,7 @@ class DataBaseCoordinator {
     const User = require('./models/user');
 
     // Get current planning id
-    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.identifier, \':\', f.name) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE ' + column + ' = ?', [value], (err, results, fields) => {
+    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.identifier, \':\', f.name)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE ' + column + ' = ?', [value], (err, results, fields) => {
       if (err) { throw err; }
 
       // Parse the meals results
