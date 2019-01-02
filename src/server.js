@@ -67,8 +67,6 @@ class Server {
     let web = Server.createWebRouter(config);
     app.use('/', web);
 
-    app.use(express.static('public'));
-
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 
@@ -82,7 +80,7 @@ class Server {
 
     if (config.ios_appname) {
       // We also have an apple-app-site-association application
-      let json = {
+      let association = {
         webcredentials: {
           apps: [config.ios_appname]
         },
@@ -94,9 +92,8 @@ class Server {
           }]
         }
       };
-
       web.all('apple-app-site-association', (req, res, next) => {
-        res.json(json);
+        res.json(association);
       });
     }
 
