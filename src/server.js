@@ -92,7 +92,7 @@ class Server {
           }]
         }
       };
-      web.all('apple-app-site-association', (req, res, next) => {
+      web.all('/apple-app-site-association', (req, res, next) => {
         res.json(association);
       });
     }
