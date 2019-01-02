@@ -18,6 +18,7 @@ CREATE TABLE `alerts` (
 CREATE TABLE `feeders` (
   `id` int(11) UNSIGNED NOT NULL,
   `identifier` varchar(16) NOT NULL,
+  `name` varchar(128) NOT NULL,
   `owner` int(11) UNSIGNED DEFAULT NULL,
   `ip` varchar(64) NOT NULL,
   `last_responded` datetime NOT NULL,

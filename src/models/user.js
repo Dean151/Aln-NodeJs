@@ -31,8 +31,9 @@ class User {
     this.login = row.login;
 
     if (row.feeders) {
-      this.feeders = row.feeders.split(',').reduce(function (carry, identifier) {
-        carry[identifier] = identifier;
+      this.feeders = row.feeders.split(',').reduce(function (carry, feeder) {
+        let components = feeder.split(':');
+        carry[components[0]] = components[1] ? components[1] : components[0];
         return carry;
       }, {});
     }
