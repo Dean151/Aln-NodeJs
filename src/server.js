@@ -73,7 +73,7 @@ class Server {
   static createWebRouter() {
     let web = express.Router();
 
-    web.route('/user/reset_password/\d+/\d+/[a-zA-Z0-9\-_]+').get((req, res, next) => {
+    web.route(['/user/create_password/\d+/\d+/[a-zA-Z0-9\-_]+', '/user/reset_password/\d+/\d+/[a-zA-Z0-9\-_]+']).get((req, res, next) => {
       // TODO: show a page that would redirect to the application.
       // Or eventually explain to open the link on the iOS device.
     });
@@ -223,6 +223,26 @@ class Server {
         database.loggedUser(user.id);
         req.session.user = user.jsoned();
         res.json({ success: true, user: req.session.user, token: passwordToken });
+      });
+    });
+
+    api.post('/user/check', (req, res, next) => {
+      if (!req.session || !req.session.user) {
+        res.json({ state: 'not logged in', user: null });
+        return;
+      }
+
+      database.getUserById(req.session.user.id, (user) => {
+        if (typeof user === 'undefined') {
+          req.session.destroy(function(err) {
+            res.json({ state: 'not logged in', user: null });
+          });
+          return;
+        }
+
+        // Update the user object
+        req.session.user = user.jsoned();
+        res.json({ state: 'logged in', user: req.session.user });
       });
     });
 
