@@ -100,7 +100,7 @@ class FeederCoordinator {
       }
     }
     catch (e) {
-      this.database.logUnknownData(e.message, data, ip);
+      this.database.logUnknownData(e.message ? e.message : e, data, ip);
       socket.destroy();
     }
   }

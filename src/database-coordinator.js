@@ -386,7 +386,7 @@ class DataBaseCoordinator {
 
     // Treating the special case of uncomplete data. This happen all the time...
     // We receive multiple times a week the data 0x9da114414c
-    // We prevent logging that since it does not actually make sence.
+    // We prevent logging that since it does not actually make sense.
     if (data.toString('hex').match(/^9da114414c$/)) {
       return;
     }
