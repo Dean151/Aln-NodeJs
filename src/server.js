@@ -215,27 +215,27 @@ class Server {
       });
     });
 
-    api.post(['/user/create_password', '/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.user_id || !req.body.timestamp || !req.body.token) {
+    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
+      if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
         throw 'Missing parameter';
       }
 
       database.getUserById(req.body.user_id, (user) => {
         if (typeof user === 'undefined') {
-          res.status(403);
+          res.status(401);
           res.json({ success: false, error: 'Wrong parameter' });
           return;
         }
         
         // First login does not expires. Other expires after 24 hours
         if (user.login > 0 && req.body.timestamp > Math.round(new Date().getTime()/1000) - 24*3600) {
-          res.status(403);
+          res.status(401);
           res.json({ success: false, error: 'Wrong parameter' });
           return;
         }
 
-        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'), config.hmac_secret)) {
-          res.status(403);
+        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'), req.body.hash, config.hmac_secret)) {
+          res.status(401);
           res.json({ success: false, error: 'Wrong parameter' });
           return;
         }

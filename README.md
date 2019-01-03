@@ -32,8 +32,7 @@ Every incoming request shall have a few headers informations:
 | POST | /api/user/register | { email: String }   | Create a new account, sending a reset pass mail to the user. |
 | POST | /api/user/login    | { email: String, password: String } | Log a user in |
 | POST | /api/user/request_new_password | { email: String } | Send a reset-pass mail to the user |
-| POST | /api/user/create_new_password | { user_id: Int, timestamp: Int, token: String } | Connect a user using a one-time login link |
-| POST | /api/user/password_reset (alias) | { user_id: Int, timestamp: Int, token: String } | Connect a user using a one-time login link |
+| POST | /api/user/password_reset | { user_id: Int, timestamp: Int, hash: String } | Connect a user using a one-time login link |
 | POST | /api/user/check    | -                   | Check if the current session correspond to a logged-in user |
 | PUT  | /api/user/{id}/edit | { new_password, current_password, pass_token } | Allow to change a user email or password using the current password or a one-time use token. |
 | POST | /api/user/logout   | -                   | Destroy the current user session. |
