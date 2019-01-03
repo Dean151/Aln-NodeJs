@@ -139,7 +139,7 @@ class Server {
       // Check if the user already exists
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
-        if (typeof user !== 'undefined') {
+        if (!user) {
           res.status(406);
           res.json({ success: false, error: 'Email already in use' });
           return;
@@ -208,7 +208,7 @@ class Server {
 
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
-        if (typeof user !== 'undefined') {
+        if (user) {
           user.sendResetPassMail(false, config);
         }
         res.json({ success: true });
