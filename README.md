@@ -24,124 +24,25 @@ Every incoming request shall have a few headers informations:
 |----------------|-----------------------------|
 | Accept         | application/json            |
 | Content-Type   | application/json            |
-| x-access-token | the-secret-key-in-config.js |
 
-### Getting the current feeder status
+### Available API Endpoints
 
-Allow to know if the feeder is currently available, and responding threw the network
-
-**URI:** `POST http(s)://myhost/api/feeders`
-
-**Parameters** : `identifier`
-
-*Example:* To get the current status of the feeders
-
-```
-POST http(s)://myhost/api/feeders
-{
-  "identifier": "XXX012345678"
-}
-```
-
-Will return something like:
-```
-{
-  "identifier": "XXX012345678",
-  "isAvailable": true,
-  "lastResponded": "2018-07-30T15:14:35.072Z"
-}
-```
-
-### Feeding
-
-You can trigger a new meal by doing just one request!
-
-**URI:** `PUT http(s)://myhost/api/feed`
-
-**Parameters** : `identifier` and `quantity`
-
-*Example:* To feed now a meal of 5 grams.
-
-```
-PUT http(s)://myhost/api/feed
-{
-  "identifier": "XXX012345678",
-  "quantity": 5
-}
-```
-
-*You can set a quantity from 5 grams to 150 grams.*
-
-
-### Setting the default feeding amount
-
-This is the amount of food that will be given when you pressed the manual button on the feeder.
-
-**URI:** `PUT http(s)://myhost/api/quantity`
-
-**Parameters** : `identifier` and `quantity`
-
-*Example:* To set a default feeding amount of 10 grams.
-
-```
-PUT http(s)://myhost/api/quantity
-{
-  "identifier": "XXX012345678",
-  "quantity": 10
-}
-```
-
-*You can set a quantity from 5 grams to 150 grams.*
-
-### Setting the planning for automated meals
-
-You can setup the feeder to trigger regulary up to 10 meals a day with different times and amounts.
-
-**URI:** `PUT http(s)://myhost/api/planning`
-
-**Parameters** : `identifier` and `meals`
-
-*Example:* To set three meals of 20 grams each. The time must be UTC time ; adjust accordingly for your timezone. DST is not yet supported.
-
-```
-PUT http(s)://myhost/api/planning
-{
-  "identifier": "XXX012345678",
-  "meals": [
-    {"time":{"hours": 8, "minutes": 0}, "quantity": 20},
-    {"time":{"hours": 13, "minutes": 0}, "quantity": 20},
-    {"time":{"hours": 21, "minutes": 0}, "quantity": 20}
-  ]
-}
-```
-
-*You can set up to 10 meals, and quantity goes from 5 grams to 150 grams.*
-
-### Getting the last setted planning
-
-
-**URI:** `POST http(s)://myhost/api/planning`
-
-**Parameters** : `identifier`
-
-```
-POST http(s)://myhost/api/planning
-{
-  "identifier": "XXX012345678"
-}
-```
-
-might return something like:
-
-```
-  "success": true,
-  "meals": [
-    {"time":{"hours": 8, "minutes": 0}, "quantity": 20},
-    {"time":{"hours": 13, "minutes": 0}, "quantity": 20},
-    {"time":{"hours": 21, "minutes": 0}, "quantity": 20}
-  ]
-```
-
+| Verb | URL                | Parameters          | Effect                |
+|------|--------------------|---------------------|-----------------------|
+| POST | /api/user/register | { email: String }   | Create a new account, sending a reset pass mail to the user. |
+| POST | /api/user/login    | { email: String, password: String } | Log a user in |
+| POST | /api/user/request_new_password | { email: String } | Send a reset-pass mail to the user |
+| POST | /api/user/create_new_password | { user_id: Int, timestamp: Int, token: String } | Connect a user using a one-time login link |
+| POST | /api/user/password_reset (alias) | { user_id: Int, timestamp: Int, token: String } | Connect a user using a one-time login link |
+| POST | /api/user/check    | -                   | Check if the current session correspond to a logged-in user |
+| PUT  | /api/user/{id}/edit | { new_password, current_password, pass_token } | Allow to change a user email or password using the current password or a one-time use token. |
+| POST | /api/user/logout   | -                   | Destroy the current user session. |
+| POST | /api/feeder/claim  | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. |
+| GET  | /api/feeder/status | { identifier: String } | Check if the feeder is currently reachable. |
+| POST | /api/feeder/feed   | { identifier: String, quantity: Int } | Trigger a meal. |
+| POST | /api/feeder/quantity | { identifier: String, quantity: Int } | Change the feeding amount when pressing the machine button. |
+| GET  | /api/feeder/planning | { identifier: String } | Get the last setted planning on the machine. |
+| POST | /api/feeder/planning | { identifier: String, meals: [{ time: { hours: Int, minutes: Int }, quantity: Int, enabled: Bool }] | Set a new planning in the machine. |
 
 ## Installation
 
@@ -174,24 +75,11 @@ cp config.example.js config.js
 nano config.js
 ```
 
-### Supervisor example configuration
+### Starting the process with PM2
 
 ```
-sudo apt-get install supervisor
-```
-
-For a use with supervisor on your raspebrry pi, this is an example config to make it happen
-
-```
-# /etc/supervisor/conf.d/aln-nodejs.conf
-
-[program:aln-nodejs]
-command=/opt/node/bin/node /home/pi/Aln-NodeJs/main.js
-```
-
-Then restart supervisor. It should start automatically the package, it's ready to use !
-```
-sudo /etc/init.d/supervisor restart
+npm install pm2@latest -g
+pm2 start main.js --name alnpet
 ```
 
 
@@ -244,131 +132,22 @@ sudo nginx -s reload
 
 The API should be available at your Raspberry Pi IP. We now need to connect the feeder to it!
 
-### Setup a WiFi from the raspberry Pi (To intercept the feeder stream)
+Note: it is recommended that you configure HTTPS connexion via TLS (LetsEncrypt would do that for you).
+
+### Configure the cat feeder
+
+First, identify the local IP of your feeder, using the connected devices table from your router interface.
+
+Then, browse to this IP in your navigator (http://192.168.1.x) and enter the username and password :
 
 ```
-sudo apt-get install dnsmasq hostapd
-
-sudo /etc/init.d/dnsmasq stop
-sudo /etc/init.d/hostapd stop
+username: admin
+password: admin
 ```
 
-```
-sudo cp /etc/dhcpcd.conf /etc/dhcpcd.conf.orig
-sudo nano /etc/dhcpcd.conf
-```
+Don't touch any of the settings without knowing exactly what you're talking about.
+You may want to change the language from chinese to english in the top right corner.
 
-###### /etc/dhcpcd.conf
-```
-interface wlan0
-    static ip_address=192.168.4.1/24
-```
+We just want to change the URL the feeder will talk to.
 
-```
-sudo /etc/init.d/dhcpcd restart
-
-sudo mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig  
-sudo nano /etc/dnsmasq.conf
-```
-
-###### /etc/dnsmasq.conf
-```
-interface=wlan0      # Use the require wireless interface - usually wlan0
-  dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h
-```
-
-```
-sudo nano /etc/hostapd/hostapd.conf
-```
-
-###### /etc/hostapd/hostapd.conf
-```
-interface=wlan0
-driver=nl80211
-ssid=RaspberryPi
-hw_mode=g
-channel=9
-wmm_enabled=0
-macaddr_acl=0
-auth_algs=1
-ignore_broadcast_ssid=0
-wpa=2
-wpa_passphrase=ASecurePassphraseHere123
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=TKIP
-rsn_pairwise=CCMP
-```
-
-```
-sudo nano /etc/default/hostapd
-```
-
-Find this commented line and complete it:
-```
-#DAEMON_CONF=""
-DAEMON_CONF="/etc/hostapd/hostapd.conf"
-```
-
-```
-sudo /etc/init.d/hostapd start
-sudo /etc/init.d/dnsmasq start
-```
-
-```
-sudo nano /etc/sysctl.conf
-```
-
-Uncomment the following line:
-
-###### /etc/sysctl.conf
-```
-net.ipv4.ip_forward=1
-```
-
-```
-sudo cp rc.local rc.local.orig
-sudo nano rc.local
-```
-
-Add right before the exit call:
-
-###### /etc/rc.local
-```
-iptables -t nat -A  POSTROUTING -o eth0 -j MASQUERADE
-exit 0
-```
-
-Reboot
-
-```
-sudo shutdown -r now
-```
-
-You may now connect your feeder to your Raspberry Pi network.
-It should work fine in the official App.
-
-
-### alnpet.com data interception
-
-The HoneyGuaridan S25 create a socket directly with alnpet.com servers. You want to intercept this socket to treat it with this node.js package.
-
-You'll need to configure your network to make the feeders requests redirect to the device that run the program.
-
-Here is an example where your Raspberry Pi is both the wifi router for the feeder, and the program runner:
-
-Append to `/etc/rc.local`, right before `exit 0`:
-
-```
-# What's headed to 47.90.203.137:1032 to localhost
-iptables -t nat -A PREROUTING -d 47.90.203.137 -p tcp -j DNAT --to-destination 192.168.1.1:1032
-exit 0
-```
-
-Reboot your device: 
-
-```
-sudo shutdown -r now
-```
-
-From now on, the feeder should appear offline from the official app. Congratulations, you are secure!
-Also, the API should recognize the feeder, and be able to interact with it!
+####Work In Progress...

@@ -22,6 +22,7 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
+const cacheControl = require('express-cache-controller');
 
 const validator = require('validator');
 
@@ -111,11 +112,7 @@ class Server {
 
     api.use(bodyParser.urlencoded({ extended: true }));
     api.use(bodyParser.json());
-
-    api.use((err, req, res, next) => {
-      res.status(500);
-      res.json({ success: false, error: err.toString() });
-    });
+    api.use(cacheControl({ noCache: true }));
 
     let requiresNotLoggedIn = (req, res, next) => {
       if (req.session && req.session.user) {
@@ -362,8 +359,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.route('/feeder/claim')
-      .post((req, res, next) => {
+    api.route('/feeder/claim').post((req, res, next) => {
         if (typeof req.body.identifier === 'undefined') {
           res.status(500);
           res.json({ success: false, error: 'No feeder identifier given' });
@@ -406,7 +402,7 @@ class Server {
       });
     });
 
-    api.route('/feeder/status').post((req, res) => {
+    api.route('/feeder/status').get((req, res) => {
       let feeders = feederCoordinator.getFeeder(req.body.identifier);
       res.json(feeders);
     });
@@ -432,7 +428,7 @@ class Server {
     });
 
     api.route('/feeder/planning')
-      .post((req, res) => {
+      .get((req, res) => {
         // Fetch the planning if it's exists
         database.getCurrentPlanning(req.body.identifier, (planning) => {
           if (typeof planning === 'undefined') {
@@ -442,7 +438,7 @@ class Server {
           res.json({ success: true, meals: planning.jsoned() });
         });
       })
-      .put((req, res) => {
+      .post((req, res) => {
         let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
         let planning = new Planning(meals);
         feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
@@ -452,6 +448,13 @@ class Server {
           res.json({ success: true });
         });
       });
+
+
+    // Error handling at the end
+    api.use((err, req, res, next) => {
+      res.status(500);
+      res.json({ success: false, error: err.toString() });
+    });
 
     return api;
   }
