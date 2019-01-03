@@ -140,7 +140,7 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
-          res.status(401);
+          res.status(406);
           res.json({ success: false, error: 'Email already in use' });
           return;
         }
@@ -197,8 +197,15 @@ class Server {
 
     api.post('/user/request_new_password', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.email) {
-        throw 'Missing email or password';
+        throw 'Missing email';
       }
+
+      if (!validator.isEmail(req.body.email)) {
+        res.status(401);
+        res.json({ success: false, error: 'Not an email' });
+        return;
+      }
+
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (typeof user !== 'undefined') {
