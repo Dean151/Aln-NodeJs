@@ -372,7 +372,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.route('/feeder/claim').post((req, res) => {
+    api.post('/feeder/claim', (req, res) => {
         if (typeof req.body.identifier === 'undefined') {
           res.status(500);
           res.json({ success: false, error: 'No feeder identifier given' });
@@ -422,7 +422,7 @@ class Server {
       res.json(feeders.jsoned());
     });
 
-    api.put('/feeder/:id/feed', (req, res) => {
+    api.post('/feeder/:id/feed', (req, res) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.feeder.identifier, quantity, (msg) => {
         if (msg !== 'success') {
