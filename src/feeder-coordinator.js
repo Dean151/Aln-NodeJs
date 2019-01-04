@@ -214,7 +214,7 @@ class FeederCoordinator {
    * @returns {Feeder}
    */
   getFeeder (identifier) {
-    if (!(identifier in FeederCoordinator.feeders)) {
+    if (!(identifier in this.feeders)) {
       throw 'Feeder not found';
     }
     return this.feeders[identifier];
