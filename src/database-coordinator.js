@@ -192,12 +192,12 @@ class DataBaseCoordinator {
    * @param {number} user_id
    * @param {DataBaseCoordinator~checkFeederCallback} callback
    */
-  checkFeederAssociation(identifier, user_id, callback) {
+  checkFeederAssociation(feeder_id, user_id, callback) {
     if (!this.isReady()) {
       return;
     }
 
-    this.con.query('SELECT * FROM feeders WHERE owner = ? AND identifier = ?', [user_id, identifier], (err, result, fields) => {
+    this.con.query('SELECT * FROM feeders WHERE owner = ? AND id = ?', [user_id, feeder_id], (err, result, fields) => {
       if (err) {
         throw err;
       }
