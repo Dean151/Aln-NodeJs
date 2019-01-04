@@ -34,7 +34,7 @@ const Planning = require("./models/planning");
 class Server {
 
   /**
-   * @param {{local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
+   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -104,7 +104,7 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {{hmac_secret: string}} config
+   * @param {{base_url: string, hmac_secret: string}} config
    * @return {express.Router}
    */
   static createApiRouter(feederCoordinator, database, config) {
@@ -125,7 +125,7 @@ class Server {
 
     /** AUTHENTICATION MECHANISMS **/
 
-    api.post('/user/register', requiresNotLoggedIn, (req, res, next) => {
+    api.post('/user/register', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email) {
         throw 'Missing email';
       }
@@ -162,14 +162,14 @@ class Server {
               return;
             }
 
-            user.sendResetPassMail(true, config);
+            user.sendResetPassMail(config);
             res.json({ success: true });
           });
         });
       });
     });
 
-    api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
+    api.post('/user/login', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email || !req.body.password) {
         throw 'Missing email or password';
       }
@@ -195,7 +195,7 @@ class Server {
       });
     });
 
-    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res, next) => {
+    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email) {
         throw 'Missing email';
       }
@@ -209,13 +209,13 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (user) {
-          user.sendResetPassMail(false, config);
+          user.sendResetPassMail(config);
         }
         res.json({ success: true });
       });
     });
 
-    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
+    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res) => {
       if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
         throw 'Missing parameter';
       }
@@ -249,7 +249,7 @@ class Server {
       });
     });
 
-    api.post('/user/check', (req, res, next) => {
+    api.post('/user/check', (req, res) => {
       if (!req.session || !req.session.user) {
         res.json({ state: 'not logged in', user: null });
         return;
@@ -279,13 +279,19 @@ class Server {
       }
     });
 
-    api.put('/user/\d+/edit', (req, res, next) => {
-      let id = req.path.split('/')[2];
+    api.put('/user/:id/edit', (req, res) => {
+      if (isNaN(+req.params.id)) {
+        res.status(500);
+        res.json({ success: false, error: 'No user id given' });
+        return;
+      }
+
+      let id = req.params.id;
       database.getUserById(id, (user) => {
         // Check we're the current user...
         if (typeof user === 'undefined' || user.id !== req.session.user.id) {
-          res.status(403);
-          res.json({ success: false, error: 'Forbidden' });
+          res.status(404);
+          res.json({ success: false, error: 'User not found' });
           return;
         }
 
@@ -353,7 +359,7 @@ class Server {
     });
 
     // Logging out
-    api.post('/user/logout', (req, res, next) => {
+    api.post('/user/logout', (req, res) => {
       // delete session object
       req.session.destroy(function(err) {
         if(err) {
@@ -366,7 +372,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.route('/feeder/claim').post((req, res, next) => {
+    api.route('/feeder/claim').post((req, res) => {
         if (typeof req.body.identifier === 'undefined') {
           res.status(500);
           res.json({ success: false, error: 'No feeder identifier given' });
@@ -392,31 +398,33 @@ class Server {
 
     // We now need to check feeder association
     api.use((req, res, next) => {
-      if (typeof req.body.identifier === 'undefined') {
+      let id = req.path.split('/')[2];
+      if (isNaN(+id)) {
         res.status(500);
-        res.json({ success: false, error: 'No feeder identifier given' });
+        res.json({ success: false, error: 'No feeder id given' });
         return;
       }
 
-      database.checkFeederAssociation(req.body.identifier, req.session.user.id, (allowed) => {
-        if (!allowed) {
-          res.status(403);
+      database.checkFeederAssociation(id, req.session.user.id, (feeder) => {
+        if (!feeder) {
+          res.status(404);
           res.json({ success: false, error: 'Feeder not found' });
           return;
         }
-        
+
+        req.feeder = feeder;
         next();
       });
     });
 
-    api.route('/feeder/status').get((req, res) => {
-      let feeders = feederCoordinator.getFeeder(req.body.identifier);
-      res.json(feeders);
+    api.get('/feeder/:id/status', (req, res) => {
+      let feeders = feederCoordinator.getFeeder(req.feeder.identifier);
+      res.json(feeders.jsoned());
     });
 
-    api.route('/feeder/feed').put((req, res) => {
+    api.put('/feeder/:id/feed', (req, res) => {
       let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.body.identifier, quantity, (msg) => {
+      feederCoordinator.feedNow(req.feeder.identifier, quantity, (msg) => {
         if (msg !== 'success') {
           throw msg;
         }
@@ -424,9 +432,9 @@ class Server {
       });
     });
 
-    api.route('/feeder/quantity').put((req, res) => {
+    api.put('/feeder/:id/quantity', (req, res) => {
       let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.body.identifier, quantity, (msg) => {
+      feederCoordinator.setDefaultQuantity(req.feeder.identifier, quantity, (msg) => {
         if (msg !== 'success') {
           throw msg;
         }
@@ -434,10 +442,10 @@ class Server {
       });
     });
 
-    api.route('/feeder/planning')
+    api.route('/feeder/:id/planning')
       .get((req, res) => {
         // Fetch the planning if it's exists
-        database.getCurrentPlanning(req.body.identifier, (planning) => {
+        database.getCurrentPlanning(req.feeder.identifier, (planning) => {
           if (typeof planning === 'undefined') {
             res.status(500);
             res.json({ success: false, error: 'No planning' });
@@ -445,10 +453,10 @@ class Server {
           res.json({ success: true, meals: planning.jsoned() });
         });
       })
-      .post((req, res) => {
+      .put((req, res) => {
         let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
         let planning = new Planning(meals);
-        feederCoordinator.setPlanning(req.body.identifier, planning, (msg) => {
+        feederCoordinator.setPlanning(req.feeder.identifier, planning, (msg) => {
           if (msg !== 'success') {
             throw msg;
           }

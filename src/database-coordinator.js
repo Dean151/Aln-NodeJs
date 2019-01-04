@@ -96,7 +96,7 @@ class DataBaseCoordinator {
     const User = require('./models/user');
 
     // Get current planning id
-    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.identifier, \':\', f.name)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE u.' + column + ' = ? HAVING u.id IS NOT NULL', [value], (err, results, fields) => {
+    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE u.' + column + ' = ? HAVING u.id IS NOT NULL', [value], (err, results, fields) => {
       if (err) { throw err; }
 
       // Parse the meals results
@@ -182,20 +182,26 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {string} identifier
-   * @param {number} user_id
-   * @param {DataBaseCoordinator~claimFeederCallback} callback
+   * @callback DataBaseCoordinator~checkFeederCallback
+   * @param {{id: number, identifier: string}|null} feeder
+   * @throws
    */
-  checkFeederAssociation(identifier, user_id, callback) {
+
+  /**
+   * @param {number} feeder_id
+   * @param {number} user_id
+   * @param {DataBaseCoordinator~checkFeederCallback} callback
+   */
+  checkFeederAssociation(feeder_id, user_id, callback) {
     if (!this.isReady()) {
       return;
     }
 
-    this.con.query('SELECT * FROM feeders WHERE owner = ? AND identifier = ?', [user_id, identifier], (err, result, fields) => {
+    this.con.query('SELECT * FROM feeders WHERE owner = ? AND id = ?', [user_id, feeder_id], (err, result, fields) => {
       if (err) {
         throw err;
       }
-      callback(result.length >= 1);
+      callback(result.length ? result[0] : null);
     });
   }
 

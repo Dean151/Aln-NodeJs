@@ -41,9 +41,8 @@ class Feeder {
    */
   jsoned () {
     return {
-      identifier: this.identifier,
-      lastResponded: this.lastResponded.toJSON(),
-      isAvailable: (Math.floor((new Date() - this.lastResponded) / 1000) <= 30),
+      last_responded: this.lastResponded.toJSON(),
+      is_available: (Math.floor((new Date() - this.lastResponded) / 1000) <= 30),
     };
   }
 
