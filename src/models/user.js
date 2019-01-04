@@ -33,13 +33,15 @@ class User {
     if (row.feeders) {
       this.feeders = row.feeders.split(',').reduce(function (carry, data) {
         let components = data.split(':');
-        let feeder = { identifier: components[0] };
+        let feeder = {
+          id: +components[0],
+        };
         if (components[1]) {
           feeder.name = components[1];
         }
-        carry[feeder.identifier] = feeder;
+        carry.push(feeder);
         return carry;
-      }, {});
+      }, []);
     }
     else {
       this.feeders = undefined;

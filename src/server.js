@@ -418,7 +418,7 @@ class Server {
 
     api.get('/feeder/:id/status', (req, res) => {
       let feeders = feederCoordinator.getFeeder(req.feeder.identifier);
-      res.json(feeders);
+      res.json(feeders.jsoned());
     });
 
     api.put('/feeder/:id/feed', (req, res) => {

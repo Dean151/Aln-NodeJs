@@ -211,13 +211,13 @@ class FeederCoordinator {
   /**
    * @param {string} identifier
    * @throws
-   * @returns {{identifier: string, isAvailable: boolean, lastResponded: string}}
+   * @returns {Feeder}
    */
   getFeeder (identifier) {
     if (!(identifier in FeederCoordinator.feeders)) {
       throw 'Feeder not found';
     }
-    return this.feeders[identifier].jsoned();
+    return this.feeders[identifier];
   }
 
   /**
