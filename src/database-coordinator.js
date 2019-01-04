@@ -182,9 +182,15 @@ class DataBaseCoordinator {
   }
 
   /**
+   * @callback DataBaseCoordinator~checkFeederCallback
+   * @param {{id: number, identifier: string}|null} feeder
+   * @throws
+   */
+
+  /**
    * @param {string} identifier
    * @param {number} user_id
-   * @param {DataBaseCoordinator~claimFeederCallback} callback
+   * @param {DataBaseCoordinator~checkFeederCallback} callback
    */
   checkFeederAssociation(identifier, user_id, callback) {
     if (!this.isReady()) {
@@ -195,7 +201,7 @@ class DataBaseCoordinator {
       if (err) {
         throw err;
       }
-      callback(result.length >= 1);
+      callback(result.length ? result[0] : null);
     });
   }
 

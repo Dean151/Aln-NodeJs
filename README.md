@@ -27,21 +27,21 @@ Every incoming request shall have a few headers informations:
 
 ### Available API Endpoints
 
-| Verb | URL                | Parameters          | Effect                |
-|------|--------------------|---------------------|-----------------------|
-| POST | /api/user/register | { email: String }   | Create a new account, sending a reset pass mail to the user. |
-| POST | /api/user/login    | { email: String, password: String } | Log a user in |
+| Verb | URL                       | Parameters             | Effect                |
+|------|---------------------------|------------------------|-----------------------|
+| POST | /api/user/register        | { email: String }      | Create a new account, sending a reset pass mail to the user. |
+| POST | /api/user/login           | { email: String, password: String } | Log a user in |
 | POST | /api/user/request_new_password | { email: String } | Send a reset-pass mail to the user |
-| POST | /api/user/password_reset | { user_id: Int, timestamp: Int, hash: String } | Connect a user using a one-time login link |
-| POST | /api/user/check    | -                   | Check if the current session correspond to a logged-in user |
-| PUT  | /api/user/{id}/edit | { new_password, current_password, pass_token } | Allow to change a user email or password using the current password or a one-time use token. |
-| POST | /api/user/logout   | -                   | Destroy the current user session. |
-| POST | /api/feeder/claim  | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. |
-| GET  | /api/feeder/status | { identifier: String } | Check if the feeder is currently reachable. |
-| POST | /api/feeder/feed   | { identifier: String, quantity: Int } | Trigger a meal. |
-| POST | /api/feeder/quantity | { identifier: String, quantity: Int } | Change the feeding amount when pressing the machine button. |
-| GET  | /api/feeder/planning | { identifier: String } | Get the last setted planning on the machine. |
-| POST | /api/feeder/planning | { identifier: String, meals: [{ time: { hours: Int, minutes: Int }, quantity: Int, enabled: Bool }] | Set a new planning in the machine. |
+| POST | /api/user/password_reset  | { user_id: Int, timestamp: Int, hash: String } | Connect a user using a one-time login link |
+| POST | /api/user/check           | -                      | Check if the current session correspond to a logged-in user |
+| PUT  | /api/user/{id}/edit       | { new_password, current_password, pass_token } | Allow to change a user email or password using the current password or a one-time use token. |
+| POST | /api/user/logout          | -                      | Destroy the current user session. |
+| POST | /api/feeder/claim         | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. |
+| GET  | /api/feeder/{id}/status   | -                      | Check if the feeder is currently reachable. |
+| PUT  | /api/feeder/{id}/feed     | { quantity: Int }      | Trigger a meal. |
+| PUT  | /api/feeder/{id}/quantity | { quantity: Int }      | Change the feeding amount when pressing the machine button. |
+| GET  | /api/feeder/{id}/planning | -                      | Get the last setted planning on the machine. |
+| PUT  | /api/feeder/{id}/planning | { meals: [{ time: { hours: Int, minutes: Int }, quantity: Int, enabled: Bool }] | Set a new planning in the machine. |
 
 ## Installation
 
