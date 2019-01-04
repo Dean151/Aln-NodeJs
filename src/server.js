@@ -34,7 +34,7 @@ const Planning = require("./models/planning");
 class Server {
 
   /**
-   * @param {{local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
+   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -104,7 +104,7 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {{hmac_secret: string}} config
+   * @param {{base_url: string, hmac_secret: string}} config
    * @return {express.Router}
    */
   static createApiRouter(feederCoordinator, database, config) {
@@ -162,7 +162,7 @@ class Server {
               return;
             }
 
-            user.sendResetPassMail(true, config);
+            user.sendResetPassMail(config);
             res.json({ success: true });
           });
         });
@@ -209,7 +209,7 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (user) {
-          user.sendResetPassMail(false, config);
+          user.sendResetPassMail(config);
         }
         res.json({ success: true });
       });

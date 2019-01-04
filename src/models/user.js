@@ -49,12 +49,11 @@ class User {
   }
 
   /**
-   * @param {boolean} registration
    * @param {{hmac_secret: string, base_url: string}} config
    */
-  sendResetPassMail(registration, config) {
+  sendResetPassMail(config) {
     // generate token
-    let type = registration ? 'create_password' : 'reset_password';
+    let type = this.login ? 'reset_password' : 'create_password';
     let timestamp = Math.round(new Date().getTime()/1000);
     let hash = CryptoHelper.hashBase64([timestamp, this.login, this.id, this.password].join(':'), config.hmac_secret);
     let url = config.base_url + '/user/' + type + '/' + this.id + '/' + timestamp + '/' + hash;
