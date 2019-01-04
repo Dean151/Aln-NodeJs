@@ -320,7 +320,7 @@ class Server {
             // Check current pass.
             CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
               if (!success) {
-                res.status(403);
+                res.status(406);
                 res.json({ success: false, error: 'Changing password requires current password' });
               }
 
@@ -342,7 +342,7 @@ class Server {
             return;
           }
 
-          res.status(403);
+          res.status(406);
           res.json({ success: false, error: 'Changing password requires current password' });
           return; 
         }
