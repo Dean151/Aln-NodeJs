@@ -398,13 +398,14 @@ class Server {
 
     // We now need to check feeder association
     api.use((req, res, next) => {
-      if (isNaN(+req.params.id)) {
+      let id = req.path.split('/')[2];
+      if (isNaN(+id)) {
         res.status(500);
         res.json({ success: false, error: 'No feeder id given' });
         return;
       }
 
-      database.checkFeederAssociation(req.params.id, req.session.user.id, (feeder) => {
+      database.checkFeederAssociation(id, req.session.user.id, (feeder) => {
         if (!feeder) {
           res.status(404);
           res.json({ success: false, error: 'Feeder not found' });
