@@ -188,7 +188,7 @@ class DataBaseCoordinator {
    */
 
   /**
-   * @param {string} identifier
+   * @param {number} feeder_id
    * @param {number} user_id
    * @param {DataBaseCoordinator~checkFeederCallback} callback
    */
