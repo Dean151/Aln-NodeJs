@@ -291,10 +291,6 @@ class Server {
       let csrf = true;
       if (CryptoHelper.checkBase64Hash('csrf', req.body._csrf, req.session.id + config.hmac_secret)) {
         csrf = false;
-      } else if (CryptoHelper.checkBase64Hash('csrf', req.query._csrf, req.session.id + config.hmac_secret)) {
-        csrf = false;
-      } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['csrf-token'], req.session.id + config.hmac_secret)) {
-        csrf = false;
       } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['x-csrf-token'], req.session.id + config.hmac_secret)) {
         csrf = false;
       }
