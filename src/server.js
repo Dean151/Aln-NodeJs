@@ -285,6 +285,11 @@ class Server {
     });
     
     api.use((req, res, next) => {
+      if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS' || req.method === 'TRACE') {
+        next();
+        return;
+      }
+
       let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
       let csrf = true;
       if (req.body._csrf === token) {
