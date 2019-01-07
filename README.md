@@ -38,7 +38,7 @@ Every incoming request shall have a few headers informations:
 | POST | /api/user/logout          | -                      | Destroy the current user session. |
 | POST | /api/feeder/claim         | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. |
 | GET  | /api/feeder/{id}/status   | -                      | Check if the feeder is currently reachable. |
-| PUT  | /api/feeder/{id}/feed     | { quantity: Int }      | Trigger a meal. |
+| POST | /api/feeder/{id}/feed     | { quantity: Int }      | Trigger a meal. |
 | PUT  | /api/feeder/{id}/quantity | { quantity: Int }      | Change the feeding amount when pressing the machine button. |
 | GET  | /api/feeder/{id}/planning | -                      | Get the last setted planning on the machine. |
 | PUT  | /api/feeder/{id}/planning | { meals: [{ time: { hours: Int, minutes: Int }, quantity: Int, enabled: Bool }] | Set a new planning in the machine. |

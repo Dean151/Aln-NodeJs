@@ -330,7 +330,7 @@ class Server {
             // Check current pass.
             CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
               if (!success) {
-                res.status(403);
+                res.status(406);
                 res.json({ success: false, error: 'Changing password requires current password' });
               }
 
@@ -352,7 +352,7 @@ class Server {
             return;
           }
 
-          res.status(403);
+          res.status(406);
           res.json({ success: false, error: 'Changing password requires current password' });
           return; 
         }
@@ -376,7 +376,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.route('/feeder/claim').post((req, res) => {
+    api.post('/feeder/claim', (req, res) => {
         if (typeof req.body.identifier === 'undefined') {
           res.status(500);
           res.json({ success: false, error: 'No feeder identifier given' });
@@ -426,7 +426,7 @@ class Server {
       res.json(feeders.jsoned());
     });
 
-    api.put('/feeder/:id/feed', (req, res) => {
+    api.post('/feeder/:id/feed', (req, res) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.feeder.identifier, quantity, (msg) => {
         if (msg !== 'success') {
