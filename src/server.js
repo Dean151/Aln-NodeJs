@@ -279,6 +279,8 @@ class Server {
       }
     });
 
+    // TODO: Add CSRF check :)
+
     api.put('/user/:id/edit', (req, res) => {
       if (isNaN(+req.params.id)) {
         res.status(500);
@@ -303,6 +305,8 @@ class Server {
         }
 
         if (req.body.new_pass) {
+          // TODO: check if the password is strong enough
+
           // We either need to validate the password (length, strongness...)
           // And also check if we have a valid hash, or a valid current password
           if (req.body.pass_token && req.body.pass_token === req.session.passworkToken) {
