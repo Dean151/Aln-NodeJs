@@ -190,7 +190,8 @@ class Server {
 
           database.loggedUser(user.id);
           req.session.user = user.jsoned();
-          res.json({ success: true, user: req.session.user });
+          let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+          res.json({ success: true, user: req.session.user, token: token });
         });
       });
     });
@@ -245,7 +246,8 @@ class Server {
 
         database.loggedUser(user.id);
         req.session.user = user.jsoned();
-        res.json({ success: true, user: req.session.user, token: passwordToken });
+        let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+        res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
       });
     });
 
@@ -265,7 +267,8 @@ class Server {
 
         // Update the user object
         req.session.user = user.jsoned();
-        res.json({ state: 'logged in', user: req.session.user });
+        let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+        res.json({ state: 'logged in', user: req.session.user, token: token });
       });
     });
 
@@ -279,26 +282,20 @@ class Server {
       }
     });
 
-    api.post('/user/token', (req, res) => {
-      let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-      res.json({ success: true, token: token });
-    });
-    
     api.use((req, res, next) => {
       if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS' || req.method === 'TRACE') {
         next();
         return;
       }
 
-      let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
       let csrf = true;
-      if (req.body._csrf === token) {
+      if (CryptoHelper.checkBase64Hash('csrf', req.body._csrf, req.session.id + config.hmac_secret)) {
         csrf = false;
-      } else if (req.query._csrf === token) {
+      } else if (CryptoHelper.checkBase64Hash('csrf', req.query._csrf, req.session.id + config.hmac_secret)) {
         csrf = false;
-      } else if (req.headers['csrf-token'] === token) {
+      } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['csrf-token'], req.session.id + config.hmac_secret)) {
         csrf = false;
-      } else if (req.headers['x-csrf-token'] === token) {
+      } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['x-csrf-token'], req.session.id + config.hmac_secret)) {
         csrf = false;
       }
 
