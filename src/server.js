@@ -279,7 +279,31 @@ class Server {
       }
     });
 
-    // TODO: Add CSRF check :)
+    api.post('/user/token', (req, res) => {
+      let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+      res.json({ success: true, token: token });
+    });
+    
+    api.use((req, res, next) => {
+      let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+      let csrf = true;
+      if (req.body._csrf === token) {
+        csrf = false;
+      } else if (req.query._csrf === token) {
+        csrf = false;
+      } else if (req.headers['csrf-token'] === token) {
+        csrf = false;
+      } else if (req.headers['x-csrf-token'] === token) {
+        csrf = false;
+      }
+
+      if (csrf) {
+        res.status(403);
+        res.json({ success: false, error: 'CSRF token check failed' });
+      } else {
+        next();
+      }
+    });
 
     api.put('/user/:id/edit', (req, res) => {
       if (isNaN(+req.params.id)) {
