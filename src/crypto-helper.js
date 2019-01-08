@@ -58,7 +58,7 @@ class CryptoHelper {
      * @return {boolean}
      */
     static checkBase64Hash(data, hash, key) {
-        return hash === hashBase64(data, key);
+        return hash === CryptoHelper.hashBase64(data, key);
     }
 
     /**
