@@ -96,7 +96,7 @@ class DataBaseCoordinator {
     const User = require('./models/user');
 
     // Get current planning id
-    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE u.' + column + ' = ? HAVING u.id IS NOT NULL', [value], (err, results, fields) => {
+    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE u.' + column + ' = ? HAVING u.id IS NOT NULL', [value], (err, results, fields) => {
       if (err) { throw err; }
 
       // Parse the meals results
@@ -234,6 +234,23 @@ class DataBaseCoordinator {
   }
 
   /**
+   * @param id
+   * @param name
+   * @throws
+   */
+  setFeederName(id, name) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    this.con.query('UPDATE feeders SET name = ? WHERE id = ?', [name, id], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+    });
+  }
+
+  /**
    * @param {string} identifier
    * @param {Quantity} quantity
    * @throws
@@ -277,11 +294,11 @@ class DataBaseCoordinator {
    */
 
   /**
-   * @param {string} identifier
+   * @param {number} id
    * @param {DataBaseCoordinator~getPlanningCallback} callback
    * @throws
    */
-  getCurrentPlanning (identifier, callback) {
+  getCurrentPlanning (id, callback) {
     if (!this.isReady()) {
       throw 'Database is not ready';
     }
@@ -290,7 +307,7 @@ class DataBaseCoordinator {
     const Meal = require('./models/meal');
 
     // Get current planning id
-    this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p LEFT JOIN feeders f ON f.id = p.feeder WHERE f.identifier = ? ORDER BY p.date DESC LIMIT 1)', [identifier], (err, results, fields) => {
+    this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p WHERE p.feeder = ? ORDER BY p.date DESC LIMIT 1)', [id], (err, results, fields) => {
       if (err) { throw err; }
 
       // Parse the meals results

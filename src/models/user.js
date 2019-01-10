@@ -39,6 +39,9 @@ class User {
         if (components[1]) {
           feeder.name = components[1];
         }
+        if (components[2]) {
+          feeder.defaultAmount = components[2];
+        }
         carry.push(feeder);
         return carry;
       }, []);

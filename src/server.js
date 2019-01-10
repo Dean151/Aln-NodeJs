@@ -303,7 +303,7 @@ class Server {
       }
     });
 
-    api.put('/user/:id/edit', (req, res) => {
+    api.put('/user/:id', (req, res) => {
       if (isNaN(+req.params.id)) {
         res.status(500);
         res.json({ success: false, error: 'No user id given' });
@@ -443,9 +443,15 @@ class Server {
       });
     });
 
-    api.get('/feeder/:id/status', (req, res) => {
+    api.get('/feeder/:id', (req, res) => {
       let feeders = feederCoordinator.getFeeder(req.feeder.identifier);
       res.json(feeders.jsoned());
+    });
+
+    api.put('/feeder/:id', (req, res) => {
+      let name = req.body.name;
+      database.setFeederName(req.feeder.id, name);
+      req.json({ success: true });
     });
 
     api.post('/feeder/:id/feed', (req, res) => {
@@ -471,7 +477,7 @@ class Server {
     api.route('/feeder/:id/planning')
       .get((req, res) => {
         // Fetch the planning if it's exists
-        database.getCurrentPlanning(req.feeder.identifier, (planning) => {
+        database.getCurrentPlanning(req.feeder.id, (planning) => {
           if (typeof planning === 'undefined') {
             res.status(500);
             res.json({ success: false, error: 'No planning' });
