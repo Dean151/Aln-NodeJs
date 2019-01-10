@@ -451,7 +451,7 @@ class Server {
     api.put('/feeder/:id', (req, res) => {
       let name = req.body.name;
       database.setFeederName(req.feeder.id, name);
-      req.json({ success: true });
+      res.json({ success: true });
     });
 
     api.post('/feeder/:id/feed', (req, res) => {
