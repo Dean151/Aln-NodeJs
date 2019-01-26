@@ -206,6 +206,30 @@ class DataBaseCoordinator {
   }
 
   /**
+   * @callback DataBaseCoordinator~fetchFeederLastRespondedCallback
+   * @param {Date|undefined} date
+   * @throws
+   */
+
+  /**
+   * @param {string} identifier 
+   * @param {DataBaseCoordinator~fetchFeederLastRespondedCallback} callback 
+   * @throws
+   */
+  fetchFeederLastResponded(identifier, callback) {
+    if (!this.isReady()) {
+      return;
+    }
+
+    this.con.query('SELECT last_responded FROM feeders WHERE identifier = ?', [identifier], (err, result, fields) => {
+      if (err) {
+        throw err;
+      }
+      callback(result.length && result[0].last_responded ? new Date(result[0].last_responded) : null);
+    });
+  }
+
+  /**
    * @param {string} identifier
    * @param {string} ip
    * @throws

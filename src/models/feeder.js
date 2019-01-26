@@ -19,13 +19,17 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 class Feeder {
 
   /**
-   *
    * @param {string} identifier
-   * @param {net.Socket|null} socket
+   * @param {net.Socket|Date|null} socket
    */
   constructor(identifier, socket) {
     this.identifier = identifier;
-    this.hasResponded(socket);
+
+    if (socket.constructor === net.Socket) {
+      this.hasResponded(socket);
+    } else if (socket.constructor === Date) {
+      this.lastResponded = socket;
+    }
   }
 
   /**
@@ -42,7 +46,7 @@ class Feeder {
   jsoned () {
     return {
       last_responded: this.lastResponded.toJSON(),
-      is_available: (Math.floor((new Date() - this.lastResponded) / 1000) <= 30),
+      is_available: this.socket !== undefined && (Math.floor((new Date() - this.lastResponded) / 1000) <= 30),
     };
   }
 

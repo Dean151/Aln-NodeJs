@@ -209,15 +209,25 @@ class FeederCoordinator {
   }
 
   /**
-   * @param {string} identifier
+   * @callback FeederCoordinator~getFeederCallback
+   * @param {Feeder|undefined} feeder
    * @throws
-   * @returns {Feeder}
    */
-  getFeeder (identifier) {
-    if (!(identifier in this.feeders)) {
-      throw 'Feeder not found';
+
+  /**
+   * @param {string} identifier
+   * @param {FeederCoordinator~getFeederCallback} callback
+   * @throws
+   */
+  getFeeder (identifier, callback) {
+    if (identifier in this.feeders) {
+      callback(this.feeders[identifier].jsoned());
     }
-    return this.feeders[identifier];
+
+    // Feeder is unreachable. Let try to get it from database
+    DataBaseCoordinator.fetchFeederLastResponded(identifier, (lastResponded) => {
+      callback(lastResponded ? Feeder(identifier, lastResponded) : undefined);
+    });
   }
 
   /**

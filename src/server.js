@@ -444,8 +444,12 @@ class Server {
     });
 
     api.get('/feeder/:id', (req, res) => {
-      let feeders = feederCoordinator.getFeeder(req.feeder.identifier);
-      res.json(feeders.jsoned());
+      feederCoordinator.getFeeder(req.feeder.identifier, (feeder) => {
+        if (!feeder) {
+          throw 'Feeder not found';
+        }
+        res.json(feeder.jsoned());
+      });
     });
 
     api.put('/feeder/:id', (req, res) => {
