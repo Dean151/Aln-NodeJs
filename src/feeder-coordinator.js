@@ -226,7 +226,7 @@ class FeederCoordinator {
 
     // Feeder is unreachable. Let try to get it from database
     this.database.fetchFeederLastResponded(identifier, (lastResponded) => {
-      callback(lastResponded ? Feeder(identifier, lastResponded) : undefined);
+      callback(lastResponded ? new Feeder(identifier, lastResponded) : undefined);
     });
   }
 
