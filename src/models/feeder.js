@@ -25,10 +25,10 @@ class Feeder {
   constructor(identifier, socket) {
     this.identifier = identifier;
 
-    if (socket.constructor === net.Socket) {
-      this.hasResponded(socket);
-    } else if (socket.constructor === Date) {
+    if (socket.constructor === Date) {
       this.lastResponded = socket;
+    } else {
+      this.hasResponded(socket);
     }
   }
 
