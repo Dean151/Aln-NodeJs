@@ -221,11 +221,11 @@ class FeederCoordinator {
    */
   getFeeder (identifier, callback) {
     if (identifier in this.feeders) {
-      callback(this.feeders[identifier].jsoned());
+      callback(this.feeders[identifier]);
     }
 
     // Feeder is unreachable. Let try to get it from database
-    DataBaseCoordinator.fetchFeederLastResponded(identifier, (lastResponded) => {
+    this.database.fetchFeederLastResponded(identifier, (lastResponded) => {
       callback(lastResponded ? Feeder(identifier, lastResponded) : undefined);
     });
   }
