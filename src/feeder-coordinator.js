@@ -222,6 +222,7 @@ class FeederCoordinator {
   getFeeder (identifier, callback) {
     if (identifier in this.feeders) {
       callback(this.feeders[identifier]);
+      return;
     }
 
     // Feeder is unreachable. Let try to get it from database
