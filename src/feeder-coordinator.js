@@ -137,6 +137,9 @@ class FeederCoordinator {
    * @throws
    */
   recordManualMeal (identifier, quantity) {
+
+    // TODO: Later, push notification sending?
+
     this.database.recordMeal(identifier, quantity);
     this.database.rememberDefaultAmount(identifier, quantity);
   }
@@ -148,7 +151,9 @@ class FeederCoordinator {
    * @throws
    */
   recordEmptyFeeder (identifier, time, quantity) {
+
     // TODO: Later, push notification sending?
+
     let data = {
       hours: time.hours,
       minutes: time.minutes,

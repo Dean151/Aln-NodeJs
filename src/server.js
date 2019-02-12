@@ -25,11 +25,19 @@ const bodyParser = require('body-parser');
 const cacheControl = require('express-cache-controller');
 
 const validator = require('validator');
+const Checker = require('password-checker');
 
 const CryptoHelper = require('./crypto-helper');
 const Quantity = require("./models/quantity");
 const Meal = require("./models/meal");
 const Planning = require("./models/planning");
+
+class HttpError extends Error {
+  constructor(message, code = 500) {
+    super(message);
+    this.code = code;
+  }
+}
 
 class Server {
 
@@ -116,76 +124,61 @@ class Server {
 
     let requiresNotLoggedIn = (req, res, next) => {
       if (req.session && req.session.user) {
-        res.status(403);
-        res.json({ success: false, error: 'Already logged-in as ' + req.session.user.email });
-      } else {
-        next();
+        throw new HttpError( 'Already logged-in as ' + req.session.user.email, 403);
       }
+      next();
     };
 
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/register', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email) {
-        throw 'Missing email';
+        throw new HttpError('Missing email', 400);
       }
 
       if (!validator.isEmail(req.body.email)) {
-        res.status(401);
-        res.json({ success: false, error: 'Not an email' });
-        return;
+        throw new HttpError('Not an email', 400);
       }
 
       // Check if the user already exists
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (user) {
-          res.status(406);
-          res.json({ success: false, error: 'Email already in use' });
-          return;
+          throw new HttpError('Email already in use', 406);
         }
 
         database.createUser({
           email: email,
           hash: 'not-an-hash',
-        }, (success) => {
-          if (!success) {
-            res.status((500));
-            res.json({ success: false, error: 'Registration failed' });
-            return;
-          }
-
+        }).then(() => {
           database.getUserByEmail(email, (user) => {
             if (!user) {
-              res.status((500));
-              res.json({ success: false, error: 'Registration failed' });
-              return;
+              throw new HttpError('Registration failed', 500);
             }
 
             user.sendResetPassMail(config);
             res.json({ success: true });
           });
+        }, (err) => {
+          throw err;
         });
       });
     });
 
     api.post('/user/login', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email || !req.body.password) {
-        throw 'Missing email or password';
+        throw new HttpError('Missing email or password', 400);
       }
+
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email, (user) => {
         if (typeof user === 'undefined') {
-          res.status(401);
-          res.json({ success: false, error: 'Wrong email/password' });
-          return;
+          throw new HttpError('Wrong email/password', 401);
         }
 
         CryptoHelper.comparePassword(req.body.password, user.password, (err, success) => {
           if (!success) {
-            res.status(401);
-            res.json({ success: false, error: 'Wrong email/password' });
-            return;
+            throw new HttpError('Wrong email/password', 401);
           }
 
           database.loggedUser(user.id);
@@ -198,13 +191,11 @@ class Server {
 
     api.post('/user/request_new_password', requiresNotLoggedIn, (req, res) => {
       if (!req.body.email) {
-        throw 'Missing email';
+        throw new HttpError('Missing email', 400);
       }
 
       if (!validator.isEmail(req.body.email)) {
-        res.status(401);
-        res.json({ success: false, error: 'Not an email' });
-        return;
+        throw new HttpError('Not an email', 400);
       }
 
       let email = validator.normalizeEmail(req.body.email);
@@ -218,27 +209,21 @@ class Server {
 
     api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res) => {
       if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
-        throw 'Missing parameter';
+        throw new HttpError('Missing parameter', 400);
       }
 
       database.getUserById(req.body.user_id, (user) => {
         if (typeof user === 'undefined') {
-          res.status(401);
-          res.json({ success: false, error: 'Wrong parameter' });
-          return;
+          throw new HttpError('Wrong parameter', 401);
         }
         
         // First login does not expires. Other expires after 24 hours
         if (user.login > 0 && req.body.timestamp > Math.round(new Date().getTime()/1000) - 24*3600) {
-          res.status(401);
-          res.json({ success: false, error: 'Wrong parameter' });
-          return;
+          throw new HttpError('Wrong parameter', 401);
         }
 
         if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'), req.body.hash, config.hmac_secret)) {
-          res.status(401);
-          res.json({ success: false, error: 'Wrong parameter' });
-          return;
+          throw new HttpError('Wrong parameter', 401);
         }
 
         let passwordToken = CryptoHelper.randomKeyBase64(64);
@@ -275,11 +260,9 @@ class Server {
     // Every endpoint below requires login-in
     api.use((req, res, next) => {
       if (!req.session || !req.session.user) {
-        res.status(403);
-        res.json({ success: false, error: 'Not logged-in' });
-      } else {
-        next();
+        throw new HttpError('Not logged-in', 403);
       }
+      next();
     });
 
     api.use((req, res, next) => {
@@ -296,91 +279,107 @@ class Server {
       }
 
       if (csrf) {
-        res.status(403);
-        res.json({ success: false, error: 'CSRF token check failed' });
-      } else {
-        next();
+        throw new HttpError('CSRF token check failed', 403);
       }
+      next();
     });
 
     api.put('/user/:id', (req, res) => {
       if (isNaN(+req.params.id)) {
-        res.status(500);
-        res.json({ success: false, error: 'No user id given' });
-        return;
+        throw new HttpError('User not found', 404);
       }
 
       let id = req.params.id;
       database.getUserById(id, (user) => {
         // Check we're the current user...
         if (typeof user === 'undefined' || user.id !== req.session.user.id) {
-          res.status(404);
-          res.json({ success: false, error: 'User not found' });
-          return;
+          throw new HttpError('User not found', 404);
         }
 
-        if (req.body.email && user.email !== req.body.email) {
-          // We're trying to change the email. 
-          // We can only do so if it's valid, non used at other place
-          // And if there is a valid password to validate the operation.
-          // TODO! (need also a new mail validation mechanism.)
-        }
+        // Updating email
+        var shouldUpdateEmail = new Promise((resolve, reject) => {
+          if (!req.body.email || user.email === req.body.email) {
+            resolve(false);
+            return;
+          }
 
-        if (req.body.new_pass) {
-          // TODO: check if the password is strong enough
+          // TODO!
+          reject(new Error('Not implemented exception'));
+        });
+        var updateEmail = new Promise((resolve, reject) => {
+          if (!req.body.email) {
+            resolve();
+            return;
+          }
+          user.email = req.body.email;
+          resolve();
+        });
 
-          // We either need to validate the password (length, strongness...)
+        // Updating password
+        var shouldUpdatePassword = new Promise((resolve, reject) => {
+          if (!req.body.new_pass) {
+            resolve(false);
+            return;
+          }
+
+          // Check password strongness
+          var checker = new Checker();
+          checker.min_length = 8;
+          checker.disallowNames(true);
+          checker.disallowWords(true, true);
+          if (!checker.check(req.body.new_pass)) {
+            reject(new HttpError('New password not strong enough', 412));
+            return;
+          }
+
           // And also check if we have a valid hash, or a valid current password
           if (req.body.pass_token && req.body.pass_token === req.session.passworkToken) {
-            // Validation has been done. We change the password
-            CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
-              if (err) {
-                res.status((500));
-                res.json({ success: false, error: err.toString() });
-                return;
-              }
-
-              // Save the new hash
-              user.password = hash;
-              database.updateUser(user);
-
-              res.json({ success: true });
-            });   
-            return;
-          }
-          if (req.body.current_pass) {
-            // Check current pass.
-            CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
-              if (!success) {
-                res.status(406);
-                res.json({ success: false, error: 'Changing password requires current password' });
-              }
-
-              // Validation has been done. We change the password
-              CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
-                if (err) {
-                  res.status((500));
-                  res.json({ success: false, error: err.toString() });
-                  return;
-                }
-
-                // Save the new hash
-                user.password = hash;
-                database.updateUser(user);
-
-                res.json({ success: true });
-              });   
-            });
+            resolve(true);
             return;
           }
 
-          res.status(406);
-          res.json({ success: false, error: 'Changing password requires current password' });
-          return; 
-        }
+          if (!req.body.current_pass) {
+            reject(new HttpError('Changing password requires current password', 406));
+            return;
+          }
 
-        // Nothing happened
-        res.json({ success: true });
+          CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+
+            if (!success) {
+              reject(new HttpError('Changing password requires current password', 406));
+              return;
+            }
+
+            resolve(true);
+          });
+        });
+        var updatePassword = new Promise((resolve, reject) => {
+          if (!req.body.new_pass) {
+            resolve();
+            return;
+          }
+          CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
+            if (err) {
+              reject(err);
+              return;
+            }
+            // Save the new hash
+            user.password = hash;
+            resolve();
+          });
+        });
+
+        Promise.all([shouldUpdateEmail, shouldUpdatePassword]).then(() => {
+          Promise.all([updateEmail, updatePassword, database.updateUser(user)]).then(() => {
+            res.json({success: true});
+          }, (err) => {
+            throw err;
+          });
+        });
       });
     });
 
@@ -388,7 +387,7 @@ class Server {
     api.post('/user/logout', (req, res) => {
       // delete session object
       req.session.destroy(function(err) {
-        if(err) {
+        if (err) {
           throw err;
         }
         res.json({ success: true });
@@ -503,8 +502,20 @@ class Server {
 
     // Error handling at the end
     api.use((err, req, res, next) => {
+      if (err instanceof HttpError) {
+        res.status(err.code);
+        res.json({ success: false, message: err.message });
+        return;
+      }
+
+      if (err instanceof Error) {
+        res.status(500);
+        res.json({ success: false, message: err.message });
+        return;
+      }
+
       res.status(500);
-      res.json({ success: false, error: err.toString() });
+      res.json({ success: false, error: err });
     });
 
     return api;

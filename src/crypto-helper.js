@@ -18,7 +18,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const secureRandom = require('secure-random')
+const secureRandom = require('secure-random');
 
 class CryptoHelper {
 

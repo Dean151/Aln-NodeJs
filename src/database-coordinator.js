@@ -129,30 +129,33 @@ class DataBaseCoordinator {
 
   /**
    * @param {{email: string, hash: string}} data
-   * @param {DataBaseCoordinator~createUserCallback} callback
+   * @return Promise
    */
-  createUser(data, callback) {
-    if (!this.isReady()) {
-      throw 'Database is not ready';
-    }
-
-    this.con.query('INSERT INTO users (email, password) VALUES (?, ?)', [data.email, data.hash], (err, result, fields) => {
-      if (err) {
-        callback(false);
-      }
-      callback(true);
+  createUser(data) {
+    return new Promise((resolve, reject) => {
+      this.con.query('INSERT INTO users (email, password) VALUES (?, ?)', [data.email, data.hash], (err, result, fields) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
     });
   }
 
+  /**
+   * @param user
+   * @return Promise
+   */
   updateUser(user) {
-    if (!this.isReady()) {
-      return;
-    }
-    
-    this.con.query('UPDATE users SET email = ?, password = ? WHERE id = ?', [user.email, user.password, user.id], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+    return new Promise((resolve, reject) => {
+      this.con.query('UPDATE users SET email = ?, password = ? WHERE id = ?', [user.email, user.password, user.id], (err, result, fields) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve();
+      });
     });
   }
 

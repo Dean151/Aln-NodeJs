@@ -28,6 +28,7 @@
     "log-timestamp": "^0.2.1",
     "mysql": "^2.16.0",
     "net": "^1.0.2",
+    "password-checker": "^0.2.4",
     "require.js": "^1.0.0",
     "secure-random": "^1.1.1",
     "validator": "^10.10.0"
