@@ -88,7 +88,7 @@ class DataBaseCoordinator {
         query += 'WHERE u.id = ?';
       }
       else if (column === 'email') {
-        query = 'WHERE u.email = ?';
+        query += 'WHERE u.email = ?';
       }
       else {
         reject(new Error('Undetermined column for getting user'));
