@@ -122,7 +122,7 @@ class FeederCoordinator {
     }
 
     // Send it back the time
-    this.send(identifier, ResponseBuilder.time(), () => {});
+    this.send(identifier, ResponseBuilder.time());
 
     // Maintain the connection with the socket
     socket.setKeepAlive(true, 30000);
@@ -165,17 +165,58 @@ class FeederCoordinator {
   /**
    * @param {string} identifier
    * @param {Buffer} data
-   * @param {Feeder~sendCallback} callback
-   * @throws
+   * @return Promise
    */
-  send (identifier, data, callback) {
-    if (!(identifier in this.feeders)) {
-      throw 'Feeder not found';
-    }
-    this.feeders[identifier].send(data, callback);
+  send (identifier, data) {
+    return new Promise((resolve, reject) => {
+      if (!(identifier in this.feeders)) {
+        reject(new Error('Feeder socket not opened'));
+        return;
+      }
+
+      this.feeders[identifier].send(data).then(resolve, reject);
+    });
   }
 
   /**
+   * @param {string} identifier
+   * @param {Buffer} data
+   * @param {Buffer} expectation
+   * @return Promise
+   */
+  sendAndWait(identifier, data, expectation) {
+    return new Promise((resolve, reject) => {
+      if (!(identifier in this.feeders)) {
+        reject(new Error('Feeder socket not opened'));
+        return;
+      }
+
+      let feeder = this.feeders[identifier];
+
+      // Prepare a timeout for execution
+      let timeout = setTimeout(() => {
+        feeder.socket.removeListener('data', expectationListener);
+        reject(new Error('Timeout occurred'));
+      }, 30000);
+
+      let expectationListener = (data) => {
+        if (data.toString('hex') === expectation.toString('hex')) {
+          resolve();
+          feeder.socket.removeListener('data', expectationListener);
+          clearTimeout(timeout);
+        }
+      };
+
+      // Listen for the expectation
+      feeder.socket.on('data', expectationListener);
+
+      // Write to the feeder
+      feeder.send(data);
+    });
+  }
+
+  /**
+   * FIXME: To delete
    * @param {string} identifier
    * @param {Buffer} data
    * @param {Buffer} expectation
@@ -208,9 +249,7 @@ class FeederCoordinator {
     feeder.socket.on('data', expectationListener);
 
     // Write to the feeder
-    feeder.send(data, () => {
-      console.log('Waiting for expectation ...');
-    });
+    feeder.send(data);
   }
 
   /**
@@ -265,16 +304,15 @@ class FeederCoordinator {
   /**
    * @param {String} identifier
    * @param {Quantity} quantity
-   * @param {FeederCoordinator~sendAndExpectCallback} callback
-   * @throws
+   * @return Promise
    */
-  feedNow (identifier, quantity, callback) {
-    let data = ResponseBuilder.feedNow(quantity);
-    let expectation = ResponseBuilder.feedNowExpectation(identifier);
-
-    this.sendAndExpect(identifier, data, expectation, (msg) => {
-      this.database.recordMeal(identifier, quantity);
-      callback(msg);
+  feedNow (identifier, quantity) {
+    return new Promise((resolve, reject) => {
+      let data = ResponseBuilder.feedNow(quantity);
+      let expectation = ResponseBuilder.feedNowExpectation(identifier);
+      this.sendAndWait(identifier, data, expectation).then(() => {
+        this.database.recordMeal(identifier, quantity);
+      }, reject);
     });
   }
 

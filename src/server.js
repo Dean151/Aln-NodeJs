@@ -440,14 +440,11 @@ class Server {
       }).catch(next);
     });
 
-    api.post('/feeder/:id/feed', (req, res) => {
+    api.post('/feeder/:id/feed', (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.feedNow(req.feeder.identifier, quantity, (msg) => {
-        if (msg !== 'success') {
-          throw msg;
-        }
+      feederCoordinator.feedNow(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
-      });
+      }).catch(next);
     });
 
     api.put('/feeder/:id/quantity', (req, res) => {

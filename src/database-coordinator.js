@@ -288,20 +288,21 @@ class DataBaseCoordinator {
   /**
    * @param {string} identifier
    * @param {Quantity} quantity
-   * @throws
+   * @return Promise
    */
   recordMeal (identifier, quantity) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    let now = new Date();
-    let date = now.toJSON().slice(0, 10);
-    let time = now.toJSON().slice(11, 19);
-    this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+    return new Promise((resolve, reject) => {
+      let now = new Date();
+      let date = now.toJSON().slice(0, 10);
+      let time = now.toJSON().slice(11, 19);
+      this.con.query('INSERT INTO meals(feeder, date, time, quantity) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, date, time, quantity.amount], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
 

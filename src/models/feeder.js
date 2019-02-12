@@ -52,18 +52,20 @@ class Feeder {
 
   /**
    * @param {Buffer} data
-   * @param {Feeder~sendCallback} callback
+   * @return Promise
    */
-  send (data, callback) {
-    this.socket.write(data, () => {
-      console.log("Data sent: " + data.toString('hex'));
-      callback();
+  send (data) {
+    return new Promise((resolve, reject) => {
+      if (this.socket === undefined) {
+        reject(new Error('Socket is not opened'));
+        return;
+      }
+      this.socket.write(data, () => {
+        console.log("Data sent: " + data.toString('hex'));
+        resolve();
+      });
     });
   }
-
-  /**
-   * @callback Feeder~sendCallback
-   */
 }
 
 module.exports = Feeder;
