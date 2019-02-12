@@ -312,6 +312,7 @@ class FeederCoordinator {
       let expectation = ResponseBuilder.feedNowExpectation(identifier);
       this.sendAndWait(identifier, data, expectation).then(() => {
         this.database.recordMeal(identifier, quantity);
+        resolve();
       }, reject);
     });
   }
