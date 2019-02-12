@@ -131,7 +131,7 @@ class Server {
 
     /** AUTHENTICATION MECHANISMS **/
 
-    api.post('/user/register', requiresNotLoggedIn, (req, res) => {
+    api.post('/user/register', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.email) {
         throw new HttpError('Missing email', 400);
       }
@@ -160,15 +160,11 @@ class Server {
 
           user.sendResetPassMail(config);
           res.json({ success: true });
-        }, (err) => {
-          throw err;
-        });
-      }, (err) => {
-        throw err;
-      });
+        }).catch(next);
+      }).catch(next);
     });
 
-    api.post('/user/login', requiresNotLoggedIn, (req, res) => {
+    api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.email || !req.body.password) {
         throw new HttpError('Missing email or password', 400);
       }
@@ -188,18 +184,12 @@ class Server {
             req.session.user = user.jsoned();
             let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
             res.json({ success: true, user: req.session.user, token: token });
-          }, (err) => {
-            throw err;
-          });
-        }, (err) => {
-          throw err;
-        });
-      }, (err) => {
-        throw err;
-      });
+          }).catch(next);
+        }).catch(next);
+      }).catch(next);
     });
 
-    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res) => {
+    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.email) {
         throw new HttpError('Missing email', 400);
       }
@@ -214,12 +204,10 @@ class Server {
           user.sendResetPassMail(config);
         }
         res.json({ success: true });
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
-    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res) => {
+    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
         throw new HttpError('Missing parameter', 400);
       }
@@ -245,15 +233,11 @@ class Server {
           req.session.user = user.jsoned();
           let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
           res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
-        }, (err) => {
-          throw err;
-        });
-      }, (err) => {
-        throw err;
-      });
+        }).catch(next);
+      }).catch(next);
     });
 
-    api.post('/user/check', (req, res) => {
+    api.post('/user/check', (req, res, next) => {
       if (!req.session || !req.session.user) {
         res.json({ state: 'not logged in', user: null });
         return;
@@ -271,9 +255,7 @@ class Server {
         req.session.user = user.jsoned();
         let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
         res.json({ state: 'logged in', user: req.session.user, token: token });
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
     // Every endpoint below requires login-in
@@ -303,7 +285,7 @@ class Server {
       next();
     });
 
-    api.put('/user/:id', (req, res) => {
+    api.put('/user/:id', (req, res, next) => {
       if (isNaN(+req.params.id)) {
         throw new HttpError('User not found', 404);
       }
@@ -388,21 +370,17 @@ class Server {
 
           Promise.all([updateEmail, updatePassword, database.updateUser(user)]).then(() => {
             res.json({success: true});
-          }, (err) => {
-            throw err;
-          });
+          }).catch(next);
         });
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
     // Logging out
-    api.post('/user/logout', (req, res) => {
+    api.post('/user/logout', (req, res, next) => {
       // delete session object
       req.session.destroy(function(err) {
         if (err) {
-          throw err;
+          next(err);
         }
         res.json({ success: true });
       });
@@ -411,7 +389,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.post('/feeder/claim', (req, res) => {
+    api.post('/feeder/claim', (req, res, next) => {
         if (typeof req.body.identifier === 'undefined') {
           throw new HttpError('No feeder identifier given', 400);
         }
@@ -426,9 +404,7 @@ class Server {
             throw new HttpError('Feeder not found', 404);
           }
           res.json({ success: true });
-        }, (err) => {
-          throw err;
-        });
+        }).catch(next);
       });
 
     // We now need to check feeder association
@@ -445,29 +421,23 @@ class Server {
 
         req.feeder = feeder;
         next();
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
-    api.get('/feeder/:id', (req, res) => {
+    api.get('/feeder/:id', (req, res, next) => {
       feederCoordinator.getFeeder(req.feeder.identifier).then((feeder) => {
         if (!feeder) {
           throw new HttpError('Feeder not found', 404);
         }
         res.json(feeder.jsoned());
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
-    api.put('/feeder/:id', (req, res) => {
+    api.put('/feeder/:id', (req, res, next) => {
       let name = req.body.name;
       database.setFeederName(req.feeder.id, name).then((success) => {
         res.json({ success: success });
-      }, (err) => {
-        throw err;
-      });
+      }).catch(next);
     });
 
     api.post('/feeder/:id/feed', (req, res) => {

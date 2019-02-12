@@ -101,7 +101,7 @@ class DataBaseCoordinator {
           reject(err);
           return;
         }
-        
+
         // Parse the meals results
         if (results.length) {
           const User = require('./models/user');
