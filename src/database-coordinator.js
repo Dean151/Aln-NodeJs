@@ -97,8 +97,11 @@ class DataBaseCoordinator {
       query += ' HAVING u.id IS NOT NULL';
 
       this.con.query(query, [value], (err, results, fields) => {
-        if (err) { throw err; }
-
+        if (err) {
+          reject(err);
+          return;
+        }
+        
         // Parse the meals results
         if (results.length) {
           const User = require('./models/user');
