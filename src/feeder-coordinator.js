@@ -214,25 +214,18 @@ class FeederCoordinator {
   }
 
   /**
-   * @callback FeederCoordinator~getFeederCallback
-   * @param {Feeder|undefined} feeder
-   * @throws
-   */
-
-  /**
    * @param {string} identifier
-   * @param {FeederCoordinator~getFeederCallback} callback
-   * @throws
+   * @return Promise
    */
-  getFeeder (identifier, callback) {
-    if (identifier in this.feeders) {
-      callback(this.feeders[identifier]);
-      return;
-    }
+  getFeeder(identifier) {
+    return new Promise((resolve, reject) => {
+      if (identifier in this.feeders) {
+        resolve(this.feeders[identifier]);
+        return;
+      }
 
-    // Feeder is unreachable. Let try to get it from database
-    this.database.fetchFeederLastResponded(identifier, (lastResponded) => {
-      callback(lastResponded ? new Feeder(identifier, lastResponded) : undefined);
+      // Feeder is unreachable. Let try to get it from database
+      return this.database.fetchFeederLastResponded(identifier);
     });
   }
 

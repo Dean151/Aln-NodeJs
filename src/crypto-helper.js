@@ -23,20 +23,36 @@ const secureRandom = require('secure-random');
 class CryptoHelper {
 
     /**
-     * @param {string} password 
-     * @param {callback} callback 
+     * @param {string} password
+     * @return Promise
      */
-    static hashPassword(password, callback) {
-        bcrypt.hash(password, 10, callback);
+    static hashPassword(password) {
+        return new Promise((resolve, reject) => {
+            bcrypt.hash(password, 10, (err, hash) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(hash);
+                }
+            });
+        });
     }
 
     /**
      * @param {string} password 
      * @param {string} hash 
-     * @param {callback} callback 
+     * @return Promise
      */
-    static comparePassword(password, hash, callback) {
-        bcrypt.compare(password, hash, callback);
+    static comparePassword(password, hash) {
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, hash, (err, success) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(success);
+                }
+            });
+        });
     }
 
     /**

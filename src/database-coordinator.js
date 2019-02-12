@@ -60,72 +60,72 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @callback DataBaseCoordinator~getUserCallback
-   * @param {User} user
-   * @throws
-   */
-
-  /**
    * @param {number} id
-   * @param {DataBaseCoordinator~getUserCallback} callback
-   * @throws
+   * @return Promise
    */
-  getUserById(id, callback) {
-    this.getUserBy('id', id, callback);
+  getUserById(id) {
+    return this.getUserBy('id', id);
   }
 
   /**
    * @param {string} email
-   * @param {DataBaseCoordinator~getUserCallback} callback
-   * @throws
+   * @return Promise
    */
-  getUserByEmail(email, callback) {
-    this.getUserBy('email', email, callback);
+  getUserByEmail(email) {
+    return this.getUserBy('email', email);
   }
 
   /**
    * @param {string} column 
-   * @param {string|number} value 
-   * @param {DataBaseCoordinator~getUserCallback} callback 
+   * @param {string|number} value
+   * @return Promise
    */
-  getUserBy(column, value, callback) {
-    if (!this.isReady()) {
-      throw 'Database is not ready';
-    }
+  getUserBy(column, value) {
+    return new Promise((resolve, reject) => {
 
-    const User = require('./models/user');
+      var query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
+      if (column === 'id') {
+        query += 'WHERE u.id = ?';
+      }
+      else if (column === 'email') {
+        query = 'WHERE u.email = ?';
+      }
+      else {
+        reject(new Error('Undetermined column for getting user'));
+        return;
+      }
+      query += ' HAVING u.id IS NOT NULL';
 
-    // Get current planning id
-    this.con.query('SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id WHERE u.' + column + ' = ? HAVING u.id IS NOT NULL', [value], (err, results, fields) => {
-      if (err) { throw err; }
+      this.con.query(query, [value], (err, results, fields) => {
+        if (err) { throw err; }
 
-      // Parse the meals results
-      let user = results.length ? new User(results[0]) : undefined;
-      callback(user);
+        // Parse the meals results
+        if (results.length) {
+          const User = require('./models/user');
+          resolve(new User(results[0]));
+        } else {
+          resolve(undefined);
+        }
+      });
     });
   }
 
   /**
    * @param {number} user_id
+   * @return Promise
    */
   loggedUser(user_id) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    // We try to update the feeder registry.
-    this.con.query('UPDATE users SET login = CURRENT_TIMESTAMP where id = ?', [user_id], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+    return new Promise((resolve, reject) => {
+      this.con.query('UPDATE users SET login = CURRENT_TIMESTAMP where id = ?', [user_id], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve();
+        }
+      });
     });
   }
-
-  /**
-   * @callback DataBaseCoordinator~createUserCallback
-   * @param {boolean} success
-   * @throws
-   */
 
   /**
    * @param {{email: string, hash: string}} data
@@ -160,120 +160,108 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @callback DataBaseCoordinator~claimFeederCallback
-   * @param {boolean} success
-   * @throws
-   */
-
-  /**
    * @param {string} identifier
    * @param {number} user_id
    * @param {string} ip
-   * @param {DataBaseCoordinator~claimFeederCallback} callback
+   * @return Promise
    */
-  claimFeeder(identifier, user_id, ip, callback) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    this.con.query('UPDATE feeders SET owner = ? WHERE owner IS NULL AND identifier = ? AND ip LIKE ?', [user_id, identifier, '%:' + ip + ':%'], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
-      callback(result.affectedRows >= 1);
+  claimFeeder(identifier, user_id, ip) {
+    return new Promise((resolve, reject) => {
+      this.con.query('UPDATE feeders SET owner = ? WHERE owner IS NULL AND identifier = ? AND ip LIKE ?', [user_id, identifier, '%:' + ip + ':%'], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
-
-  /**
-   * @callback DataBaseCoordinator~checkFeederCallback
-   * @param {{id: number, identifier: string}|null} feeder
-   * @throws
-   */
 
   /**
    * @param {number} feeder_id
    * @param {number} user_id
-   * @param {DataBaseCoordinator~checkFeederCallback} callback
+   * @return Promise
    */
-  checkFeederAssociation(feeder_id, user_id, callback) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    this.con.query('SELECT * FROM feeders WHERE owner = ? AND id = ?', [user_id, feeder_id], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
-      callback(result.length ? result[0] : null);
+  checkFeederAssociation(feeder_id, user_id) {
+    return new Promise((resolve, reject) => {
+      this.con.query('SELECT * FROM feeders WHERE owner = ? AND id = ?', [user_id, feeder_id], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.length ? result[0] : undefined);
+        }
+      });
     });
   }
 
   /**
-   * @callback DataBaseCoordinator~fetchFeederLastRespondedCallback
-   * @param {Date|undefined} date
-   * @throws
+   * @param {string} identifier
+   * @return Promise
    */
-
-  /**
-   * @param {string} identifier 
-   * @param {DataBaseCoordinator~fetchFeederLastRespondedCallback} callback 
-   * @throws
-   */
-  fetchFeederLastResponded(identifier, callback) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    this.con.query('SELECT last_responded FROM feeders WHERE identifier = ?', [identifier], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
-      callback(result.length && result[0].last_responded ? new Date(result[0].last_responded) : null);
+  fetchFeederLastResponded(identifier) {
+    return new Promise((resolve, reject) => {
+      this.con.query('SELECT last_responded FROM feeders WHERE identifier = ?', [identifier], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          const Feeder = require("./models/feeder");
+          resolve(result.length && result[0].last_responded ? new Feeder(identifier, new Date(result[0].last_responded)) : undefined);
+        }
+      });
     });
   }
 
   /**
    * @param {string} identifier
    * @param {string} ip
-   * @throws
+   * @return Promise
    */
   registerFeeder(identifier, ip) {
-    if (!this.isReady()) {
-      return;
-    }
+    return new Promise((resolve, reject) => {
+      // We try to update the feeder registry.
+      let now = new Date();
+      let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+      this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-    // We try to update the feeder registry.
-    let now = new Date();
-    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-    this.con.query('UPDATE feeders SET last_responded = ?, ip = ? WHERE identifier = ?', [date, ip, identifier], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
-      if (result.affectedRows < 1) {
-        // We insert the new row in the feeder registry.
-        this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
-          if (err) {
-            throw err;
-          }
-        });
-      }
+        if (result.affectedRows < 1) {
+          // We insert the new row in the feeder registry.
+          this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        }
+        else {
+          resolve();
+        }
+      });
     });
   }
 
   /**
    * @param id
    * @param name
-   * @throws
+   * @return Promise
    */
   setFeederName(id, name) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    this.con.query('UPDATE feeders SET name = ? WHERE id = ?', [name, id], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+    return new Promise((resolve, reject) => {
+      this.con.query('UPDATE feeders SET name = ? WHERE id = ?', [name, id], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
 

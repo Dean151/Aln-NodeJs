@@ -142,26 +142,29 @@ class Server {
 
       // Check if the user already exists
       let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email, (user) => {
+      database.getUserByEmail(email).then((user) => {
         if (user) {
           throw new HttpError('Email already in use', 406);
         }
 
-        database.createUser({
+        var data = {
           email: email,
           hash: 'not-an-hash',
-        }).then(() => {
-          database.getUserByEmail(email, (user) => {
-            if (!user) {
-              throw new HttpError('Registration failed', 500);
-            }
+        };
 
-            user.sendResetPassMail(config);
-            res.json({ success: true });
-          });
+        Promise.all([database.createUser(data), database.getUserByEmail(email)]).then((results) => {
+          var user = results[1];
+          if (!user) {
+            throw new HttpError('Registration failed', 500);
+          }
+
+          user.sendResetPassMail(config);
+          res.json({ success: true });
         }, (err) => {
           throw err;
         });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -171,21 +174,28 @@ class Server {
       }
 
       let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email, (user) => {
-        if (typeof user === 'undefined') {
+      database.getUserByEmail(email).then((user) => {
+        if (user === undefined) {
           throw new HttpError('Wrong email/password', 401);
         }
 
-        CryptoHelper.comparePassword(req.body.password, user.password, (err, success) => {
+        CryptoHelper.comparePassword(req.body.password, user.password).then((success) => {
           if (!success) {
             throw new HttpError('Wrong email/password', 401);
           }
 
-          database.loggedUser(user.id);
-          req.session.user = user.jsoned();
-          let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-          res.json({ success: true, user: req.session.user, token: token });
+          database.loggedUser(user.id).then(() => {
+            req.session.user = user.jsoned();
+            let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+            res.json({ success: true, user: req.session.user, token: token });
+          }, (err) => {
+            throw err;
+          });
+        }, (err) => {
+          throw err;
         });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -199,11 +209,13 @@ class Server {
       }
 
       let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email, (user) => {
+      database.getUserByEmail(email).then((user) => {
         if (user) {
           user.sendResetPassMail(config);
         }
         res.json({ success: true });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -212,11 +224,11 @@ class Server {
         throw new HttpError('Missing parameter', 400);
       }
 
-      database.getUserById(req.body.user_id, (user) => {
-        if (typeof user === 'undefined') {
+      database.getUserById(req.body.user_id).then((user) => {
+        if (user === undefined) {
           throw new HttpError('Wrong parameter', 401);
         }
-        
+
         // First login does not expires. Other expires after 24 hours
         if (user.login > 0 && req.body.timestamp > Math.round(new Date().getTime()/1000) - 24*3600) {
           throw new HttpError('Wrong parameter', 401);
@@ -229,10 +241,15 @@ class Server {
         let passwordToken = CryptoHelper.randomKeyBase64(64);
         req.session.passworkToken = passwordToken;
 
-        database.loggedUser(user.id);
-        req.session.user = user.jsoned();
-        let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-        res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
+        database.loggedUser(user.id).then(() => {
+          req.session.user = user.jsoned();
+          let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
+          res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
+        }, (err) => {
+          throw err;
+        });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -242,8 +259,8 @@ class Server {
         return;
       }
 
-      database.getUserById(req.session.user.id, (user) => {
-        if (typeof user === 'undefined') {
+      database.getUserById(req.session.user.id).then( (user) => {
+        if (user === undefined) {
           req.session.destroy(function(err) {
             res.json({ state: 'not logged in', user: null });
           });
@@ -254,6 +271,8 @@ class Server {
         req.session.user = user.jsoned();
         let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
         res.json({ state: 'logged in', user: req.session.user, token: token });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -290,9 +309,9 @@ class Server {
       }
 
       let id = req.params.id;
-      database.getUserById(id, (user) => {
+      database.getUserById(id).then((user) => {
         // Check we're the current user...
-        if (typeof user === 'undefined' || user.id !== req.session.user.id) {
+        if (user === undefined || user.id !== req.session.user.id) {
           throw new HttpError('User not found', 404);
         }
 
@@ -305,14 +324,6 @@ class Server {
 
           // TODO!
           reject(new Error('Not implemented exception'));
-        });
-        var updateEmail = new Promise((resolve, reject) => {
-          if (!req.body.email) {
-            resolve();
-            return;
-          }
-          user.email = req.body.email;
-          resolve();
         });
 
         // Updating password
@@ -343,43 +354,46 @@ class Server {
             return;
           }
 
-          CryptoHelper.comparePassword(req.body.current_pass, user.hash, (err, success) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-
-            if (!success) {
-              reject(new HttpError('Changing password requires current password', 406));
-              return;
-            }
-
-            resolve(true);
-          });
-        });
-        var updatePassword = new Promise((resolve, reject) => {
-          if (!req.body.new_pass) {
-            resolve();
-            return;
-          }
-          CryptoHelper.hashPassword(req.body.new_pass, (err, hash) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            // Save the new hash
-            user.password = hash;
-            resolve();
-          });
+          CryptoHelper.comparePassword(req.body.current_pass, user.hash).then((success) => {
+              if (!success) {
+                reject(new HttpError('Changing password requires current password', 406));
+                return;
+              }
+              resolve(true);
+            }, reject);
         });
 
         Promise.all([shouldUpdateEmail, shouldUpdatePassword]).then(() => {
+
+          var updateEmail = new Promise((resolve, reject) => {
+            if (!req.body.email) {
+              resolve();
+              return;
+            }
+            user.email = req.body.email;
+            resolve();
+          });
+
+          var updatePassword = new Promise((resolve, reject) => {
+            if (!req.body.new_pass) {
+              resolve();
+              return;
+            }
+            CryptoHelper.hashPassword(req.body.new_pass).then((hash) => {
+              // Save the new hash
+              user.password = hash;
+              resolve();
+            }, reject);
+          });
+
           Promise.all([updateEmail, updatePassword, database.updateUser(user)]).then(() => {
             res.json({success: true});
           }, (err) => {
             throw err;
           });
         });
+      }, (err) => {
+        throw err;
       });
     });
 
@@ -399,25 +413,21 @@ class Server {
 
     api.post('/feeder/claim', (req, res) => {
         if (typeof req.body.identifier === 'undefined') {
-          res.status(500);
-          res.json({ success: false, error: 'No feeder identifier given' });
-          return;
+          throw new HttpError('No feeder identifier given', 400);
         }
 
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         if (!validator.isIP(ip)) {
-          res.status(401);
-          res.json({ success: false, error: 'Feeder not found' });
-          return;
+          throw new HttpError('Feeder not found', 404);
         }
 
-        database.claimFeeder(req.body.identifier, req.session.user.id, ip, (success) => {
+        database.claimFeeder(req.body.identifier, req.session.user.id, ip).then((success) => {
           if (!success) {
-            res.status(401);
-            res.json({ success: false, error: 'Feeder not found' });
-          } else {
-            res.json({ success: true });
+            throw new HttpError('Feeder not found', 404);
           }
+          res.json({ success: true });
+        }, (err) => {
+          throw err;
         });
       });
 
@@ -425,36 +435,39 @@ class Server {
     api.use((req, res, next) => {
       let id = req.path.split('/')[2];
       if (isNaN(+id)) {
-        res.status(500);
-        res.json({ success: false, error: 'No feeder id given' });
-        return;
+        throw new HttpError('No feeder id given', 400);
       }
 
-      database.checkFeederAssociation(id, req.session.user.id, (feeder) => {
+      database.checkFeederAssociation(id, req.session.user.id).then((feeder) => {
         if (!feeder) {
-          res.status(404);
-          res.json({ success: false, error: 'Feeder not found' });
-          return;
+          throw new HttpError('Feeder not found', 404);
         }
 
         req.feeder = feeder;
         next();
+      }, (err) => {
+        throw err;
       });
     });
 
     api.get('/feeder/:id', (req, res) => {
-      feederCoordinator.getFeeder(req.feeder.identifier, (feeder) => {
+      feederCoordinator.getFeeder(req.feeder.identifier).then((feeder) => {
         if (!feeder) {
-          throw 'Feeder not found';
+          throw new HttpError('Feeder not found', 404);
         }
         res.json(feeder.jsoned());
+      }, (err) => {
+        throw err;
       });
     });
 
     api.put('/feeder/:id', (req, res) => {
       let name = req.body.name;
-      database.setFeederName(req.feeder.id, name);
-      res.json({ success: true });
+      database.setFeederName(req.feeder.id, name).then((success) => {
+        res.json({ success: success });
+      }, (err) => {
+        throw err;
+      });
     });
 
     api.post('/feeder/:id/feed', (req, res) => {
