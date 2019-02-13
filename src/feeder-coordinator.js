@@ -134,32 +134,29 @@ class FeederCoordinator {
   /**
    * @param {String} identifier
    * @param {Quantity} quantity
-   * @throws
+   * @return Promise
    */
   recordManualMeal (identifier, quantity) {
-
     // TODO: Later, push notification sending?
-
-    this.database.recordMeal(identifier, quantity);
-    this.database.rememberDefaultAmount(identifier, quantity);
+    return Promise.all([
+      this.database.recordMeal(identifier, quantity),
+      this.database.rememberDefaultAmount(identifier, quantity),
+    ]);
   }
 
   /**
    * @param {String} identifier
    * @param {Time} time
    * @param {Quantity} quantity
-   * @throws
+   * @return Promise
    */
   recordEmptyFeeder (identifier, time, quantity) {
-
     // TODO: Later, push notification sending?
-
-    let data = {
+    return this.database.logAlert(identifier, 'empty', {
       hours: time.hours,
       minutes: time.minutes,
       amount: quantity.amount
-    };
-    this.database.logAlert(identifier, 'empty', data);
+    });
   }
 
   /**
@@ -280,11 +277,6 @@ class FeederCoordinator {
       }, reject);
     });
   }
-
-  /**
-   * @callback FeederCoordinator~sendAndExpectCallback
-   * @param {string} msg
-   */
 }
 
 module.exports = FeederCoordinator;
