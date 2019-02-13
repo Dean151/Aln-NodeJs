@@ -84,6 +84,10 @@ class Server {
   static createWebRouter(config, database) {
     let web = express.Router();
 
+    web.use('/dist/popper.js', express.static(__dirname + '/node_modules/popper.js/dist'));
+    web.use('/dist/jquery', express.static(__dirname + '/node_modules/jquery/dist'));
+    web.use('/dist/bootstrap', express.static(__dirname + '/node_modules/bootstrap/dist'));
+
     web.route('/user/:type/:id/:timestamp/:hash').get((req, res, next) => {
       var availableTypes = ['create_password', 'reset_password', 'validate_email'];
       if (availableTypes.indexOf(req.params.type) === -1) {
