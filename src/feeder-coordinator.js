@@ -108,11 +108,11 @@ class FeederCoordinator {
   identifyFeeder (identifier, ip, socket) {
     console.log('Feeder identified with', identifier);
 
-    if (this.feeders[identifier] === undefined) {
-      this.feeders[identifier] = new Feeder(identifier, socket);
+    if (identifier in this.feeders) {
+      this.feeders[identifier].hasResponded(socket);
     }
     else {
-      this.feeders[identifier].hasResponded(socket);
+      this.feeders[identifier] = new Feeder(identifier, socket);
     }
 
     // Maintain the connection with the socket

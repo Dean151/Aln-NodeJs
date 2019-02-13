@@ -119,12 +119,12 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {{email: string, hash: string}} data
+   * @param {{email: string, shown_email: string, hash: string}} data
    * @return Promise
    */
   createUser(data) {
     return new Promise((resolve, reject) => {
-      this.con.query('INSERT INTO users (email, password) VALUES (?, ?)', [data.email, data.hash], (err, result, fields) => {
+      this.con.query('INSERT INTO users (email, email_shown, password) VALUES (?, ?, ?)', [data.email, data.shown_email, data.hash], (err, result, fields) => {
         if (err) {
           reject(err);
           return;
@@ -140,7 +140,7 @@ class DataBaseCoordinator {
    */
   updateUser(user) {
     return new Promise((resolve, reject) => {
-      this.con.query('UPDATE users SET email = ?, password = ? WHERE id = ?', [user.email, user.password, user.id], (err, result, fields) => {
+      this.con.query('UPDATE users SET email = ?, email_shown = ?, email_unvalidated, password = ? WHERE id = ?', [user.email, user.shown_email, user.unvalidated_email, user.password, user.id], (err, result, fields) => {
         if (err) {
           reject(err);
           return;

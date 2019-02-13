@@ -52,9 +52,11 @@ CREATE TABLE `unknown_data` (
 CREATE TABLE `users` (
   `id` int(11) UNSIGNED NOT NULL,
   `email` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `email_shown` varchar(254) NOT NULL,
+  `email_unvalidated` varchar(254) DEFAULT NULL,
   `password` varchar(60) NOT NULL,
-  `register` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `login` datetime NULL DEFAULT NULL
+  `register` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `login` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 

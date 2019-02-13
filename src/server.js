@@ -73,18 +73,39 @@ class Server {
     let api = Server.createApiRouter(feederCoordinator, database, config);
     app.use('/api', api);
 
-    let web = Server.createWebRouter(config);
+    let web = Server.createWebRouter(config, database);
     app.use('/', web);
 
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 
-  static createWebRouter(config) {
+  static createWebRouter(config, database) {
     let web = express.Router();
 
-    web.route(['/user/create_password/\d+/\d+/[a-zA-Z0-9\-_]+', '/user/reset_password/\d+/\d+/[a-zA-Z0-9\-_]+']).get((req, res, next) => {
-      // TODO: show a page that would redirect to the application.
-      // Or eventually explain to open the link on the iOS device.
+    web.route('/user/:type/:id/:timestamp/:hash').get((req, res, next) => {
+      var availableTypes = ['create_password', 'reset_password', 'validate_email'];
+      if (availableTypes.indexOf(req.params.type) === -1) {
+        throw new HttpError('Not found', 404);
+      }
+
+      // Validate the link.
+      database.getUserById(req.params.id).then((user) => {
+        if (user === undefined) {
+          throw new HttpError('Not found', 404);
+        }
+
+        if (req.params.type !== 'validate_email' && !user.validatePassMail(config, req.params.timestamp, req.params.hash)) {
+          throw new HttpError('Link is unvalid', 403);
+        }
+        if (req.params.type === 'validate_email' && !user.validateEmailMail(config, req.params.timestamp, req.params.hash)) {
+          throw new HttpError('Link is unvalid', 403);
+        }
+
+        // TODO: show a page that will handle the link
+        // TODO: show a page that would redirect to the application.
+        // Or eventually explain to open the link on the iOS device.
+
+      }).catch(next);
     });
 
     if (config.ios_appname) {
@@ -97,7 +118,7 @@ class Server {
           apps: [],
           details: [{
             appID: config.ios_appname,
-            paths:['/user/create_password/*', '/user/reset_password/*']
+            paths:['/user/create_password/*', '/user/reset_password/*', '/user/reset_password/*']
           }]
         }
       };
@@ -106,6 +127,18 @@ class Server {
       });
     }
 
+
+    // Error handling at the end
+    web.use((err, req, res, next) => {
+      if (err instanceof HttpError) {
+        res.status(err.code);
+      }
+      else {
+        res.status(500);
+      }
+      res.render('error', { error: err });
+    });
+    
     return web;
   }
 
@@ -149,6 +182,7 @@ class Server {
 
         var data = {
           email: email,
+          shown_email: req.body.email,
           hash: 'not-an-hash',
         };
 
@@ -207,7 +241,7 @@ class Server {
       }).catch(next);
     });
 
-    api.post(['/user/password_reset'], requiresNotLoggedIn, (req, res, next) => {
+    api.post('/user/password_reset', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
         throw new HttpError('Missing parameter', 400);
       }
@@ -217,12 +251,7 @@ class Server {
           throw new HttpError('Wrong parameter', 401);
         }
 
-        // First login does not expires. Other expires after 24 hours
-        if (user.login > 0 && req.body.timestamp > Math.round(new Date().getTime()/1000) - 24*3600) {
-          throw new HttpError('Wrong parameter', 401);
-        }
-
-        if (!CryptoHelper.checkBase64Hash([req.body.timestamp, user.login, user.id, user.password].join(':'), req.body.hash, config.hmac_secret)) {
+        if (!user.validatePassMail(config, req.body.timestamp, req.body.hash)) {
           throw new HttpError('Wrong parameter', 401);
         }
 
@@ -234,6 +263,26 @@ class Server {
           let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
           res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
         }).catch(next);
+      }).catch(next);
+    });
+
+    api.post('/user/validate_email', (req, res, next) => {
+      if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
+        throw new HttpError('Missing parameter', 400);
+      }
+
+      database.getUserById(req.body.user_id).then((user) => {
+        if (user === undefined) {
+          throw new HttpError('Wrong parameter', 401);
+        }
+
+        if (!user.validateEmailMail(config, req.body.timestamp, req.body.hash)) {
+          throw new HttpError('Wrong parameter', 401);
+        }
+
+        // TODO: enable validated email
+
+        res.json({ success: true });
       }).catch(next);
     });
 
@@ -299,13 +348,27 @@ class Server {
 
         // Updating email
         var shouldUpdateEmail = new Promise((resolve, reject) => {
-          if (!req.body.email || user.email === req.body.email) {
+          if (!req.body.email || user.email === validator.normalizeEmail(req.body.email)) {
             resolve(false);
             return;
           }
 
-          // TODO!
-          reject(new Error('Not implemented exception'));
+          if (!validator.isEmail(req.body.email)) {
+            reject(new HttpError('Not an email', 400));
+          }
+
+          if (!req.body.current_pass) {
+            reject(new HttpError('Changing password requires current password', 406));
+            return;
+          }
+
+          CryptoHelper.comparePassword(req.body.current_pass, user.hash).then((success) => {
+            if (!success) {
+              reject(new HttpError('Changing password requires current password', 406));
+              return;
+            }
+            resolve(true);
+          }, reject);
         });
 
         // Updating password
@@ -352,7 +415,8 @@ class Server {
               resolve();
               return;
             }
-            user.email = req.body.email;
+            user.unvalidated_email = req.body.email;
+            user.sendValidateEmailMail(config);
             resolve();
           });
 
@@ -471,7 +535,6 @@ class Server {
           res.json({ success: true });
         }).catch(next);
       });
-
 
     // Error handling at the end
     api.use((err, req, res, next) => {
