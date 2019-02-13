@@ -82,8 +82,7 @@ class Server {
   static createWebRouter(config, database) {
     let web = express.Router();
 
-    web.engine('jade', require('jade').__express);
-    web.set('view engine','jade');
+    web.set('view engine', 'pug');
 
     web.route('/user/:type/:id/:timestamp/:hash').get((req, res, next) => {
       var availableTypes = ['create_password', 'reset_password', 'validate_email'];
@@ -139,7 +138,7 @@ class Server {
       else {
         res.status(500);
       }
-      res.render('errors.jade', { error: err });
+      res.render('errors', { error: err });
     });
 
     return web;
