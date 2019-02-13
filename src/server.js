@@ -133,12 +133,9 @@ class Server {
       if (err instanceof HttpError) {
         res.status(err.code);
       }
-      else {
-        res.status(500);
-      }
-      res.render('error', { error: err });
+      next(err);
     });
-    
+
     return web;
   }
 
