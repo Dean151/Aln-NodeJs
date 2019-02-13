@@ -66,7 +66,7 @@ class FeederCoordinator {
       console.log('Client disconnected:', ip);
     });
     socket.on('data', (data) => {
-      this.socketDataRetreived(data, ip, socket);
+      this.socketDataRetrieved(data, ip, socket);
     });
   }
 
@@ -74,42 +74,36 @@ class FeederCoordinator {
    * @param {Buffer} data
    * @param {string} ip
    * @param {net.Socket} socket
+   * @return Promise
    */
-  socketDataRetreived (data, ip, socket) {
+  socketDataRetrieved (data, ip, socket) {
     console.log('Data received from', ip, ':', data.toString('hex'));
 
-    try {
-      let treatedData = ResponseBuilder.recognize(data);
-      switch (treatedData.type) {
-        case 'identification':
-          this.identifyFeeder(treatedData.identifier, ip, socket);
-          break;
-        case 'manual_meal':
-          let quantity = new Quantity(treatedData.amount);
-          this.recordManualMeal(treatedData.identifier, quantity);
-          break;
-        case 'empty_feeder':
-          let time = new Time(treatedData.hours, treatedData.minutes);
-          let plannedQuantity = new Quantity(treatedData.amount);
-          this.recordEmptyFeeder(treatedData.identifier, time, plannedQuantity);
-          break;
-        case 'expectation':
-          break;
-        default:
-          throw 'Untreated response type';
-      }
+    let treatedData = ResponseBuilder.recognize(data);
+    switch (treatedData.type) {
+      case 'identification':
+        return this.identifyFeeder(treatedData.identifier, ip, socket);
+      case 'manual_meal':
+        let quantity = new Quantity(treatedData.amount);
+        return this.recordManualMeal(treatedData.identifier, quantity);
+      case 'empty_feeder':
+        let time = new Time(treatedData.hours, treatedData.minutes);
+        let plannedQuantity = new Quantity(treatedData.amount);
+        return this.recordEmptyFeeder(treatedData.identifier, time, plannedQuantity);
+      case 'expectation':
+        // Don't do a thing for expectations.
+        return new Promise((resolve, reject) => { resolve(); });
     }
-    catch (e) {
-      this.database.logUnknownData(e.message ? e.message : e, data, ip);
-      socket.destroy();
-    }
+
+    socket.destroy();
+    return this.database.logUnknownData('Unknown response', data, ip);
   }
 
   /**
    * @param {string} identifier
    * @param {string} ip
    * @param {net.Socket} socket
-   * @throws
+   * @return Promise
    */
   identifyFeeder (identifier, ip, socket) {
     console.log('Feeder identified with', identifier);
@@ -121,14 +115,15 @@ class FeederCoordinator {
       this.feeders[identifier].hasResponded(socket);
     }
 
-    // Send it back the time
-    this.send(identifier, ResponseBuilder.time());
-
     // Maintain the connection with the socket
     socket.setKeepAlive(true, 30000);
 
-    // Register it in database
-    this.database.registerFeeder(identifier, ip);
+    return Promise.all([
+      // Send it back the time
+      this.send(identifier, ResponseBuilder.time()),
+      // Register it in database
+      this.database.registerFeeder(identifier, ip),
+    ]);
   }
 
   /**

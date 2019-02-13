@@ -80,8 +80,7 @@ class ResponseBuilder {
 
   /**
    * @param {Buffer} data
-   * @throws
-   * @returns {{type: string, identifier: string}}
+   * @returns {{type: string, identifier: string}}|undefined
    */
   static recognize (data) {
     let hexString = data.toString('hex');
@@ -137,7 +136,7 @@ class ResponseBuilder {
       return { type: 'empty_feeder', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
     }
     else {
-      throw 'Unknown response';
+      return undefined;
     }
   }
 
