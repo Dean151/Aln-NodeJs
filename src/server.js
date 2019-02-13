@@ -447,36 +447,29 @@ class Server {
       }).catch(next);
     });
 
-    api.put('/feeder/:id/quantity', (req, res) => {
+    api.put('/feeder/:id/quantity', (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
-      feederCoordinator.setDefaultQuantity(req.feeder.identifier, quantity, (msg) => {
-        if (msg !== 'success') {
-          throw msg;
-        }
+      feederCoordinator.setDefaultQuantity(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
-      });
+      }).catch(next);
     });
 
     api.route('/feeder/:id/planning')
-      .get((req, res) => {
+      .get((req, res, next) => {
         // Fetch the planning if it's exists
-        database.getCurrentPlanning(req.feeder.id, (planning) => {
-          if (typeof planning === 'undefined') {
-            res.status(500);
-            res.json({ success: false, error: 'No planning' });
+        database.getCurrentPlanning(req.feeder.id).then((planning) => {
+          if (planning === undefined) {
+            throw new HttpError('No planning found', 404);
           }
           res.json({ success: true, meals: planning.jsoned() });
-        });
+        }).catch(next);
       })
-      .put((req, res) => {
+      .put((req, res, next) => {
         let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
         let planning = new Planning(meals);
-        feederCoordinator.setPlanning(req.feeder.identifier, planning, (msg) => {
-          if (msg !== 'success') {
-            throw msg;
-          }
+        feederCoordinator.setPlanning(req.feeder.identifier, planning).then(() => {
           res.json({ success: true });
-        });
+        }).catch(next);
       });
 
 

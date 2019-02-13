@@ -197,7 +197,7 @@ class FeederCoordinator {
       let timeout = setTimeout(() => {
         feeder.socket.removeListener('data', expectationListener);
         reject(new Error('Timeout occurred'));
-      }, 30000);
+      }, 5000);
 
       let expectationListener = (data) => {
         if (data.toString('hex') === expectation.toString('hex')) {
@@ -213,43 +213,6 @@ class FeederCoordinator {
       // Write to the feeder
       feeder.send(data);
     });
-  }
-
-  /**
-   * FIXME: To delete
-   * @param {string} identifier
-   * @param {Buffer} data
-   * @param {Buffer} expectation
-   * @param {FeederCoordinator~sendAndExpectCallback} callback
-   * @throws
-   */
-  sendAndExpect (identifier, data, expectation, callback) {
-    if (!(identifier in this.feeders)) {
-      throw 'Feeder not found';
-    }
-    let feeder = this.feeders[identifier];
-
-    // Prepare a timeout for execution
-    let timeout = setTimeout(() => {
-      feeder.socket.removeListener('data', expectationListener);
-      callback('timeout');
-    }, 30000);
-
-    let expectationListener = (data) => {
-      if (data.toString('hex') === expectation.toString('hex')) {
-        if (typeof callback === 'function') {
-          callback('success');
-        }
-        feeder.socket.removeListener('data', expectationListener);
-        clearTimeout(timeout);
-      }
-    };
-
-    // Listen for the expectation
-    feeder.socket.on('data', expectationListener);
-
-    // Write to the feeder
-    feeder.send(data);
   }
 
   /**
@@ -271,16 +234,17 @@ class FeederCoordinator {
   /**
    * @param {String} identifier
    * @param {Quantity} quantity
-   * @param {FeederCoordinator~sendAndExpectCallback} callback
-   * @throws
+   * @return Promise
    */
-  setDefaultQuantity (identifier, quantity, callback) {
-    let data = ResponseBuilder.changeDefaultQuantity(quantity);
-    let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
+  setDefaultQuantity (identifier, quantity) {
+    return new Promise((resolve, reject) => {
+      let data = ResponseBuilder.changeDefaultQuantity(quantity);
+      let expectation = ResponseBuilder.changeDefaultQuantityExpectation(identifier);
 
-    this.sendAndExpect(identifier, data, expectation, (msg) => {
-      this.database.rememberDefaultAmount(identifier, quantity);
-      callback(msg);
+      this.sendAndWait(identifier, data, expectation).then(() => {
+        this.database.rememberDefaultAmount(identifier, quantity);
+        resolve();
+      }, reject);
     });
   }
 
@@ -288,16 +252,16 @@ class FeederCoordinator {
   /**
    * @param {String} identifier
    * @param {Planning} planning
-   * @param {FeederCoordinator~sendAndExpectCallback} callback
-   * @throws
+   * @return Promise
    */
-  setPlanning (identifier, planning, callback) {
-    let data = ResponseBuilder.changePlanning(planning);
-    let expectation = ResponseBuilder.changePlanningExpectation(identifier);
+  setPlanning (identifier, planning) {
+    return new Promise((resolve, reject) => {
+      let data = ResponseBuilder.changePlanning(planning);
+      let expectation = ResponseBuilder.changePlanningExpectation(identifier);
 
-    this.sendAndExpect(identifier, data, expectation, (msg) => {
-      this.database.recordPlanning(identifier, planning);
-      callback(msg);
+      this.sendAndWait(identifier, data, expectation).then(() => {
+        this.database.recordPlanning(identifier, planning).then(resolve, reject);
+      }, reject);
     });
   }
 

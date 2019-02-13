@@ -24,8 +24,6 @@ class DataBaseCoordinator {
    * @param {{mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    */
   constructor (config) {
-    this.isConnected = false;
-
     this.con = mysql.createConnection({
       host: config.mysql_host,
       user: config.mysql_user,
@@ -35,28 +33,18 @@ class DataBaseCoordinator {
 
     this.con.connect((err) => {
       if (err) {
-        console.log('Could not connect to database: ', err);
+        throw err;
       }
-      else {
-        this.con.query('SHOW TABLES LIKE ?;', ['feeders'], (err, result, fields) => {
-          if (result.length === 0) {
-            // We create the tables, it's the first app start
-            console.log('Tables does not exists. You need to run init.sql file to create them!');
-          }
-          else {
-            this.isConnected = true;
-            console.log('Database connection is ready');
-          }
-        });
-      }
-    });
-  }
 
-  /**
-   * @returns {boolean}
-   */
-  isReady() {
-    return this.isConnected;
+      this.con.query('SHOW TABLES LIKE ?;', ['feeders'], (err, result, fields) => {
+        if (result.length === 0) {
+          throw 'Tables does not exists. You need to run init.sql file to create them!';
+        }
+        else {
+            console.log('Database connection is ready');
+        }
+      });
+    });
   }
 
   /**
@@ -83,7 +71,7 @@ class DataBaseCoordinator {
   getUserBy(column, value) {
     return new Promise((resolve, reject) => {
 
-      var query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
+      let query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
       if (column === 'id') {
         query += 'WHERE u.id = ?';
       }
@@ -271,17 +259,18 @@ class DataBaseCoordinator {
   /**
    * @param {string} identifier
    * @param {Quantity} quantity
-   * @throws
+   * @return Promise
    */
   rememberDefaultAmount(identifier, quantity) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount, identifier], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+    return new Promise((resolve, reject) => {
+      this.con.query('UPDATE feeders SET default_value = ? WHERE identifier = ?', [quantity.amount, identifier], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
 
@@ -290,7 +279,7 @@ class DataBaseCoordinator {
    * @param {Quantity} quantity
    * @return Promise
    */
-  recordMeal (identifier, quantity) {
+  recordMeal(identifier, quantity) {
     return new Promise((resolve, reject) => {
       let now = new Date();
       let date = now.toJSON().slice(0, 10);
@@ -307,31 +296,25 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @callback DataBaseCoordinator~getPlanningCallback
-   * @param {Planning} planning
-   * @throws
-   */
-
-  /**
    * @param {number} id
-   * @param {DataBaseCoordinator~getPlanningCallback} callback
-   * @throws
+   * @return Promise
    */
-  getCurrentPlanning (id, callback) {
-    if (!this.isReady()) {
-      throw 'Database is not ready';
-    }
+  getCurrentPlanning(id) {
+    return new Promise((resolve, reject) => {
+      const Planning = require('./models/planning');
+      const Meal = require('./models/meal');
 
-    const Planning = require('./models/planning');
-    const Meal = require('./models/meal');
+      // Get current planning id
+      this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p WHERE p.feeder = ? ORDER BY p.date DESC LIMIT 1)', [id], (err, results, fields) => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-    // Get current planning id
-    this.con.query('SELECT time, quantity, enabled FROM meals WHERE planning = (SELECT p.id FROM plannings p WHERE p.feeder = ? ORDER BY p.date DESC LIMIT 1)', [id], (err, results, fields) => {
-      if (err) { throw err; }
-
-      // Parse the meals results
-      let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
-      callback(new Planning(meals));
+        // Parse the meals results
+        let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
+        resolve(new Planning(meals));
+      });
     });
   }
 
@@ -339,56 +322,65 @@ class DataBaseCoordinator {
   /**
    * @param {string} identifier
    * @param {Planning} planning
-   * @throws
+   * @return Promise
    */
-  recordPlanning (identifier, planning) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    let connection = this.con;
-
-    let now = new Date();
-    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-
-    connection.beginTransaction((err) => {
-      if (err) { throw err; }
-
-      // We register the planning in the database
-      connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
+  recordPlanning(identifier, planning) {
+    return new Promise((resolve, reject) => {
+      let connection = this.con;
+      connection.beginTransaction((err) => {
         if (err) {
-          return connection.rollback(() => {
-            throw err;
-          });
+          reject(err);
+          return;
         }
 
-        if (planning.mealsCount() === 0) {
-          connection.commit((err) => {
-            if (err) {
-              return connection.rollback(() => {
-                throw err;
-              });
-            }
-          });
-        }
-        else {
+        let now = new Date();
+        let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+        // We register the planning in the database
+        connection.query('INSERT INTO plannings(feeder, date) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?)', [identifier, date], (err, result, fields) => {
+          if (err) {
+            connection.rollback(() => {
+              reject(err);
+            });
+            return;
+          }
+
+          if (planning.mealsCount() === 0) {
+            connection.commit((err) => {
+              if (err) {
+                connection.rollback(() => {
+                  reject(err);
+                });
+                return;
+              }
+
+              resolve();
+            });
+            return;
+          }
+
           // We then insert all meals in the table meals
           let meals = planning.sqled(result.insertId);
           connection.query('INSERT INTO meals(planning, time, quantity, enabled) VALUES ?', [meals], (err, result, fields) => {
             if (err) {
-              return this.con.rollback(() => {
-                throw err;
+              connection.rollback(() => {
+                reject(err);
               });
+              return;
             }
+
             connection.commit((err) => {
               if (err) {
-                return connection.rollback(() => {
-                  throw err;
+                connection.rollback(() => {
+                  reject(err);
                 });
+                return;
               }
+
+              resolve();
             });
           });
-        }
+        });
       });
     });
   }
@@ -397,21 +389,22 @@ class DataBaseCoordinator {
    * @param {string} identifier
    * @param {string} type
    * @param {*} data
-   * @throws
+   * @return Promise
    */
-  logAlert (identifier, type, data) {
-    if (!this.isReady()) {
-      return;
-    }
+  logAlert(identifier, type, data) {
+    return new Promise((resolve, reject) => {
+      let now = new Date();
+      let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+      let json = Buffer.from(JSON.stringify(data));
 
-    let now = new Date();
-    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-    let json = Buffer.from(JSON.stringify(data));
-
-    this.con.query('INSERT INTO alerts(feeder, type, date, data) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, type, date, json], (err, result, fields) => {
-      if (err) {
-        throw err;
-      }
+      this.con.query('INSERT INTO alerts(feeder, type, date, data) VALUES ((SELECT id FROM feeders WHERE identifier = ?), ?, ?, ?)', [identifier, type, date, json], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
 
@@ -419,27 +412,29 @@ class DataBaseCoordinator {
    * @param {string} type
    * @param {Buffer} data
    * @param {string} ip
-   * @throws
+   * @return Promise
    */
-  logUnknownData (type, data, ip) {
-    if (!this.isReady()) {
-      return;
-    }
-
-    // Treating the special case of uncomplete data. This happen all the time...
-    // We receive multiple times a week the data 0x9da114414c
-    // We prevent logging that since it does not actually make sense.
-    if (data.toString('hex').match(/^9da114414c$/)) {
-      return;
-    }
-
-    let now = new Date();
-    let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
-
-    this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type.substring(0, 64), ip, data], (err, result, fields) => {
-      if (err) {
-        throw err;
+  logUnknownData(type, data, ip) {
+    return new Promise((resolve, reject) => {
+      // Treating the special case of uncomplete data. This happen all the time...
+      // We receive multiple times a week the data 0x9da114414c
+      // We prevent logging that since it does not actually make sense.
+      if (data.toString('hex') === '9da114414c') {
+        resolve(false);
+        return;
       }
+
+      let now = new Date();
+      let date = now.toJSON().slice(0, 10) + ' ' + now.toJSON().slice(11, 19);
+
+      this.con.query('INSERT INTO unknown_data(date, type, ip, data) VALUES (?, ?, ?, ?)', [date, type.substring(0, 64), ip, data], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        }
+        else {
+          resolve(result.affectedRows >= 1);
+        }
+      });
     });
   }
 }
