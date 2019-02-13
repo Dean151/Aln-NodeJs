@@ -73,6 +73,8 @@ class Server {
     let api = Server.createApiRouter(feederCoordinator, database, config);
     app.use('/api', api);
 
+    app.set('view engine', 'pug');
+
     let web = Server.createWebRouter(config, database);
     app.use('/', web);
 
@@ -81,8 +83,6 @@ class Server {
 
   static createWebRouter(config, database) {
     let web = express.Router();
-
-    web.set('view engine', 'pug');
 
     web.route('/user/:type/:id/:timestamp/:hash').get((req, res, next) => {
       var availableTypes = ['create_password', 'reset_password', 'validate_email'];
