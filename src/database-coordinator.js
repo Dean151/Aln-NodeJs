@@ -352,7 +352,7 @@ class DataBaseCoordinator {
           resolve(result.map((row) => {
             return {
               type: 'manual',
-              date: new Date(row.date + ' ' + row.time),
+              date: new Date(row.date.toISOString().split('T')[0] + 'T' + row.time),
               quantity: row.quantity,
             };
           }));
