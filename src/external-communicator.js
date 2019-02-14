@@ -49,5 +49,6 @@ class ExternalCommunicator {
       });
     });
   }
-
 }
+
+module.exports = ExternalCommunicator;
