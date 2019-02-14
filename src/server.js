@@ -200,9 +200,9 @@ class Server {
           if (!user) {
             throw new HttpError('Registration failed', 500);
           }
-
-          user.sendResetPassMail(config);
-          res.json({ success: true });
+          user.sendResetPassMail(config).then(() => {
+            res.json({ success: true });
+          }).catch(next);
         }).catch(next);
       }).catch(next);
     });
@@ -244,9 +244,12 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email).then((user) => {
         if (user) {
-          user.sendResetPassMail(config);
+          user.sendResetPassMail(config).then(() => {
+            res.json({ success: true });
+          }).catch(next);
+        } else {
+          res.json({ success: true });
         }
-        res.json({ success: true });
       }).catch(next);
     });
 
@@ -425,8 +428,7 @@ class Server {
               return;
             }
             user.unvalidated_email = req.body.email;
-            user.sendValidateEmailMail(config);
-            resolve();
+            user.sendValidateEmailMail(config).then(resolve, reject);
           });
 
           var updatePassword = new Promise((resolve, reject) => {

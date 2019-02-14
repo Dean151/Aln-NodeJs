@@ -54,6 +54,31 @@ class User {
   }
 
   /**
+   * @param to
+   * @param subject
+   * @param content
+   * @return Promise
+   */
+  sendMail(to, subject, content) {
+    return new Promise((resolve, reject) => {
+      const sendmail = require('sendmail')();
+
+      sendmail({
+        from: 'no-reply@alnpet.thomasdurand.fr',
+        to: to,
+        subject: '[BetterAln] ' + subject,
+        html: content + '<br><br>The BetterAln team.',
+      }, function(err, reply) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(reply);
+        }
+      });
+    });
+  }
+
+  /**
    * @param {{hmac_secret: string, base_url: string}} config
    * @param {string} type
    * @param {string} key
@@ -66,13 +91,17 @@ class User {
 
   /**
    * @param {{hmac_secret: string, base_url: string}} config
+   * @return Promise
    */
   sendResetPassMail(config) {
     // generate token
     let type = this.login ? 'reset_password' : 'create_password';
     let url = this.generateUrl(config, type, this.login + ':' + this.password);
 
-    // TODO: send mail!
+    let subject = type === 'reset_password' ? 'Password reset request' : 'Welcome on BetterAln!';
+    let message = type === 'reset_password' ? ('To proceed with your password reset request, please follow this link: <br>' + url + '<br>If you\'re not at the origin of this request, please ignore this email.') : ('Welcome on BetterAln!<br>Follow this link to continue your registering: <br>' + url);
+
+    return this.sendMail(this.shown_email, subject, message);
   }
 
   /**
@@ -92,13 +121,17 @@ class User {
 
   /**
    * @param {{hmac_secret: string, base_url: string}} config
+   * @return Promise
    */
   sendValidateEmailMail(config) {
     let url = this.generateUrl(config, 'validate_email', this.unvalidated_email);
 
     // send a mail to unvalidated_email value.
     // Also send a mail to mail value warning about the change.
-    // TODO: send mail!
+    return Promise.all([
+      this.sendMail(this.shown_email, 'Email change request', 'You have requested to change your email address to ' + this.unvalidated_email + '<br>If you\'re not at the origin of this request, please contact the support team as soon as possible ; and change your password.'),
+      this.sendMail(this.unvalidated_email, 'Please validate your email', 'Please click the following link to validate this email as your main BetterAln account : <br>' + url),
+    ]);
   }
 
   /**

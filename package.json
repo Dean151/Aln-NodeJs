@@ -32,6 +32,7 @@
     "pug": "^2.0.3",
     "require.js": "^1.0.0",
     "secure-random": "^1.1.1",
+    "sendmail": "^1.4.1",
     "validator": "^10.11.0"
   },
   "devDependencies": {
