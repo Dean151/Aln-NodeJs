@@ -328,10 +328,37 @@ class DataBaseCoordinator {
   getPlannedMeals(id, period, offset) {
     let dates = this._getDates(period, offset);
 
+    let query = 'SELECT p.date, GROUP_CONCAT(CONCAT(m.time, \'/\', m.quantity)) as meals ' +
+      'FROM plannings p ' +
+      'LEFT JOIN meals m ON p.id = m.planning AND m.enabled <> 0 ' +
+      'WHERE p.feeder = ? AND p.date BETWEEN ? AND ? OR p.date = (SELECT MAX(date) FROM plannings WHERE date < ?) ' +
+      'GROUP BY p.id';
+
     // This one is tricky : get plannings from the range, and recreate meals manually
     return new Promise((resolve, reject) => {
-      // TODO!
-      resolve([]);
+      this.con.query(query, [id, dates.begin, dates.end, dates.begin], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          let plans = result.map((row) => {
+            return {
+              date: row.date,
+              meals: row.meals.split(',').map((data) => {
+                let meal = data.split('/');
+                return {
+                  time: meal[0],
+                  quantity: meal[1]
+                };
+              })
+            };
+          });
+
+          console.log(plans);
+
+          // TODO!
+          resolve([]);
+        }
+      });
     });
   }
 
@@ -362,8 +389,8 @@ class DataBaseCoordinator {
   }
 
   _getDates(period, offset) {
-    let dayLength = isNaN(+period) ? 30 : period;
-    let dayEnd = isNaN(+offset) ? 0 : offset;
+    let dayLength = isNaN(+period) ? 7 : period;
+    let dayEnd = (isNaN(+offset) ? 0 : offset) * dayLength;
 
     let date = new Date();
     date.setDate(date.getDate() - dayEnd);
