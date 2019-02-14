@@ -22,7 +22,14 @@ module.exports = {
   'debug_mode': false,
 
   // The base url of the website
-  'base_url': 'http://localhost:3000',
+  'product_name': 'BetterAln',
+  'base_url': 'http://example.com',
+  'sender_mail': 'no-reply@example.com',
+  'mail_transporter': {
+    sendmail: true,
+    newline: 'unix',
+    path: '/usr/sbin/sendmail'
+  },
 
   // Local port to set in nginx reverse proxy
   'local_port': 3000,

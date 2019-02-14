@@ -45,8 +45,9 @@ class Server {
    * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
+   * @param {ExternalCommunicator} communicator
    */
-  constructor(config, feederCoordinator, database) {
+  constructor(config, feederCoordinator, database, communicator) {
 
     // Create a service (the app object is just a callback).
     let app = express();
@@ -70,7 +71,7 @@ class Server {
     }));
 
     // Create the routes for the API
-    let api = Server.createApiRouter(feederCoordinator, database, config);
+    let api = Server.createApiRouter(feederCoordinator, database, communicator, config);
     app.use('/api', api);
 
     app.set('view engine', 'pug');
@@ -153,10 +154,11 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
+   * @param {ExternalCommunicator} communicator
    * @param {{base_url: string, hmac_secret: string}} config
    * @return {express.Router}
    */
-  static createApiRouter(feederCoordinator, database, config) {
+  static createApiRouter(feederCoordinator, database, communicator, config) {
     let api = express.Router();
 
     api.use(bodyParser.urlencoded({ extended: true }));
@@ -199,7 +201,7 @@ class Server {
           if (!user) {
             throw new HttpError('Registration failed', 500);
           }
-          user.sendResetPassMail(config).then(() => {
+          user.sendResetPassMail(config, communicator).then(() => {
             res.json({ success: true });
           }).catch(next);
         }).catch(next);
@@ -243,7 +245,7 @@ class Server {
       let email = validator.normalizeEmail(req.body.email);
       database.getUserByEmail(email).then((user) => {
         if (user) {
-          user.sendResetPassMail(config).then(() => {
+          user.sendResetPassMail(config, communicator).then(() => {
             res.json({ success: true });
           }).catch(next);
         } else {
@@ -434,7 +436,7 @@ class Server {
               return;
             }
             user.unvalidated_email = req.body.email;
-            user.sendValidateEmailMail(config).then(resolve, reject);
+            user.sendValidateEmailMail(config, communicator).then(resolve, reject);
           });
 
           var updatePassword = new Promise((resolve, reject) => {

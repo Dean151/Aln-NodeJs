@@ -31,13 +31,17 @@ else {
 const DataBaseCoordinator = require("./src/database-coordinator");
 let database = new DataBaseCoordinator(config);
 
+// This will handle mail & notification sending
+const ExternalCommunicator = require("./src/external-communicator");
+let communicator = new ExternalCommunicator(config);
+
 // This will handle feeders connexions
 const FeederCoordinator = require("./src/feeder-coordinator");
 let feederCoordinator = new FeederCoordinator(config, database);
 
 // This will handle the REST API
 const Server = require("./src/server");
-new Server(config, feederCoordinator, database);
+new Server(config, feederCoordinator, database, communicator);
 
 // This is the feeder emulator part
 if (config.enable_emulator && config.emulator_identifier) {
