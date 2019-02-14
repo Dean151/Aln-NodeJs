@@ -109,8 +109,7 @@ class Server {
           }).catch(next);
         }
 
-        // TODO: show a page that will handle the link
-        // TODO: show a page that would redirect to the application.
+        // TODO: show a page that allow changing the password
         // Or eventually explain to open the link on the iOS device.
         res.send('Please, open that link on your iOS device with the app installed.');
 

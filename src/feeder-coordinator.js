@@ -57,8 +57,6 @@ class FeederCoordinator {
    * @param {{feeder_list: string[]|undefined, feeder_mode: string|undefined}} config
    */
   handleSocketConnection (socket, config) {
-    
-    // TODO: filter only with IP from registering process
 
     let ip = socket.remoteAddress + ":" + socket.remotePort;
     console.log('Client connected:', ip);
