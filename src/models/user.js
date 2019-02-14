@@ -61,18 +61,25 @@ class User {
    */
   sendMail(to, subject, content) {
     return new Promise((resolve, reject) => {
-      const sendmail = require('sendmail')();
+      const nodemailer = require('nodemailer');
 
-      sendmail({
-        from: 'no-reply@alnpet.thomasdurand.fr',
+      // Use sendmail command line
+      let transporter = nodemailer.createTransport({
+        sendmail: true,
+        newline: 'unix',
+        path: '/usr/sbin/sendmail'
+      });
+
+      transporter.sendMail({
+        from: '"BetterAln" <no-reply@alnpet.thomasdurand.fr>',
         to: to,
         subject: '[BetterAln] ' + subject,
-        html: content + '<br><br>The BetterAln team.',
-      }, function(err, reply) {
+        text: content + '<br><br>The BetterAln team.'
+      }, (err, info) => {
         if (err) {
           reject(err);
         } else {
-          resolve(reply);
+          resolve(info);
         }
       });
     });
