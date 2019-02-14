@@ -328,6 +328,7 @@ class Server {
       next();
     });
 
+    // CSRF Protection
     api.use((req, res, next) => {
       if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS' || req.method === 'TRACE') {
         next();
@@ -520,6 +521,12 @@ class Server {
       let name = req.body.name;
       database.setFeederName(req.feeder.id, name).then((success) => {
         res.json({ success: success });
+      }).catch(next);
+    });
+
+    api.get('/feeder/:id/meals', (req, res, next) => {
+      database.getMealHistory(req.feeder.id, req.query.period, req.query.offset).then((meals) => {
+        res.json(meals);
       }).catch(next);
     });
 

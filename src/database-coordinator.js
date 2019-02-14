@@ -297,6 +297,89 @@ class DataBaseCoordinator {
 
   /**
    * @param {number} id
+   * @param period
+   * @param offset
+   * @return {Promise<[{type: string, date: Date, quantity: number}]>}
+   */
+  getMealHistory(id, period, offset) {
+    return new Promise((resolve, reject) => {
+      Promise.all([
+        this.getPlannedMeals(id, period, offset),
+        this.getManualMeals(id, period, offset)
+      ]).then((results) => {
+        // Merge meals array
+        let meals = results[0].concat(results[1]);
+
+        // Sort meals array by DESC dates
+        meals.sort((a, b) => { return b.date - a.date; });
+
+        // Return them
+        resolve(meals);
+      }, reject);
+    });
+  }
+
+  /**
+   * @param {number} id
+   * @param period
+   * @param offset
+   * @return {Promise<[{type: string, date: Date, quantity: number}]>}
+   */
+  getPlannedMeals(id, period, offset) {
+    let dates = this._getDates(period, offset);
+
+    // This one is tricky : get plannings from the range, and recreate meals manually
+    return new Promise((resolve, reject) => {
+      // TODO!
+      resolve([]);
+    });
+  }
+
+  /**
+   * @param {number} id
+   * @param period
+   * @param offset
+   * @return {Promise<[{type: string, date: Date, quantity: number}]>}
+   */
+  getManualMeals(id, period, offset) {
+    let dates = this._getDates(period, offset);
+
+    return new Promise((resolve, reject) => {
+      this.con.query('SELECT * FROM meals m WHERE feeder = ? AND m.date IS NOT NULL AND m.date BETWEEN ? AND ?', [id, dates.begin, dates.end], (err, result, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result.map((row) => {
+            return {
+              type: 'manual',
+              date: new Date(row.date + ' ' + row.time),
+              quantity: row.quantity,
+            };
+          }));
+        }
+      });
+    });
+  }
+
+  _getDates(period, offset) {
+    let dayLength = isNaN(+period) ? 30 : period;
+    let dayEnd = isNaN(+offset) ? 0 : offset;
+
+    let date = new Date();
+    date.setDate(date.getDate() - dayEnd);
+    let end = date.toISOString().split('T')[0];
+
+    date.setDate(date.getDate() - dayLength);
+    let begin = date.toISOString().split('T')[0];
+
+    return {
+      begin: begin,
+      end: end
+    };
+  }
+
+  /**
+   * @param {number} id
    * @return Promise
    */
   getCurrentPlanning(id) {
