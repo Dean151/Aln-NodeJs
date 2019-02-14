@@ -117,6 +117,31 @@ class User {
   }
 
   /**
+   * @param {DataBaseCoordinator} database
+   * @return Promise
+   */
+  validateUnvalidatedMail(database) {
+    return new Promise((resolve, reject) => {
+
+      if (this.unvalidated_email === undefined || this.unvalidated_email === null) {
+        reject(new Error('No validating email pending'));
+        return;
+      }
+
+      const validator = require('validator');
+      if (!validator.isEmail(this.unvalidated_email)) {
+        reject(new Error('No validating email pending'));
+        return;
+      }
+
+      this.email = validator.normalizeEmail(this.unvalidated_email);
+      this.shown_email = this.unvalidated_email;
+      this.unvalidated_email = null;
+      return database.updateUser(this);
+    });
+  }
+
+  /**
    * @returns {{id: number, email: string}}
    */
   jsoned () {

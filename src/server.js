@@ -103,9 +103,16 @@ class Server {
           throw new HttpError('Link is unvalid', 403);
         }
 
+        if (req.params.type === 'validate_email') {
+          user.validateUnvalidatedMail(database).then(() => {
+            res.send('The new mail address has been validated');
+          }).catch(next);
+        }
+
         // TODO: show a page that will handle the link
         // TODO: show a page that would redirect to the application.
         // Or eventually explain to open the link on the iOS device.
+        res.send('Please, open that link on your iOS device with the app installed.');
 
       }).catch(next);
     });
@@ -120,7 +127,7 @@ class Server {
           apps: [],
           details: [{
             appID: config.ios_appname,
-            paths:['/user/create_password/*', '/user/reset_password/*', '/user/reset_password/*']
+            paths:['/user/create_password/*', '/user/reset_password/*']
           }]
         }
       };
