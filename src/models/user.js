@@ -74,7 +74,7 @@ class User {
         from: '"BetterAln" <no-reply@alnpet.thomasdurand.fr>',
         to: to,
         subject: '[BetterAln] ' + subject,
-        text: content + '<br><br>The BetterAln team.'
+        text: 'Hi ' + this.shown_email + '\n\n' + content + '\n\nThe BetterAln team.'
       }, (err, info) => {
         if (err) {
           reject(err);
@@ -106,7 +106,7 @@ class User {
     let url = this.generateUrl(config, type, this.login + ':' + this.password);
 
     let subject = type === 'reset_password' ? 'Password reset request' : 'Welcome on BetterAln!';
-    let message = type === 'reset_password' ? ('To proceed with your password reset request, please follow this link: <br>' + url + '<br>If you\'re not at the origin of this request, please ignore this email.') : ('Welcome on BetterAln!<br>Follow this link to continue your registering: <br>' + url);
+    let message = type === 'reset_password' ? ('To proceed with your password reset request, please follow this link:\n' + url + '\n\nIf you\'re not at the origin of this request, please ignore this email.') : ('Welcome on BetterAln!\n\nFollow this link to continue your registering: \n' + url);
 
     return this.sendMail(this.shown_email, subject, message);
   }
@@ -137,7 +137,7 @@ class User {
     // Also send a mail to mail value warning about the change.
     return Promise.all([
       this.sendMail(this.shown_email, 'Email change request', 'You have requested to change your email address to ' + this.unvalidated_email + '<br>If you\'re not at the origin of this request, please contact the support team as soon as possible ; and change your password.'),
-      this.sendMail(this.unvalidated_email, 'Please validate your email', 'Please click the following link to validate this email as your main BetterAln account : <br>' + url),
+      this.sendMail(this.unvalidated_email, 'Please validate your email', 'Please click the following link to validate this email as your main BetterAln account : \n' + url),
     ]);
   }
 
