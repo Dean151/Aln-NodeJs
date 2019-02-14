@@ -174,10 +174,17 @@ class User {
         return;
       }
 
-      this.email = validator.normalizeEmail(this.unvalidated_email);
-      this.shown_email = this.unvalidated_email;
-      this.unvalidated_email = null;
-      return database.updateUser(this);
+      let newMail = validator.normalizeEmail(this.unvalidated_email);
+      database.getUserByEmail(newMail).then((user) => {
+        if (user) {
+          reject(new Error('Email already in use'));
+        }
+
+        this.email = newMail;
+        this.shown_email = this.unvalidated_email;
+        this.unvalidated_email = null;
+        database.updateUser(this).then(resolve, reject);
+      });
     });
   }
 

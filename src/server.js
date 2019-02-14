@@ -292,9 +292,9 @@ class Server {
           throw new HttpError('Wrong parameter', 401);
         }
 
-        // TODO: enable validated email
-
-        res.json({ success: true });
+        user.validateUnvalidatedMail(database).then(() => {
+          res.json({ success: true });
+        }).catch(next);
       }).catch(next);
     });
 
@@ -379,8 +379,15 @@ class Server {
               reject(new HttpError('Changing password requires current password', 406));
               return;
             }
-            resolve(true);
-          }, reject);
+
+            database.getUserByEmail(req.body.email).then((user) => {
+              if (user) {
+                reject(new HttpError('Email already in use', 406));
+                return;
+              }
+              resolve(true);
+            }, reject);
+          });
         });
 
         // Updating password
