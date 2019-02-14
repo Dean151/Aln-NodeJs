@@ -353,9 +353,8 @@ class DataBaseCoordinator {
             };
           });
 
-          console.log(plans);
-
-          // TODO!
+          // TODO: process plans to recreate given meals for the period
+          console.log(JSON.stringify(plans));
           resolve([]);
         }
       });
