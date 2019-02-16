@@ -354,6 +354,9 @@ class DataBaseCoordinator {
             };
           });
 
+          console.log('PLANS');
+          console.log(JSON.stringify(plans));
+
           let meals = plans.map((plan, index)  => {
             let start = plan.date;
             let end = plan[index+1] ? plan[index+1].date : new Date(); // Today is the upper limit if there is now newer plan
@@ -371,6 +374,9 @@ class DataBaseCoordinator {
               return carry.concat(meals);
             }, []);
           });
+
+          console.log('MEALS');
+          console.log(JSON.stringify(meals));
 
           resolve(meals);
         }
