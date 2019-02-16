@@ -327,14 +327,15 @@ class DataBaseCoordinator {
    */
   getPlannedMeals(id, period, offset) {
     let dates = this._getDates(period, offset);
+    let datesArray = this._getDatesArray(dates.begin, dates.end);
 
+    // This one is tricky : get plannings from the range, and recreate meals manually
     let query = 'SELECT p.date, GROUP_CONCAT(CONCAT(m.time, \'/\', m.quantity)) as meals ' +
       'FROM plannings p ' +
       'LEFT JOIN meals m ON p.id = m.planning AND m.enabled <> 0 ' +
       'WHERE p.feeder = ? AND p.date BETWEEN ? AND ? OR p.date = (SELECT MAX(date) FROM plannings WHERE date < ?) ' +
       'GROUP BY p.id';
 
-    // This one is tricky : get plannings from the range, and recreate meals manually
     return new Promise((resolve, reject) => {
       this.con.query(query, [id, dates.begin, dates.end, dates.begin], (err, result, fields) => {
         if (err) {
@@ -353,9 +354,25 @@ class DataBaseCoordinator {
             };
           });
 
-          // TODO: process plans to recreate given meals for the period
-          console.log(JSON.stringify(plans));
-          resolve([]);
+          let meals = plans.map((plan, index)  => {
+            let start = plan.date;
+            let end = plan[index+1] ? plan[index+1].date : new Date(); // Today is the upper limit if there is now newer plan
+            return datesArray.map((date) => {
+              return plan.meals.map((meal) => {
+                return {
+                  type: 'planned',
+                  date: new Date(date + 'T' + meal.time),
+                  quantity: meal.quantity,
+                };
+              }).filter((meal) => {
+                return meal.date >= start && meal.date < end;
+              });
+            }).reduce((carry, meals) => {
+              return carry.concat(meals);
+            }, []);
+          });
+
+          resolve(meals);
         }
       });
     });
@@ -402,6 +419,16 @@ class DataBaseCoordinator {
       begin: begin,
       end: end
     };
+  }
+
+  _getDatesArray(start, end) {
+    let dateArray = [];
+    let currentDate = start;
+    while (currentDate <= end) {
+      dateArray.push(currentDate.toISOString().split('T')[0]);
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return dateArray;
   }
 
   /**
