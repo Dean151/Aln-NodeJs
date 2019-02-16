@@ -361,7 +361,7 @@ class DataBaseCoordinator {
               return plan.meals.map((meal) => {
                 return {
                   type: 'planned',
-                  date: new Date(date + 'T' + meal.time),
+                  date: new Date(date + 'T' + meal.time), // FIXME: date issues with timezone & DST
                   quantity: meal.quantity,
                 };
               }).filter((meal) => {
