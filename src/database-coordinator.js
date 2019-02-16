@@ -354,12 +354,20 @@ class DataBaseCoordinator {
             };
           });
 
+          console.log('Dates');
+          console.log(dates);
+
+          console.log('Date array');
+          console.log(datesArray);
+
           console.log('PLANS');
           console.log(JSON.stringify(plans));
 
           let meals = plans.map((plan, index)  => {
             let start = plan.date;
             let end = plan[index+1] ? plan[index+1].date : new Date(); // Today is the upper limit if there is now newer plan
+            console.log('START' + start);
+            console.log('END' + end);
             return datesArray.map((date) => {
               return plan.meals.map((meal) => {
                 return {
@@ -373,7 +381,9 @@ class DataBaseCoordinator {
             }).reduce((carry, meals) => {
               return carry.concat(meals);
             }, []);
-          });
+          }).reduce((carry, meals) => {
+            return carry.concat(meals);
+          }, []);
 
           console.log('MEALS');
           console.log(JSON.stringify(meals));
