@@ -423,7 +423,7 @@ class DataBaseCoordinator {
 
   _getDatesArray(start, end) {
     let dateArray = [];
-    let currentDate = start;
+    let currentDate = new Date(start);
     while (currentDate <= end) {
       dateArray.push(currentDate.toISOString().split('T')[0]);
       currentDate.setDate(currentDate.getDate() + 1);
