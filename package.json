@@ -36,7 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^10.14.9",
-    "jest": "^23.6.0",
+    "jest": "^24.8.0",
     "jshint": "^2.10.2",
     "merge": ">=1.2.1"
   },
