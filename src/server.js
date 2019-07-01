@@ -160,8 +160,10 @@ class Server {
       let logAppleIdUser = (apple_id) => {
         database.getUserByAppleId(apple_id).then((user) => {
           if (user === undefined) {
+            if (!req.body.email) {
+              throw new HttpError('Missing email for registration', 400);
+            }
             // We create a user here
-            console.log('New user!');
             let data = {
               apple_id: req.body.apple_id,
               email: validator.normalizeEmail(req.body.email),
