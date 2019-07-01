@@ -176,8 +176,8 @@ class Server {
 
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((keys) => {
-        console.log(keys[0]);
-        let decoded = CryptoHelper.checkAppleToken(keys[0], req.body.identityToken, config.ios_appname);
+        let idToken = Buffer.from(req.body.identityToken, 'base64');
+        let decoded = CryptoHelper.checkAppleToken(keys[0], idToken, config.ios_appname);
         console.log(decoded);
         // TODO!
         throw new HttpError('Blocked IP', 401);
