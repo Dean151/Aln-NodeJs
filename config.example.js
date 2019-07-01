@@ -21,16 +21,6 @@ module.exports = {
   // Disable or enable console.logs outputs
   'debug_mode': false,
 
-  // The base url of the website
-  'product_name': 'BetterAln',
-  'base_url': 'http://example.com',
-  'sender_mail': 'no-reply@example.com',
-  'mail_transporter': {
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/sbin/sendmail'
-  },
-
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
   // Port that will be called by the feeder (defined by the iptables rule that redirect the feeder calls)
@@ -57,4 +47,6 @@ module.exports = {
   'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any foo
 
   'ios_appname': '',
+
+  'whitelist_ip': '1.2.3.4',
 };

@@ -56,11 +56,11 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {string} email
+   * @param {string} apple_id
    * @return Promise
    */
-  getUserByEmail(email) {
-    return this.getUserBy('email', email);
+  getUserByAppleId(apple_id) {
+    return this.getUserBy('apple_id', apple_id);
   }
 
   /**
@@ -119,28 +119,12 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {{email: string, shown_email: string, hash: string}} data
+   * @param {{apple_id: string, email: string, shown_email: string}} data
    * @return Promise
    */
   createUser(data) {
     return new Promise((resolve, reject) => {
-      this.con.query('INSERT INTO users (email, email_shown, password) VALUES (?, ?, ?)', [data.email, data.shown_email, data.hash], (err, result, fields) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * @param user
-   * @return Promise
-   */
-  updateUser(user) {
-    return new Promise((resolve, reject) => {
-      this.con.query('UPDATE users SET email = ?, email_shown = ?, email_unvalidated = ?, password = ? WHERE id = ?', [user.email, user.shown_email, user.unvalidated_email, user.password, user.id], (err, result, fields) => {
+      this.con.query('INSERT INTO users (apple_id, email, email_shown) VALUES (?, ?, ?, ?)', [data.apple_id, data.email, data.shown_email], (err, result, fields) => {
         if (err) {
           reject(err);
           return;

@@ -51,9 +51,9 @@ CREATE TABLE `unknown_data` (
 
 CREATE TABLE `users` (
   `id` int(11) UNSIGNED NOT NULL,
+  `apple_id` varchar(128) DEFAULT NULL,
   `email` varchar(254) CHARACTER SET utf8 NOT NULL,
   `email_shown` varchar(254) NOT NULL,
-  `email_unvalidated` varchar(254) DEFAULT NULL,
   `password` varchar(60) NOT NULL,
   `register` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `login` timestamp NULL DEFAULT NULL
@@ -83,6 +83,7 @@ ALTER TABLE `unknown_data`
 
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `apple_id` (`apple_id`),
   ADD UNIQUE KEY `email` (`email`);
 
 ALTER TABLE `alerts`

@@ -29,14 +29,9 @@ Every incoming request shall have a few headers informations:
 
 | Verb | URL                       | Parameters             | Effect                |
 |------|---------------------------|------------------------|-----------------------|
-| POST | /api/user/login           | { email: String, password: String } | Log a user in |
+| POST | /api/user/login           | { email: String, apple_id: String, token: String } | Log a user in with Sign in with Apple |
 | POST | /api/user/logout          | -                      | Destroy the current user session. |
 | POST | /api/user/check           | -                      | Check if the current session correspond to a logged-in user |
-| POST | /api/user/register        | { email: String }      | Create a new account, sending a reset pass mail to the user. |
-| POST | /api/user/request_new_password | { email: String } | Send a reset-pass mail to the user |
-| POST | /api/user/password_reset  | { user_id: Int, timestamp: Int, hash: String } | Connect a user using a one-time login link |
-| POST | /api/user/validate_email  | { user_id: Int, timestamp: Int, hash: String } | Validate an email change request |
-| PUT  | /api/user/{id}            | { new_password, current_password, pass_token } | Allow to change a user email or password using the current password or a one-time use token. |
 | POST | /api/feeder/claim         | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. This request must be sent from the same network the feeder is connected to. |
 | GET  | /api/feeder/{id}          | -                      | Check if the feeder is currently reachable. |
 | PUT  | /api/feeder/{id}          | { name: String }       | Change the feeder name |

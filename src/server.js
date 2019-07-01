@@ -25,7 +25,6 @@ const bodyParser = require('body-parser');
 const cacheControl = require('express-cache-controller');
 
 const validator = require('validator');
-const Checker = require('password-checker');
 
 const CryptoHelper = require('./crypto-helper');
 const Quantity = require("./models/quantity");
@@ -85,38 +84,6 @@ class Server {
   static createWebRouter(config, database) {
     let web = express.Router();
 
-    web.route('/user/:type/:id/:timestamp/:hash').get((req, res, next) => {
-      var availableTypes = ['create_password', 'reset_password', 'validate_email'];
-      if (availableTypes.indexOf(req.params.type) === -1) {
-        throw new HttpError('Not found', 404);
-      }
-
-      // Validate the link.
-      database.getUserById(req.params.id).then((user) => {
-        if (user === undefined) {
-          throw new HttpError('Not found', 404);
-        }
-
-        if (req.params.type !== 'validate_email' && !user.validatePassMail(config, req.params.timestamp, req.params.hash)) {
-          throw new HttpError('Link is unvalid', 403);
-        }
-        if (req.params.type === 'validate_email' && !user.validateEmailMail(config, req.params.timestamp, req.params.hash)) {
-          throw new HttpError('Link is unvalid', 403);
-        }
-
-        if (req.params.type === 'validate_email') {
-          user.validateUnvalidatedMail(database).then(() => {
-            res.send('The new mail address has been validated');
-          }).catch(next);
-        }
-
-        // TODO: show a page that allow changing the password
-        // Or eventually explain to open the link on the iOS device.
-        res.send('Please, open that link on your iOS device with the app installed.');
-
-      }).catch(next);
-    });
-
     if (config.ios_appname) {
       // We also have an apple-app-site-association application
       let association = {
@@ -127,7 +94,7 @@ class Server {
           apps: [],
           details: [{
             appID: config.ios_appname,
-            paths:['/user/create_password/*', '/user/reset_password/*']
+            paths:['*']
           }]
         }
       };
@@ -135,7 +102,6 @@ class Server {
         res.json(association);
       });
     }
-
 
     // Error handling at the end
     web.use((err, req, res, next) => {
@@ -174,128 +140,44 @@ class Server {
 
     /** AUTHENTICATION MECHANISMS **/
 
-    api.post('/user/register', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.email) {
-        throw new HttpError('Missing email', 400);
-      }
-
-      if (!validator.isEmail(req.body.email)) {
-        throw new HttpError('Not an email', 400);
-      }
-
-      // Check if the user already exists
-      let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email).then((user) => {
-        if (user) {
-          throw new HttpError('Email already in use', 406);
-        }
-
-        var data = {
-          email: email,
-          shown_email: req.body.email,
-          hash: 'not-an-hash',
-        };
-
-        Promise.all([database.createUser(data), database.getUserByEmail(email)]).then((results) => {
-          var user = results[1];
-          if (!user) {
-            throw new HttpError('Registration failed', 500);
-          }
-          user.sendResetPassMail(config, communicator).then(() => {
-            res.json({ success: true });
-          }).catch(next);
-        }).catch(next);
-      }).catch(next);
-    });
-
     api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.email || !req.body.password) {
-        throw new HttpError('Missing email or password', 400);
+      if (!req.body.appleId || !req.body.authorizationCode || !req.body.identityToken) {
+        throw new HttpError('Missing apple_id or authorization code', 400);
       }
 
-      let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email).then((user) => {
-        if (user === undefined) {
-          throw new HttpError('Wrong email/password', 401);
-        }
-
-        CryptoHelper.comparePassword(req.body.password, user.password).then((success) => {
-          if (!success) {
-            throw new HttpError('Wrong email/password', 401);
-          }
-
-          database.loggedUser(user.id).then(() => {
-            req.session.user = user.jsoned();
-            let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-            res.json({ success: true, user: req.session.user, token: token });
-          }).catch(next);
-        }).catch(next);
-      }).catch(next);
-    });
-
-    api.post('/user/request_new_password', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.email) {
-        throw new HttpError('Missing email', 400);
-      }
-
-      if (!validator.isEmail(req.body.email)) {
-        throw new HttpError('Not an email', 400);
-      }
-
-      let email = validator.normalizeEmail(req.body.email);
-      database.getUserByEmail(email).then((user) => {
-        if (user) {
-          user.sendResetPassMail(config, communicator).then(() => {
-            res.json({ success: true });
-          }).catch(next);
-        } else {
-          res.json({ success: true });
-        }
-      }).catch(next);
-    });
-
-    api.post('/user/password_reset', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
-        throw new HttpError('Missing parameter', 400);
-      }
-
-      database.getUserById(req.body.user_id).then((user) => {
-        if (user === undefined) {
-          throw new HttpError('Wrong parameter', 401);
-        }
-
-        if (!user.validatePassMail(config, req.body.timestamp, req.body.hash)) {
-          throw new HttpError('Wrong parameter', 401);
-        }
-
-        let passwordToken = CryptoHelper.randomKeyBase64(64);
-        req.session.passworkToken = passwordToken;
-
+      let logUser = (user) => {
         database.loggedUser(user.id).then(() => {
           req.session.user = user.jsoned();
           let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-          res.json({ success: true, user: req.session.user, token: token, passwordToken: passwordToken });
+          res.json({ success: true, user: req.session.user, token: token });
         }).catch(next);
-      }).catch(next);
-    });
+      };
 
-    api.post('/user/validate_email', (req, res, next) => {
-      if (!req.body.user_id || !req.body.timestamp || !req.body.hash) {
-        throw new HttpError('Missing parameter', 400);
-      }
+      database.getUserByAppleId(req.body.apple_id).then((user) => {
 
-      database.getUserById(req.body.user_id).then((user) => {
+        // TODO!!!
+        // CHECK VALIDITY WITH APPLE!
+        if (req.header('x-forwarded-for') != config.whitelist_ip) {
+          throw new HttpError('Blocked IP', 401);
+        }
+
         if (user === undefined) {
-          throw new HttpError('Wrong parameter', 401);
+          // We create a user here
+          let data = {
+            apple_id: req.body.apple_id,
+            email: validator.normalizeEmail(req.body.email),
+            shown_email: req.body.email,
+          };
+          Promise.all([database.createUser(data), database.getUserByAppleId(req.body.apple_id)]).then((results) => {
+            let user = results[1];
+            if (!user) {
+              throw new HttpError('Registration failed', 500);
+            }
+            logUser(user);
+          }).catch(next);
+          return;
         }
-
-        if (!user.validateEmailMail(config, req.body.timestamp, req.body.hash)) {
-          throw new HttpError('Wrong parameter', 401);
-        }
-
-        user.validateUnvalidatedMail(database).then(() => {
-          res.json({ success: true });
-        }).catch(next);
+        logUser(user);
       }).catch(next);
     });
 
@@ -346,117 +228,6 @@ class Server {
         throw new HttpError('CSRF token check failed', 403);
       }
       next();
-    });
-
-    api.put('/user/:id', (req, res, next) => {
-      if (isNaN(+req.params.id)) {
-        throw new HttpError('User not found', 404);
-      }
-
-      let id = req.params.id;
-      database.getUserById(id).then((user) => {
-        // Check we're the current user...
-        if (user === undefined || user.id !== req.session.user.id) {
-          throw new HttpError('User not found', 404);
-        }
-
-        // Updating email
-        var shouldUpdateEmail = new Promise((resolve, reject) => {
-          if (!req.body.email || user.email === validator.normalizeEmail(req.body.email)) {
-            resolve(false);
-            return;
-          }
-
-          if (!validator.isEmail(req.body.email)) {
-            reject(new HttpError('Not an email', 400));
-          }
-
-          if (!req.body.current_pass) {
-            reject(new HttpError('Changing password requires current password', 406));
-            return;
-          }
-
-          CryptoHelper.comparePassword(req.body.current_pass, user.hash).then((success) => {
-            if (!success) {
-              reject(new HttpError('Changing password requires current password', 406));
-              return;
-            }
-
-            database.getUserByEmail(req.body.email).then((user) => {
-              if (user) {
-                reject(new HttpError('Email already in use', 406));
-                return;
-              }
-              resolve(true);
-            }, reject);
-          });
-        });
-
-        // Updating password
-        var shouldUpdatePassword = new Promise((resolve, reject) => {
-          if (!req.body.new_pass) {
-            resolve(false);
-            return;
-          }
-
-          // Check password strongness
-          var checker = new Checker();
-          checker.min_length = 8;
-          checker.disallowNames(true);
-          checker.disallowWords(true, true);
-          if (!checker.check(req.body.new_pass)) {
-            reject(new HttpError('New password not strong enough', 412));
-            return;
-          }
-
-          // And also check if we have a valid hash, or a valid current password
-          if (req.body.pass_token && req.body.pass_token === req.session.passworkToken) {
-            resolve(true);
-            return;
-          }
-
-          if (!req.body.current_pass) {
-            reject(new HttpError('Changing password requires current password', 406));
-            return;
-          }
-
-          CryptoHelper.comparePassword(req.body.current_pass, user.hash).then((success) => {
-              if (!success) {
-                reject(new HttpError('Changing password requires current password', 406));
-                return;
-              }
-              resolve(true);
-            }, reject);
-        });
-
-        Promise.all([shouldUpdateEmail, shouldUpdatePassword]).then(() => {
-
-          var updateEmail = new Promise((resolve, reject) => {
-            if (!req.body.email) {
-              resolve();
-              return;
-            }
-            user.unvalidated_email = req.body.email;
-            user.sendValidateEmailMail(config, communicator).then(resolve, reject);
-          });
-
-          var updatePassword = new Promise((resolve, reject) => {
-            if (!req.body.new_pass) {
-              resolve();
-              return;
-            }
-            CryptoHelper.hashPassword(req.body.new_pass).then((hash) => {
-              // Save the new hash
-              user.password = hash;
-              resolve();
-            }, reject);
-          });
-
-          Promise.all([updateEmail, updatePassword, database.updateUser(user)]).then(() => {
-            res.json({success: true});
-          }).catch(next);
-        });
-      }).catch(next);
     });
 
     // Logging out

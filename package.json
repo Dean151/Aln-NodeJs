@@ -29,7 +29,6 @@
     "mysql": "^2.17.1",
     "net": "^1.0.2",
     "nodemailer": "^5.1.1",
-    "password-checker": "^0.2.4",
     "pug": "^2.0.4",
     "require.js": "^1.0.0",
     "secure-random": "^1.1.2",
