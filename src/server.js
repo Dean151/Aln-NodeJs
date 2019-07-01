@@ -175,8 +175,7 @@ class Server {
       };
 
       // Fetch Apple's public key
-      this.fetchApplePublicKey().then((data) => {
-        console.log(JSON.parse(data).explanation);
+      this.fetchApplePublicKey().then((keys) => {
 
         // TODO!
         throw new HttpError('Blocked IP', 401);
@@ -373,7 +372,7 @@ class Server {
 
         // The whole response has been received. Print out the result.
         resp.on('end', () => {
-          resolve(data);
+          resolve(JSON.parse(data).keys);
         });
       }).on("error", (err) => {
         reject(err);
