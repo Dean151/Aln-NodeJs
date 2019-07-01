@@ -176,7 +176,7 @@ class Server {
 
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((keys) => {
-        let idToken = Buffer.from(req.body.identityToken, 'base64');
+        let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         let decoded = CryptoHelper.checkAppleToken(keys[0], idToken, config.ios_appname);
         console.log(decoded);
         // TODO!
