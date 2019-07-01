@@ -182,7 +182,9 @@ class Server {
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
-        let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        // Will throw if identityToken is not okay
+        CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        // Validate authorization code
         this.validateAppleAuthToken(req.body.authorizationCode, config).then((auth) => {
           console.log(auth);
           // TODO!
@@ -390,14 +392,13 @@ class Server {
    */
   static validateAppleAuthToken(code, config) {
     let secret = CryptoHelper.getAppleClientSecret(config);
-    console.log(secret);
     let data = {
       client_id: config.ios_bundle_identifier,
       client_secret: secret,
-      code: code,
-      grant_type: 'authorization_code',
-      redirect_uri: config.base_url,
+      refresh_token: code,
+      grant_type: 'refresh_token.',
     };
+    console.log('secret: ' + secret);
     return new Promise((resolve, reject) => {
       request.post('https://appleid.apple.com/auth/token', { form: data }, (error, res, body) => {
         if (error) {
