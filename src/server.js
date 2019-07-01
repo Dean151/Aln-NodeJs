@@ -44,9 +44,8 @@ class Server {
    * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {ExternalCommunicator} communicator
    */
-  constructor(config, feederCoordinator, database, communicator) {
+  constructor(config, feederCoordinator, database) {
 
     // Create a service (the app object is just a callback).
     let app = express();
@@ -70,18 +69,18 @@ class Server {
     }));
 
     // Create the routes for the API
-    let api = Server.createApiRouter(feederCoordinator, database, communicator, config);
+    let api = Server.createApiRouter(feederCoordinator, database, config);
     app.use('/api', api);
 
     app.set('view engine', 'pug');
 
-    let web = Server.createWebRouter(config, database);
+    let web = Server.createWebRouter(config);
     app.use('/', web);
 
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 
-  static createWebRouter(config, database) {
+  static createWebRouter(config) {
     let web = express.Router();
 
     if (config.ios_appname) {
@@ -120,11 +119,10 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {ExternalCommunicator} communicator
    * @param {{base_url: string, hmac_secret: string}} config
    * @return {express.Router}
    */
-  static createApiRouter(feederCoordinator, database, communicator, config) {
+  static createApiRouter(feederCoordinator, database, config) {
     let api = express.Router();
 
     api.use(bodyParser.urlencoded({ extended: true }));
