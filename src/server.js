@@ -161,6 +161,7 @@ class Server {
         database.getUserByAppleId(apple_id).then((user) => {
           if (user === undefined) {
             // We create a user here
+            console.log('New user!');
             let data = {
               apple_id: req.body.apple_id,
               email: validator.normalizeEmail(req.body.email),
@@ -357,6 +358,7 @@ class Server {
 
       if (err instanceof Error) {
         console.log('Error: ' + err.message);
+        console.log(err.stack);
         res.status(500);
         res.json({ success: false, message: err.message });
         return;
