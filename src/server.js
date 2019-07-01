@@ -395,8 +395,8 @@ class Server {
     let data = {
       client_id: config.ios_bundle_identifier,
       client_secret: secret,
+      grant_type: 'refresh_token',
       refresh_token: code,
-      grant_type: 'refresh_token.',
     };
     console.log('secret: ' + secret);
     return new Promise((resolve, reject) => {
