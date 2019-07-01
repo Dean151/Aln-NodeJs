@@ -201,7 +201,7 @@ class Server {
       database.getUserById(req.session.user.id).then( (user) => {
         if (user === undefined) {
           req.session.destroy(function(err) {
-            res.json({ state: 'not logged in', user: null });
+            res.json({ loggedIn: false, user: null, token: null });
           });
           return;
         }
@@ -209,7 +209,7 @@ class Server {
         // Update the user object
         req.session.user = user.jsoned();
         let token = CryptoHelper.hashBase64('csrf', req.session.id + config.hmac_secret);
-        res.json({ state: 'logged in', user: req.session.user, token: token });
+        res.json({ loggedIn: true, user: req.session.user, token: token });
       }).catch(next);
     });
 
