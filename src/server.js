@@ -42,7 +42,7 @@ class HttpError extends Error {
 class Server {
 
   /**
-   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string, ios_app_identifier: string}} config
+   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string, ios_bundle_identifier: string, ios_app_identifier: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -125,7 +125,7 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {{base_url: string, hmac_secret: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string }} config
+   * @param {{base_url: string, hmac_secret: string, ios_bundle_identifier: string, key_id: string, key_path: string }} config
    * @return {Router}
    */
   static createApiRouter(feederCoordinator, database, config) {
@@ -184,13 +184,12 @@ class Server {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         // Will throw if identityToken is not okay
         let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
-        console.log(token);
-        // Validate authorization code
-        this.validateAppleAuthToken(req.body.authorizationCode, config).then((auth) => {
-          console.log(auth);
-          // TODO!
-          logAppleIdUser(req.body.apple_id);
-        }).catch(next);
+        if (token.sub !== req.body.appleId) {
+          // Throw unvalid credentials error
+          throw new HttpError('Invalid user credentials', 403);
+        }
+        // TODO! Validate req.body.authorizationCode
+        logAppleIdUser(req.body.apple_id);
       }).catch(next);
     });
 
@@ -372,7 +371,7 @@ class Server {
   }
 
   /**
-   * @return {Promise<any>}
+   * @return {Promise<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>}
    */
   static fetchApplePublicKey() {
     return new Promise((resolve, reject) => {
@@ -382,33 +381,6 @@ class Server {
           return;
         }
         resolve(body.keys[0]);
-      });
-    });
-  }
-
-  /**
-   * @param code
-   * @param {{ base_url: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string}} config
-   * @return {Promise<any>}
-   */
-  static validateAppleAuthToken(code, config) {
-    let secret = CryptoHelper.getAppleClientSecret(config);
-    let data = {
-      client_id: config.ios_bundle_identifier,
-      client_secret: secret,
-      grant_type: 'refresh_token',
-      refresh_token: code,
-    };
-    console.log('secret: ' + secret);
-    return new Promise((resolve, reject) => {
-      request.post('https://appleid.apple.com/auth/token', { form: data }, (error, res, body) => {
-        if (error) {
-          console.log(error);
-          reject(error);
-          return;
-        }
-        console.log(body);
-        resolve(body);
       });
     });
   }

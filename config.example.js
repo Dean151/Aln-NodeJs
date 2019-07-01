@@ -16,7 +16,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-module.exports = {
+let config = {
 
   // Disable or enable console.logs outputs
   'debug_mode': false,
@@ -52,8 +52,8 @@ module.exports = {
   // iOS app identifiers
   'ios_bundle_identifier': '',
   'ios_team_identifier': '',
-
-  // Sign-in with Apple options
-  'key_id': '',
-  'key_path': '',
 };
+
+config.ios_app_identifier = config.ios_team_identifier + '.' + config.ios_bundle_identifier;
+
+module.exports = config;
