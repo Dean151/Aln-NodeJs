@@ -78,6 +78,10 @@ class CryptoHelper {
         }
 
         const timeNow = Math.floor(Date.now() / 1000);
+        const header = {
+            alg: 'ES256',
+            kid: config.key_id
+        };
         const claims = {
             iss: config.ios_team_identifier,
             iat: timeNow,
@@ -85,7 +89,6 @@ class CryptoHelper {
             aud: 'https://appleid.apple.com',
             sub: config.ios_bundle_identifier,
         };
-        const header = { alg: 'ES256', kid: config.key_id };
         const key = fs.readFileSync(config.key_path);
         return jwt.sign(claims, key, { algorithm: 'ES256', header });
     }

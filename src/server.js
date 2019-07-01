@@ -183,8 +183,8 @@ class Server {
       this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
-        console.log(token);
-        this.validateAppleAuthToken(token.sub, config).then((res) => {
+        this.validateAppleAuthToken(req.body.authorizationCode, config).then((auth) => {
+          console.log(auth);
           // TODO!
           logAppleIdUser(req.body.apple_id);
         }).catch(next);
@@ -384,18 +384,19 @@ class Server {
   }
 
   /**
-   * @param refresh_token
-   * @param {{ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string}} config
+   * @param code
+   * @param {{ base_url: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string}} config
    * @return {Promise<any>}
    */
-  static validateAppleAuthToken(refresh_token, config) {
+  static validateAppleAuthToken(code, config) {
     let secret = CryptoHelper.getAppleClientSecret(config);
     console.log(secret);
     let data = {
       client_id: config.ios_bundle_identifier,
       client_secret: secret,
-      grant_type: 'refresh_token',
-      refresh_token: refresh_token,
+      code: code,
+      grant_type: 'authorization_code',
+      redirect_uri: config.base_url,
     };
     return new Promise((resolve, reject) => {
       request.post('https://appleid.apple.com/auth/token', { form: data }, (error, res, body) => {
