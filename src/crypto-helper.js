@@ -18,6 +18,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
 const NodeRSA = require('node-rsa');
 
 class CryptoHelper {
@@ -65,6 +66,28 @@ class CryptoHelper {
             throw new Error('id token has expired');
         }
         return jwtClaims;
+    }
+
+    /**
+     * @param {{ ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string }} config
+     * @return {*}
+     */
+    static getAppleClientSecret(config) {
+        if (!fs.existsSync(config.key_path)) {
+            throw new Error("Can't find private key");
+        }
+
+        const timeNow = Math.floor(Date.now() / 1000);
+        const claims = {
+            iss: config.ios_team_identifier,
+            iat: timeNow,
+            exp: timeNow + 15777000,
+            aud: 'https://appleid.apple.com',
+            sub: config.ios_bundle_identifier,
+        };
+        const header = { alg: 'ES256', kid: config.key_id };
+        const key = fs.readFileSync(config.key_path);
+        return jwt.sign(claims, key, { algorithm: 'ES256', header });
     }
 }
 

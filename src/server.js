@@ -42,7 +42,7 @@ class HttpError extends Error {
 class Server {
 
   /**
-   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string}} config
+   * @param {{base_url: string, local_port: number, session_name: string, session_secret: string, hmac_secret: string, mysql_host: string, mysql_user: string, mysql_password: string, mysql_database: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string, ios_app_identifier: string}} config
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
    */
@@ -81,6 +81,11 @@ class Server {
     http.createServer(app).listen(config.local_port, 'localhost');
   }
 
+  /**
+   *
+   * @param {{ios_app_identifier: string}} config
+   * @return {Router}
+   */
   static createWebRouter(config) {
     let web = express.Router();
 
@@ -120,8 +125,8 @@ class Server {
   /**
    * @param {FeederCoordinator} feederCoordinator
    * @param {DataBaseCoordinator} database
-   * @param {{base_url: string, hmac_secret: string}} config
-   * @return {express.Router}
+   * @param {{base_url: string, hmac_secret: string, ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string }} config
+   * @return {Router}
    */
   static createApiRouter(feederCoordinator, database, config) {
     let api = express.Router();
@@ -175,12 +180,14 @@ class Server {
       };
 
       // Fetch Apple's public key
-      this.fetchApplePublicKey().then((keys) => {
+      this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
-        let decoded = CryptoHelper.checkAppleToken(keys[0], idToken, config.ios_bundle_identifier);
-        // TODO!
-        throw new HttpError('Blocked IP', 401);
-        logAppleIdUser(req.body.apple_id);
+        let decoded = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        console.log(decoded);
+        this.validateAppleAuthToken('', config).then((res) => {
+          // TODO!
+          logAppleIdUser(req.body.apple_id);
+        }).catch(next);
       }).catch(next);
     });
 
@@ -361,6 +368,9 @@ class Server {
     return api;
   }
 
+  /**
+   * @return {Promise<any>}
+   */
   static fetchApplePublicKey() {
     return new Promise((resolve, reject) => {
       request('https://appleid.apple.com/auth/keys', { json: true }, (err, res, body) => {
@@ -368,19 +378,31 @@ class Server {
           reject(err);
           return;
         }
-        resolve(body.keys);
+        resolve(body.keys[0]);
       });
     });
   }
 
-  static validateAppleAuthToken() {
-    let data = {};
+  /**
+   * @param refresh_token
+   * @param {{ios_bundle_identifier: string, ios_team_identifier: string, key_id: string, key_path: string}} config
+   * @return {Promise<any>}
+   */
+  static validateAppleAuthToken(refresh_token, config) {
+    let data = {
+      client_id: config.ios_bundle_identifier,
+      client_secret: CryptoHelper.getAppleClientSecret(config),
+      grant_type: 'refresh_token',
+      refresh_token: refresh_token,
+    };
     return new Promise((resolve, reject) => {
-      request.post('https://appleid.apple.com/auth/token', { json: data }, (error, res, body) => {
+      request.post('https://appleid.apple.com/auth/token', { form: data }, (error, res, body) => {
         if (error) {
+          console.log(error);
           reject(error);
           return;
         }
+        console.log(body);
         resolve(body);
       });
     });
