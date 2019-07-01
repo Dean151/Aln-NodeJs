@@ -183,7 +183,8 @@ class Server {
       this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         // Will throw if identityToken is not okay
-        CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        console.log(token);
         // Validate authorization code
         this.validateAppleAuthToken(req.body.authorizationCode, config).then((auth) => {
           console.log(auth);
