@@ -145,8 +145,8 @@ class Server {
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.appleId || !req.body.authorizationCode || !req.body.identityToken) {
-        throw new HttpError('Missing appleId, authorizationCode or identityToken', 400);
+      if (!req.body.authorizationCode || !req.body.identityToken) {
+        throw new HttpError('Missing authorizationCode or identityToken', 400);
       }
 
       let logUser = (user) => {
@@ -165,11 +165,11 @@ class Server {
             }
             // We create a user here
             let data = {
-              apple_id: req.body.apple_id,
+              apple_id: apple_id,
               email: validator.normalizeEmail(req.body.email),
               shown_email: req.body.email,
             };
-            Promise.all([database.createUser(data), database.getUserByAppleId(req.body.apple_id)]).then((results) => {
+            Promise.all([database.createUser(data), database.getUserByAppleId(apple_id)]).then((results) => {
               let user = results[1];
               if (!user) {
                 throw new HttpError('Registration failed', 500);
@@ -187,12 +187,8 @@ class Server {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         // Will throw if identityToken is not okay
         let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
-        if (token.sub !== req.body.appleId) {
-          // Throw unvalid credentials error
-          throw new HttpError('Invalid user credentials', 403);
-        }
         // TODO! Validate req.body.authorizationCode
-        logAppleIdUser(req.body.apple_id);
+        logAppleIdUser(token.sub);
       }).catch(next);
     });
 
