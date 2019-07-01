@@ -84,16 +84,16 @@ class Server {
   static createWebRouter(config) {
     let web = express.Router();
 
-    if (config.ios_appname) {
+    if (config.ios_app_identifier) {
       // We also have an apple-app-site-association application
       let association = {
         webcredentials: {
-          apps: [config.ios_appname]
+          apps: [config.ios_app_identifier]
         },
         applinks: {
           apps: [],
           details: [{
-            appID: config.ios_appname,
+            appID: config.ios_app_identifier,
             paths:['*']
           }]
         }
@@ -177,7 +177,7 @@ class Server {
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((keys) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
-        let decoded = CryptoHelper.checkAppleToken(keys[0], idToken, config.ios_appname);
+        let decoded = CryptoHelper.checkAppleToken(keys[0], idToken, config.ios_bundle_identifier);
         console.log(decoded);
         // TODO!
         throw new HttpError('Blocked IP', 401);
