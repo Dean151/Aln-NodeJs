@@ -50,13 +50,12 @@ class User {
   }
 
   /**
-   * @returns {{id: number, email: string}}
+   * @returns {{id: number, email: string, register: string, login: string, feeders: Array}}
    */
   jsoned () {
     return {
       id: this.id,
-      email: this.email,
-      shown_email: this.shown_email,
+      email: this.shown_email,
       register: this.register ? this.register.toJSON() : null,
       login: this.login ? this.login.toJSON() : null,
       feeders: this.feeders,
