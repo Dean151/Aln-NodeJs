@@ -182,9 +182,8 @@ class Server {
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
-        let decoded = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
-        console.log(decoded);
-        this.validateAppleAuthToken('', config).then((res) => {
+        let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        this.validateAppleAuthToken(token.sub, config).then((res) => {
           // TODO!
           logAppleIdUser(req.body.apple_id);
         }).catch(next);
@@ -389,9 +388,11 @@ class Server {
    * @return {Promise<any>}
    */
   static validateAppleAuthToken(refresh_token, config) {
+    let secret = CryptoHelper.getAppleClientSecret(config);
+    console.log(secret);
     let data = {
       client_id: config.ios_bundle_identifier,
-      client_secret: CryptoHelper.getAppleClientSecret(config),
+      client_secret: secret,
       grant_type: 'refresh_token',
       refresh_token: refresh_token,
     };

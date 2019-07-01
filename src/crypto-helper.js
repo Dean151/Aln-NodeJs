@@ -49,7 +49,7 @@ class CryptoHelper {
      * @param {{kty: string, kid: string, use: string, alg: string, n: string, e: string}} key
      * @param {string} idToken
      * @param {string} clientId
-     * @return {object}
+     * @return {{aud: string, exp: number, iat: number, sub: string}}
      */
     static checkAppleToken(key, idToken, clientId) {
         const pubKey = new NodeRSA();
