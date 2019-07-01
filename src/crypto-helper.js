@@ -45,7 +45,7 @@ class CryptoHelper {
     }
 
     /**
-     * @param {{e: string, n: string}} key
+     * @param {{kty: string, kid: string, use: string, alg: string, n: string, e: string}} key
      * @param {string} idToken
      * @param {string} clientId
      * @return {object}
@@ -57,10 +57,10 @@ class CryptoHelper {
         const jwtClaims = jwt.verify(idToken, applePublicKey, { algorithms: key.alg });
 
         if (jwtClaims.iss !== 'https://appleid.apple.com') {
-            throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | from: ' + jwtClaims.iss);
+            throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + jwtClaims.iss);
         }
         if (clientId !== undefined && jwtClaims.aud !== clientId) {
-            throw new Error('aud parameter does not include this client - is: ' + jwtClaims.aud + '| expected: ' + clientId);
+            throw new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + jwtClaims.aud);
         }
         if (jwtClaims.exp < (Date.now() / 1000)) {
             throw new Error('id token has expired');
