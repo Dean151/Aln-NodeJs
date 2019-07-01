@@ -131,7 +131,7 @@ class Server {
 
     let requiresNotLoggedIn = (req, res, next) => {
       if (req.session && req.session.user) {
-        throw new HttpError( 'Already logged-in as ' + req.session.user.email, 403);
+        throw new HttpError( 'Already logged-in', 403);
       }
       next();
     };
@@ -140,7 +140,7 @@ class Server {
 
     api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
       if (!req.body.appleId || !req.body.authorizationCode || !req.body.identityToken) {
-        throw new HttpError('Missing apple_id or authorization code', 400);
+        throw new HttpError('Missing appleId, authorizationCode or identityToken', 400);
       }
 
       let logUser = (user) => {
@@ -151,13 +151,13 @@ class Server {
         }).catch(next);
       };
 
-      database.getUserByAppleId(req.body.apple_id).then((user) => {
+      // TODO!!!
+      // CHECK VALIDITY WITH APPLE!
+      if (req.header('x-forwarded-for') != config.whitelist_ip) {
+        throw new HttpError('Blocked IP', 401);
+      }
 
-        // TODO!!!
-        // CHECK VALIDITY WITH APPLE!
-        if (req.header('x-forwarded-for') != config.whitelist_ip) {
-          throw new HttpError('Blocked IP', 401);
-        }
+      database.getUserByAppleId(req.body.apple_id).then((user) => {
 
         if (user === undefined) {
           // We create a user here
