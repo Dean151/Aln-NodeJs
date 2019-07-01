@@ -334,17 +334,20 @@ class Server {
     // Error handling at the end
     api.use((err, req, res, next) => {
       if (err instanceof HttpError) {
+        console.log('Error: ' + err.message);
         res.status(err.code);
         res.json({ success: false, message: err.message });
         return;
       }
 
       if (err instanceof Error) {
+        console.log('Error: ' + err.message);
         res.status(500);
         res.json({ success: false, message: err.message });
         return;
       }
 
+      console.log('Error: ' + err);
       res.status(500);
       res.json({ success: false, error: err });
     });
