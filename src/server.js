@@ -183,6 +183,7 @@ class Server {
       this.fetchApplePublicKey().then((key) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        console.log(token);
         this.validateAppleAuthToken(token.sub, config).then((res) => {
           // TODO!
           logAppleIdUser(req.body.apple_id);
