@@ -17,6 +17,7 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const http = require('http');
+const https = require('https');
 const express = require('express');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
@@ -151,31 +152,35 @@ class Server {
         }).catch(next);
       };
 
-      // TODO!!!
-      // CHECK VALIDITY WITH APPLE!
-      if (req.header('x-forwarded-for') != config.whitelist_ip) {
+      let logAppleIdUser = (apple_id) => {
+        database.getUserByAppleId(apple_id).then((user) => {
+          if (user === undefined) {
+            // We create a user here
+            let data = {
+              apple_id: req.body.apple_id,
+              email: validator.normalizeEmail(req.body.email),
+              shown_email: req.body.email,
+            };
+            Promise.all([database.createUser(data), database.getUserByAppleId(req.body.apple_id)]).then((results) => {
+              let user = results[1];
+              if (!user) {
+                throw new HttpError('Registration failed', 500);
+              }
+              logUser(user);
+            }).catch(next);
+            return;
+          }
+          logUser(user);
+        }).catch(next);
+      };
+
+      // Fetch Apple's public key
+      this.fetchApplePublicKey().then((data) => {
+        console.log(JSON.parse(data).explanation);
+
+        // TODO!
         throw new HttpError('Blocked IP', 401);
-      }
-
-      database.getUserByAppleId(req.body.apple_id).then((user) => {
-
-        if (user === undefined) {
-          // We create a user here
-          let data = {
-            apple_id: req.body.apple_id,
-            email: validator.normalizeEmail(req.body.email),
-            shown_email: req.body.email,
-          };
-          Promise.all([database.createUser(data), database.getUserByAppleId(req.body.apple_id)]).then((results) => {
-            let user = results[1];
-            if (!user) {
-              throw new HttpError('Registration failed', 500);
-            }
-            logUser(user);
-          }).catch(next);
-          return;
-        }
-        logUser(user);
+        logAppleIdUser(req.body.apple_id);
       }).catch(next);
     });
 
@@ -247,6 +252,7 @@ class Server {
           throw new HttpError('No feeder identifier given', 400);
         }
 
+        // THIS DOES NOT WORK since we have the nginx proxy making it always 127.0.0.1
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         if (!validator.isIP(ip)) {
           throw new HttpError('Feeder not found', 404);
@@ -353,6 +359,26 @@ class Server {
     });
 
     return api;
+  }
+
+  static fetchApplePublicKey() {
+    return new Promise((resolve, reject) => {
+      https.get('https://appleid.apple.com/auth/keys', (resp) => {
+        let data = '';
+
+        // A chunk of data has been recieved.
+        resp.on('data', (chunk) => {
+          data += chunk;
+        });
+
+        // The whole response has been received. Print out the result.
+        resp.on('end', () => {
+          resolve(data);
+        });
+      }).on("error", (err) => {
+        reject(err);
+      });
+    });
   }
 }
 
