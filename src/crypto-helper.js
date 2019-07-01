@@ -16,44 +16,11 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const secureRandom = require('secure-random');
+const jwt = require('jsonwebtoken');
+const NodeRSA = require('node-rsa');
 
 class CryptoHelper {
-
-    /**
-     * @param {string} password
-     * @return Promise
-     */
-    static hashPassword(password) {
-        return new Promise((resolve, reject) => {
-            bcrypt.hash(password, 10, (err, hash) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(hash);
-                }
-            });
-        });
-    }
-
-    /**
-     * @param {string} password 
-     * @param {string} hash 
-     * @return Promise
-     */
-    static comparePassword(password, hash) {
-        return new Promise((resolve, reject) => {
-            bcrypt.compare(password, hash, (err, success) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(success);
-                }
-            });
-        });
-    }
 
     /**
      * @param {string} data 
@@ -78,12 +45,28 @@ class CryptoHelper {
     }
 
     /**
-     * @param {number} bytes 
+     * @param {{e: string, n: string}} key
+     * @param {string} idToken
+     * @param {string} clientId
+     * @return {object}
      */
-    static randomKeyBase64(bytes) {
-        return secureRandom.randomBuffer(bytes).toString('base64').replace('+', '-').replace('/', '_').replace('=', '');
-    }
+    static checkAppleToken(key, idToken, clientId) {
+        const pubKey = new NodeRSA();
+        pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
+        let applePublicKey = pubKey.exportKey(['public']);
+        const jwtClaims = jwt.verify(idToken, applePublicKey, { algorithms: key.alg });
 
+        if (jwtClaims.iss !== 'https://appleid.apple.com') {
+            throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | from: ' + jwtClaims.iss);
+        }
+        if (clientId !== undefined && jwtClaims.aud !== clientId) {
+            throw new Error('aud parameter does not include this client - is: ' + jwtClaims.aud + '| expected: ' + clientId);
+        }
+        if (jwtClaims.exp < (Date.now() / 1000)) {
+            throw new Error('id token has expired');
+        }
+        return jwtClaims;
+    }
 }
 
 module.exports = CryptoHelper;

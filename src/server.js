@@ -17,8 +17,8 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 "use strict";
 
 const http = require('http');
-const https = require('https');
 const express = require('express');
+const request = require('request');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const helmet = require('helmet');
@@ -176,7 +176,7 @@ class Server {
 
       // Fetch Apple's public key
       this.fetchApplePublicKey().then((keys) => {
-
+        let decoded = CryptoHelper.checkAppleToken(keys[0], req.body.identityToken, '');
         // TODO!
         throw new HttpError('Blocked IP', 401);
         logAppleIdUser(req.body.apple_id);
@@ -362,20 +362,25 @@ class Server {
 
   static fetchApplePublicKey() {
     return new Promise((resolve, reject) => {
-      https.get('https://appleid.apple.com/auth/keys', (resp) => {
-        let data = '';
+      request('https://appleid.apple.com/auth/keys', { json: true }, (err, res, body) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(body.keys);
+      });
+    });
+  }
 
-        // A chunk of data has been recieved.
-        resp.on('data', (chunk) => {
-          data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        resp.on('end', () => {
-          resolve(JSON.parse(data).keys);
-        });
-      }).on("error", (err) => {
-        reject(err);
+  static validateAppleAuthToken() {
+    let data = {};
+    return new Promise((resolve, reject) => {
+      request.post('https://appleid.apple.com/auth/token', { json: data }, (error, res, body) => {
+        if (error) {
+          reject(error);
+          return;
+        }
+        resolve(body);
       });
     });
   }
