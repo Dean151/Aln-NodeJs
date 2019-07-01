@@ -54,7 +54,10 @@ class CryptoHelper {
         const pubKey = new NodeRSA();
         pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
         let applePublicKey = pubKey.exportKey(['public']);
-        const jwtClaims = jwt.verify(idToken, applePublicKey, { algorithms: key.alg });
+        console.log(idToken);
+        console.log(applePublicKey);
+        const jwtClaims = jwt.verify(idToken, applePublicKey, { algorithms: [key.alg] });
+        console.log(jwtClaims);
 
         if (jwtClaims.iss !== 'https://appleid.apple.com') {
             throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + jwtClaims.iss);
