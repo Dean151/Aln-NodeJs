@@ -29,9 +29,9 @@ Every incoming request shall have a few headers informations:
 
 | Verb | URL                       | Parameters             | Effect                |
 |------|---------------------------|------------------------|-----------------------|
-| POST | /api/user/login           | { email: String?, identityToken: base64, authorizationCode: base64 } | Log a user in with Sign in with Apple |
+| POST | /api/user/login           | { email: String?, apple_id: String, identityToken: base64, authorizationCode: base64 } | Log a user in with Sign in with Apple |
 | POST | /api/user/logout          | -                      | Destroy the current user session. |
-| POST | /api/user/check           | -                      | Check if the current session correspond to a logged-in user |
+| POST | /api/user/check           | { apple_id: String }   | Check if the current session correspond to a logged-in user |
 | POST | /api/feeder/claim         | { identifier: String } | Claim the ownership of a feeder, after it's been connected to the API for the first time. This request must be sent from the same network the feeder is connected to. |
 | GET  | /api/feeder/{id}          | -                      | Check if the feeder is currently reachable. |
 | PUT  | /api/feeder/{id}          | { name: String }       | Change the feeder name |

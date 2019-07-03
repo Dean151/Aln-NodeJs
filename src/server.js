@@ -145,8 +145,8 @@ class Server {
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.authorizationCode || !req.body.identityToken) {
-        throw new HttpError('Missing authorizationCode or identityToken', 400);
+      if (!req.body.apple_id || !req.body.authorizationCode || !req.body.identityToken) {
+        throw new HttpError('Missing apple_id or authorizationCode or identityToken', 400);
       }
 
       let logUser = (user) => {
@@ -187,19 +187,23 @@ class Server {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         // Will throw if identityToken is not okay
         let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        // We check apple_id congruency with identityToken
+        if (token.sub !== req.body.apple_id) {
+          throw new HttpError('Unrecognized apple_id for login', 400);
+        }
         // TODO! Validate req.body.authorizationCode
         logAppleIdUser(token.sub);
       }).catch(next);
     });
 
     api.post('/user/check', (req, res, next) => {
-      if (!req.session || !req.session.user) {
-        res.json({ state: 'not logged in', user: null });
+      if (!req.body.apple_id || !req.session || !req.session.user) {
+        res.json({ loggedIn: false, user: null, token: null });
         return;
       }
 
       database.getUserById(req.session.user.id).then( (user) => {
-        if (user === undefined) {
+        if (user === undefined || user.apple_id !== req.body.apple_id) {
           req.session.destroy(function(err) {
             res.json({ loggedIn: false, user: null, token: null });
           });
