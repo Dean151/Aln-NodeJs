@@ -23,7 +23,7 @@
     "express-cache-controller": "^1.1.0",
     "express-mysql-session": "^2.1.0",
     "express-session": "^1.16.2",
-    "helmet": "^3.18.0",
+    "helmet": "^3.20.0",
     "http": "0.0.0",
     "log-timestamp": "^0.2.1",
     "mysql": "^2.17.1",
@@ -36,7 +36,7 @@
     "validator": "^10.11.0"
   },
   "devDependencies": {
-    "@types/node": "^10.14.9",
+    "@types/node": "^10.14.14",
     "jest": "^24.8.0",
     "jshint": "^2.10.2",
     "merge": ">=1.2.1"
