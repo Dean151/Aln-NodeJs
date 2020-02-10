@@ -145,8 +145,8 @@ class Server {
     /** AUTHENTICATION MECHANISMS **/
 
     api.post('/user/login', requiresNotLoggedIn, (req, res, next) => {
-      if (!req.body.appleId || !req.body.authorizationCode || !req.body.identityToken) {
-        throw new HttpError('Missing appleId or authorizationCode or identityToken', 400);
+      if (!req.body.appleId || !req.body.identityToken) {
+        throw new HttpError('Missing appleId or identityToken', 400);
       }
 
       let logUser = (user) => {
@@ -191,7 +191,6 @@ class Server {
         if (token.sub !== req.body.appleId) {
           throw new HttpError('Unrecognized appleId for login', 400);
         }
-        // TODO! Validate req.body.authorizationCode
         logAppleIdUser(token.sub);
       }).catch(next);
     });
