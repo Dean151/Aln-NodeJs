@@ -136,7 +136,7 @@ class ResponseBuilder {
       return { type: 'empty_feeder', identifier: identifier, hours: hours, minutes: minutes, amount: amount };
     }
     else {
-      return undefined;
+      return { type: 'unknown' };
     }
   }
 
