@@ -283,7 +283,7 @@ class Server {
       });
 
     // We now need to check feeder association
-    api.use((req, res, next) => {
+    let requiresFeederAssociation = (req, res, next) => {
       let id = req.path.split('/')[2];
       if (isNaN(+id)) {
         throw new HttpError('No feeder id given', 400);
@@ -297,9 +297,9 @@ class Server {
         req.feeder = feeder;
         next();
       }).catch(next);
-    });
+    };
 
-    api.get('/feeder/:id', requiresLoggedIn, (req, res, next) => {
+    api.get('/feeder/:id', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
       feederCoordinator.getFeeder(req.feeder.identifier).then((feeder) => {
         if (!feeder) {
           throw new HttpError('Feeder not found', 404);
@@ -308,35 +308,34 @@ class Server {
       }).catch(next);
     });
 
-    api.put('/feeder/:id', requiresLoggedIn, (req, res, next) => {
+    api.put('/feeder/:id', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
       let name = req.body.name;
       database.setFeederName(req.feeder.id, name).then((success) => {
         res.json({ success: success });
       }).catch(next);
     });
 
-    api.get('/feeder/:id/meals', requiresLoggedIn, (req, res, next) => {
+    api.get('/feeder/:id/meals', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
       database.getMealHistory(req.feeder.id, req.query.period, req.query.offset).then((meals) => {
         res.json(meals);
       }).catch(next);
     });
 
-    api.post('/feeder/:id/feed', requiresLoggedIn, (req, res, next) => {
+    api.post('/feeder/:id/feed', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
       }).catch(next);
     });
 
-    api.put('/feeder/:id/quantity', requiresLoggedIn, (req, res, next) => {
+    api.put('/feeder/:id/quantity', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.setDefaultQuantity(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
       }).catch(next);
     });
 
-    api.route('/feeder/:id/planning')
-      .get(requiresLoggedIn, (req, res, next) => {
+    api.get('/feeder/:id/planning', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
         // Fetch the planning if it's exists
         database.getCurrentPlanning(req.feeder.id).then((planning) => {
           if (planning === undefined) {
@@ -344,8 +343,8 @@ class Server {
           }
           res.json({ success: true, meals: planning.jsoned() });
         }).catch(next);
-      })
-      .put((req, res, next) => {
+      });
+    api.put('/feeder/:id/planning', requiresLoggedIn, requiresFeederAssociation, (req, res, next) => {
         let meals = req.body.meals.map((obj) => { return new Meal(obj.time, obj.quantity, obj.enabled); });
         let planning = new Planning(meals);
         feederCoordinator.setPlanning(req.feeder.identifier, planning).then(() => {
