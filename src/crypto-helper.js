@@ -45,16 +45,25 @@ class CryptoHelper {
     }
 
     /**
-     * @param {{kty: string, kid: string, use: string, alg: string, n: string, e: string}} key
+     * @param {Array<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>} keys
      * @param {string} idToken
      * @param {string} clientId
      * @return {{aud: string, exp: number, iat: number, sub: string}}
      */
-    static checkAppleToken(key, idToken, clientId) {
-        const pubKey = new NodeRSA();
-        pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
-        let applePublicKey = pubKey.exportKey(['public']);
-        const jwtClaims = jwt.verify(idToken, applePublicKey, { algorithms: [key.alg] });
+    static checkAppleToken(keys, idToken, clientId) {
+        let getKey = (header, callback) => {
+            const pubKey = new NodeRSA();
+            for (var key in keys) {
+                if (key.kid !== header.kid) {
+                    continue;
+                }
+                pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
+                callback(null, pubKey.exportKey(['public']));
+                return;
+            }
+            callback(new Error('Matching signature key not found'), null);
+        };
+        const jwtClaims = jwt.verify(idToken, getKey);
         if (jwtClaims.iss !== 'https://appleid.apple.com') {
             throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + jwtClaims.iss);
         }

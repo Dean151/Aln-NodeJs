@@ -215,10 +215,10 @@ class Server {
       };
 
       // Fetch Apple's public key
-      this.fetchApplePublicKey().then((key) => {
+      this.fetchApplePublicKeys().then((keys) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
         // Will throw if identityToken is not okay
-        let token = CryptoHelper.checkAppleToken(key, idToken, config.ios_bundle_identifier);
+        let token = CryptoHelper.checkAppleToken(keys, idToken, config.ios_bundle_identifier);
         // We check apple_id congruency with identityToken
         if (token.sub !== req.body.appleId) {
           throw new HttpError('Unrecognized appleId for login', 400);
@@ -380,13 +380,13 @@ class Server {
   }
 
   /**
-   * @return {Promise<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>}
+   * @return {Promise<Array<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>>}
    */
-  static fetchApplePublicKey() {
+  static fetchApplePublicKeys() {
     return new Promise((resolve, reject) => {
       axios.get('https://appleid.apple.com/auth/keys')
         .then( (res) => {
-          resolve(res.data.keys[0]);
+          resolve(res.data.keys);
         })
         .catch((error) => {
           reject(error);
