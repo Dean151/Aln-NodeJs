@@ -230,12 +230,14 @@ class Server {
 
     api.post('/user/check', (req, res, next) => {
       if (!req.body.appleId || !req.session || !req.session.user) {
+        console.log('/user/check miss session, user or appleId');
         res.json({ loggedIn: false, user: null, token: null });
         return;
       }
 
       database.getUserById(req.session.user.id).then( (user) => {
         if (user === undefined || user.apple_id !== req.body.appleId) {
+          console.log('/user/check mismatching appleId or user is not found');
           req.session.destroy(function(err) {
             res.json({ loggedIn: false, user: null, token: null });
           });
