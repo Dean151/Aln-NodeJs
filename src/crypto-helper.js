@@ -65,24 +65,24 @@ class CryptoHelper {
                 }
                 callback(new Error('Matching signature key not found'), null);
             };
-            jwt.verify(idToken, getKey, (err, data) => {
+            jwt.verify(idToken, getKey, (err, payload) => {
                 if (err) {
                     reject(err);
                     return;
                 }
-                if (data.payload.iss !== 'https://appleid.apple.com') {
-                    reject(new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + data.payload.iss));
+                if (payload.iss !== 'https://appleid.apple.com') {
+                    reject(new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + payload.iss));
                     return;
                 }
-                if (clientId !== undefined && data.payload.aud !== clientId) {
-                    reject(new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + data.payload.aud));
+                if (clientId !== undefined && payload.aud !== clientId) {
+                    reject(new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + payload.aud));
                     return;
                 }
-                if (data.payload.exp < (Date.now() / 1000)) {
+                if (payload.exp < (Date.now() / 1000)) {
                     reject(new Error('id token has expired'));
                     return;
                 }
-                return data.payload;
+                resolve(payload);
             });
         });
     }
