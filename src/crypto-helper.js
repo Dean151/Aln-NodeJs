@@ -48,32 +48,42 @@ class CryptoHelper {
      * @param {Array<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>} keys
      * @param {string} idToken
      * @param {string} clientId
-     * @return {{aud: string, exp: number, iat: number, sub: string}}
+     * @return {Promise<{aud: string, exp: number, iat: number, sub: string}>}
      */
     static checkAppleToken(keys, idToken, clientId) {
-        let getKey = (header, callback) => {
-            const pubKey = new NodeRSA();
-            for (var key in keys) {
-                if (key.kid !== header.kid) {
-                    continue;
+        return new Promise((resolve, reject) => {
+            let getKey = (header, callback) => {
+                const pubKey = new NodeRSA();
+                for (var key in keys) {
+                    if (key.kid !== header.kid) {
+                        continue;
+                    }
+                    pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
+                    callback(null, pubKey.exportKey(['public']));
+                    return;
                 }
-                pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
-                callback(null, pubKey.exportKey(['public']));
-                return;
-            }
-            callback(new Error('Matching signature key not found'), null);
-        };
-        const jwtClaims = jwt.verify(idToken, getKey);
-        if (jwtClaims.iss !== 'https://appleid.apple.com') {
-            throw new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + jwtClaims.iss);
-        }
-        if (clientId !== undefined && jwtClaims.aud !== clientId) {
-            throw new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + jwtClaims.aud);
-        }
-        if (jwtClaims.exp < (Date.now() / 1000)) {
-            throw new Error('id token has expired');
-        }
-        return jwtClaims;
+                callback(new Error('Matching signature key not found'), null);
+            };
+            jwt.verify(idToken, getKey, (err, data) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                if (data.payload.iss !== 'https://appleid.apple.com') {
+                    reject(new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + data.payload.iss));
+                    return;
+                }
+                if (clientId !== undefined && data.payload.aud !== clientId) {
+                    reject(new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + data.payload.aud));
+                    return;
+                }
+                if (data.payload.exp < (Date.now() / 1000)) {
+                    reject(new Error('id token has expired'));
+                    return;
+                }
+                return data.payload;
+            });
+        });
     }
 }
 
