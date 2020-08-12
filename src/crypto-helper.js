@@ -54,7 +54,8 @@ class CryptoHelper {
         return new Promise((resolve, reject) => {
             let getKey = (header, callback) => {
                 const pubKey = new NodeRSA();
-                for (var key in keys) {
+                for (var index in keys) {
+                    var key = keys[index];
                     if (key.kid !== header.kid) {
                         continue;
                     }
