@@ -207,7 +207,7 @@ class DataBaseCoordinator {
 
         if (result.affectedRows < 1) {
           // We insert the new row in the feeder registry.
-          this.con.query('INSERT INTO feeders(identifier, name, last_responded, ip) VALUES (?, ?, ?, ?)', [identifier, "", date, ip], (err, result, fields) => {
+          this.con.query('INSERT INTO feeders(identifier, name, default_value, last_responded, ip) VALUES (?, ?, ?, ?, ?)', [identifier, "", 5, date, ip], (err, result, fields) => {
             if (err) {
               reject(err);
             } else {
