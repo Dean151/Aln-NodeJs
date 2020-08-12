@@ -71,7 +71,7 @@ class DataBaseCoordinator {
   getUserBy(column, value) {
     return new Promise((resolve, reject) => {
 
-      let query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
+      let query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', IFNULL(f.name, \'\'), \':\', IFNULL(f.default_value, 5))) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
       if (column === 'id') {
         query += 'WHERE u.id = ?';
       }
