@@ -16,9 +16,9 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
+const axios = require('axios');
 const http = require('http');
 const express = require('express');
-const request = require('request');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const helmet = require('helmet');
@@ -135,9 +135,41 @@ class Server {
     api.use(bodyParser.json());
     api.use(cacheControl({ noCache: true }));
 
+    // CSRF Protection
+    api.use((req, res, next) => {
+      if (req.path === '/user/check' || req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS' || req.method === 'TRACE') {
+        next();
+        return;
+      }
+
+      if (!req.session || !req.session.user) {
+        next();
+        return;
+      }
+
+      let csrf = true;
+      if (CryptoHelper.checkBase64Hash('csrf', req.body._csrf, req.session.id + config.hmac_secret)) {
+        csrf = false;
+      } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['x-csrf-token'], req.session.id + config.hmac_secret)) {
+        csrf = false;
+      }
+
+      if (csrf) {
+        throw new HttpError('CSRF token check failed', 403);
+      }
+      next();
+    });
+
     let requiresNotLoggedIn = (req, res, next) => {
       if (req.session && req.session.user) {
         throw new HttpError( 'Already logged-in', 403);
+      }
+      next();
+    };
+
+    let requiresLoggedIn = (req, res, next) => {
+      if (!req.session || !req.session.user) {
+        throw new HttpError('Not logged-in', 403);
       }
       next();
     };
@@ -217,36 +249,8 @@ class Server {
       }).catch(next);
     });
 
-    // Every endpoint below requires login-in
-    api.use((req, res, next) => {
-      if (!req.session || !req.session.user) {
-        throw new HttpError('Not logged-in', 403);
-      }
-      next();
-    });
-
-    // CSRF Protection
-    api.use((req, res, next) => {
-      if (req.method === 'GET' || req.method === 'HEAD' || req.method === 'OPTIONS' || req.method === 'TRACE') {
-        next();
-        return;
-      }
-
-      let csrf = true;
-      if (CryptoHelper.checkBase64Hash('csrf', req.body._csrf, req.session.id + config.hmac_secret)) {
-        csrf = false;
-      } else if (CryptoHelper.checkBase64Hash('csrf', req.headers['x-csrf-token'], req.session.id + config.hmac_secret)) {
-        csrf = false;
-      }
-
-      if (csrf) {
-        throw new HttpError('CSRF token check failed', 403);
-      }
-      next();
-    });
-
     // Logging out
-    api.post('/user/logout', (req, res, next) => {
+    api.post('/user/logout', requiresLoggedIn, (req, res, next) => {
       // delete session object
       req.session.destroy(function(err) {
         if (err) {
@@ -259,7 +263,7 @@ class Server {
 
     /** FEEDER HANDLING **/
 
-    api.post('/feeder/claim', (req, res, next) => {
+    api.post('/feeder/claim', requiresLoggedIn, (req, res, next) => {
         if (typeof req.body.identifier === 'undefined') {
           throw new HttpError('No feeder identifier given', 400);
         }
@@ -295,7 +299,7 @@ class Server {
       }).catch(next);
     });
 
-    api.get('/feeder/:id', (req, res, next) => {
+    api.get('/feeder/:id', requiresLoggedIn, (req, res, next) => {
       feederCoordinator.getFeeder(req.feeder.identifier).then((feeder) => {
         if (!feeder) {
           throw new HttpError('Feeder not found', 404);
@@ -304,27 +308,27 @@ class Server {
       }).catch(next);
     });
 
-    api.put('/feeder/:id', (req, res, next) => {
+    api.put('/feeder/:id', requiresLoggedIn, (req, res, next) => {
       let name = req.body.name;
       database.setFeederName(req.feeder.id, name).then((success) => {
         res.json({ success: success });
       }).catch(next);
     });
 
-    api.get('/feeder/:id/meals', (req, res, next) => {
+    api.get('/feeder/:id/meals', requiresLoggedIn, (req, res, next) => {
       database.getMealHistory(req.feeder.id, req.query.period, req.query.offset).then((meals) => {
         res.json(meals);
       }).catch(next);
     });
 
-    api.post('/feeder/:id/feed', (req, res, next) => {
+    api.post('/feeder/:id/feed', requiresLoggedIn, (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.feedNow(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
       }).catch(next);
     });
 
-    api.put('/feeder/:id/quantity', (req, res, next) => {
+    api.put('/feeder/:id/quantity', requiresLoggedIn, (req, res, next) => {
       let quantity = new Quantity(req.body.quantity);
       feederCoordinator.setDefaultQuantity(req.feeder.identifier, quantity).then(() => {
         res.json({ success: true });
@@ -332,7 +336,7 @@ class Server {
     });
 
     api.route('/feeder/:id/planning')
-      .get((req, res, next) => {
+      .get(requiresLoggedIn, (req, res, next) => {
         // Fetch the planning if it's exists
         database.getCurrentPlanning(req.feeder.id).then((planning) => {
           if (planning === undefined) {
@@ -379,13 +383,13 @@ class Server {
    */
   static fetchApplePublicKey() {
     return new Promise((resolve, reject) => {
-      request('https://appleid.apple.com/auth/keys', { json: true }, (err, res, body) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(body.keys[0]);
-      });
+      axios.get('https://appleid.apple.com/auth/keys')
+        .then( (res) => {
+          resolve(res.data.keys[0]);
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   }
 }

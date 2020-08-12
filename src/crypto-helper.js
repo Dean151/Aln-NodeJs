@@ -18,7 +18,6 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
 const NodeRSA = require('node-rsa');
 
 class CryptoHelper {
