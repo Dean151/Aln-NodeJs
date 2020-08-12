@@ -19,10 +19,11 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 class User {
 
   /**
-   * @param {{id: number, email: string, email_shown: string: string|null, register: string, login: string, feeders: string|null}} row
+   * @param {{id: number, apple_id: string, email: string, email_shown: string: string|null, register: string, login: string, feeders: string|null}} row
    */
   constructor (row) {
     this.id = row.id;
+    this.apple_id = row.apple_id;
     this.email = row.email;
     this.shown_email = row.email_shown;
     this.register = row.register;
