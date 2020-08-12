@@ -217,14 +217,14 @@ class Server {
       // Fetch Apple's public key
       this.fetchApplePublicKeys().then((keys) => {
         let idToken = Buffer.from(req.body.identityToken, 'base64').toString('utf8');
-        // Will throw if identityToken is not okay
-        let token = CryptoHelper.checkAppleToken(keys, idToken, config.ios_bundle_identifier);
-        // We check apple_id congruency with identityToken
-        if (token.sub !== req.body.appleId) {
-          throw new HttpError('Unrecognized appleId for login', 400);
-        }
-        // TODO! Validate req.body.authorizationCode
-        logAppleIdUser(token.sub);
+        CryptoHelper.checkAppleToken(keys, idToken, config.ios_bundle_identifier).then((token) => {
+            // We check apple_id congruency with identityToken
+            if (token.sub !== req.body.appleId) {
+              throw new HttpError('Unrecognized appleId for login', 400);
+            }
+            // TODO! Validate req.body.authorizationCode
+            logAppleIdUser(token.sub);
+          }).catch(next);
       }).catch(next);
     });
 
