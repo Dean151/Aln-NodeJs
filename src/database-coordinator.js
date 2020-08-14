@@ -434,7 +434,7 @@ class DataBaseCoordinator {
         }
 
         // Parse the meals results
-        let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
+        let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled !== 0); });
         resolve(new Planning(meals));
       });
     });
