@@ -217,7 +217,7 @@ class FeederCoordinator {
       }
 
       // Feeder is unreachable. Let try to get it from database
-      return this.database.fetchFeederLastResponded(identifier);
+      this.database.fetchFeederLastResponded(identifier).then(resolve).catch(reject);
     });
   }
 
