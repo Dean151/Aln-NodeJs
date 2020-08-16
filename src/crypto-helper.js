@@ -16,44 +16,11 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const secureRandom = require('secure-random');
+const jwt = require('jsonwebtoken');
+const NodeRSA = require('node-rsa');
 
 class CryptoHelper {
-
-    /**
-     * @param {string} password
-     * @return Promise
-     */
-    static hashPassword(password) {
-        return new Promise((resolve, reject) => {
-            bcrypt.hash(password, 10, (err, hash) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(hash);
-                }
-            });
-        });
-    }
-
-    /**
-     * @param {string} password 
-     * @param {string} hash 
-     * @return Promise
-     */
-    static comparePassword(password, hash) {
-        return new Promise((resolve, reject) => {
-            bcrypt.compare(password, hash, (err, success) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(success);
-                }
-            });
-        });
-    }
 
     /**
      * @param {string} data 
@@ -78,12 +45,47 @@ class CryptoHelper {
     }
 
     /**
-     * @param {number} bytes 
+     * @param {Array<{kty: string, kid: string, use: string, alg: string, n: string, e: string}>} keys
+     * @param {string} idToken
+     * @param {string} clientId
+     * @return {Promise<{aud: string, exp: number, iat: number, sub: string}>}
      */
-    static randomKeyBase64(bytes) {
-        return secureRandom.randomBuffer(bytes).toString('base64').replace('+', '-').replace('/', '_').replace('=', '');
+    static checkAppleToken(keys, idToken, clientId) {
+        return new Promise((resolve, reject) => {
+            let getKey = (header, callback) => {
+                const pubKey = new NodeRSA();
+                for (var index in keys) {
+                    var key = keys[index];
+                    if (key.kid !== header.kid) {
+                        continue;
+                    }
+                    pubKey.importKey({ n: Buffer.from(key.n, 'base64'), e: Buffer.from(key.e, 'base64') }, 'components-public');
+                    callback(null, pubKey.exportKey(['public']));
+                    return;
+                }
+                callback(new Error('Matching signature key not found'), null);
+            };
+            jwt.verify(idToken, getKey, (err, payload) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                if (payload.iss !== 'https://appleid.apple.com') {
+                    reject(new Error('id token not issued by correct OpenID provider - expected: https://appleid.apple.com | is: ' + payload.iss));
+                    return;
+                }
+                if (clientId !== undefined && payload.aud !== clientId) {
+                    reject(new Error('aud parameter does not include this client - expected: ' + clientId + ' | is: ' + payload.aud));
+                    return;
+                }
+                if (payload.exp < (Date.now() / 1000)) {
+                    reject(new Error('id token has expired'));
+                    return;
+                }
+                resolve(payload);
+            });
+        });
     }
-
 }
 
 module.exports = CryptoHelper;

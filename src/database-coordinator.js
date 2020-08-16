@@ -56,11 +56,11 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {string} email
+   * @param {string} apple_id
    * @return Promise
    */
-  getUserByEmail(email) {
-    return this.getUserBy('email', email);
+  getUserByAppleId(apple_id) {
+    return this.getUserBy('apple_id', apple_id);
   }
 
   /**
@@ -71,12 +71,12 @@ class DataBaseCoordinator {
   getUserBy(column, value) {
     return new Promise((resolve, reject) => {
 
-      let query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', f.name, \':\', f.default_value)) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
+      let query = 'SELECT u.*, GROUP_CONCAT(CONCAT(f.id, \':\', IFNULL(f.name, \'\'), \':\', IFNULL(f.default_value, 5))) as feeders FROM users u LEFT JOIN feeders f ON f.owner = u.id ';
       if (column === 'id') {
         query += 'WHERE u.id = ?';
       }
-      else if (column === 'email') {
-        query += 'WHERE u.email = ?';
+      else if (column === 'apple_id') {
+        query += 'WHERE u.apple_id = ?';
       }
       else {
         reject(new Error('Undetermined column for getting user'));
@@ -119,28 +119,12 @@ class DataBaseCoordinator {
   }
 
   /**
-   * @param {{email: string, shown_email: string, hash: string}} data
+   * @param {{apple_id: string, email: string, shown_email: string}} data
    * @return Promise
    */
   createUser(data) {
     return new Promise((resolve, reject) => {
-      this.con.query('INSERT INTO users (email, email_shown, password) VALUES (?, ?, ?)', [data.email, data.shown_email, data.hash], (err, result, fields) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve();
-      });
-    });
-  }
-
-  /**
-   * @param user
-   * @return Promise
-   */
-  updateUser(user) {
-    return new Promise((resolve, reject) => {
-      this.con.query('UPDATE users SET email = ?, email_shown = ?, email_unvalidated = ?, password = ? WHERE id = ?', [user.email, user.shown_email, user.unvalidated_email, user.password, user.id], (err, result, fields) => {
+      this.con.query('INSERT INTO users (apple_id, email, email_shown) VALUES (?, ?, ?, ?)', [data.apple_id, data.email, data.shown_email], (err, result, fields) => {
         if (err) {
           reject(err);
           return;
@@ -223,7 +207,7 @@ class DataBaseCoordinator {
 
         if (result.affectedRows < 1) {
           // We insert the new row in the feeder registry.
-          this.con.query('INSERT INTO feeders(identifier, last_responded, ip) VALUES (?, ?, ?)', [identifier, date, ip], (err, result, fields) => {
+          this.con.query('INSERT INTO feeders(identifier, name, default_value, last_responded, ip) VALUES (?, ?, ?, ?, ?)', [identifier, "", 5, date, ip], (err, result, fields) => {
             if (err) {
               reject(err);
             } else {
@@ -450,7 +434,7 @@ class DataBaseCoordinator {
         }
 
         // Parse the meals results
-        let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled); });
+        let meals = results.map((row) => { return new Meal(row.time, row.quantity, row.enabled !== 0); });
         resolve(new Planning(meals));
       });
     });

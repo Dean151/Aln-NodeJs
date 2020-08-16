@@ -60,3 +60,5 @@ typings/
 # custom config file
 config.js
 
+# Keys
+*.p8

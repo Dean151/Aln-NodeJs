@@ -16,20 +16,13 @@ CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 "use strict";
 
-module.exports = {
+let config = {
 
   // Disable or enable console.logs outputs
   'debug_mode': false,
 
-  // The base url of the website
-  'product_name': 'BetterAln',
+  // Url
   'base_url': 'http://example.com',
-  'sender_mail': 'no-reply@example.com',
-  'mail_transporter': {
-    sendmail: true,
-    newline: 'unix',
-    path: '/usr/sbin/sendmail'
-  },
 
   // Local port to set in nginx reverse proxy
   'local_port': 3000,
@@ -56,5 +49,11 @@ module.exports = {
   'emulator_identifier': 'XXX012345678', // The identifier that will be used for the emulated feeder. Emulation allow to use the original app with a fake feeder.
   'empty_emulator': false, // Set as true if you want to simulate an emulator empty of any foo
 
-  'ios_appname': '',
+  // iOS app identifiers
+  'ios_bundle_identifier': '',
+  'ios_team_identifier': '',
 };
+
+config.ios_app_identifier = config.ios_team_identifier + '.' + config.ios_bundle_identifier;
+
+module.exports = config;

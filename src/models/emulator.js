@@ -32,7 +32,7 @@ class Emulator {
       // Client is supposed to identify itself, in order to get the timestamp from official server
       setInterval(() => {
         client.write(ResponseBuilder.feederIdentification(identifier));
-      }, 5000);
+      }, 10000);
     });
 
     client.on('data', (data) => {
