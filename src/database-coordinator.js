@@ -28,7 +28,8 @@ class DataBaseCoordinator {
       host: config.mysql_host,
       user: config.mysql_user,
       password: config.mysql_password,
-      database: config.mysql_database
+      database: config.mysql_database,
+      timezone: 'UTC'
     });
 
     this.con.connect((err) => {
