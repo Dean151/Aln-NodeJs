@@ -1,6 +1,6 @@
 {
   "name": "aln-nodejs",
-  "version": "0.8.0",
+  "version": "0.8.1",
   "description": "A remplacement for alnpet.com API to make HoneyGuaridan S25 more secure",
   "main": "main.js",
   "scripts": {
