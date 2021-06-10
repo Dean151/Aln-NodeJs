@@ -22,7 +22,7 @@
     "express": "^4.17.1",
     "express-cache-controller": "^1.1.0",
     "express-mysql-session": "^2.1.4",
-    "express-session": "^1.17.1",
+    "express-session": "^1.17.2",
     "helmet": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
     "log-timestamp": "^0.3.0",
@@ -33,9 +33,9 @@
     "validator": "^13.1.1"
   },
   "devDependencies": {
-    "@types/node": "^15.0.1",
+    "@types/node": "^15.12.2",
     "jest": "^26.3.0",
-    "jshint": "^2.12.0",
+    "jshint": "^2.13.0",
     "merge": "^2.1.1"
   },
   "jest": {
