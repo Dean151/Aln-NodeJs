@@ -30,7 +30,7 @@
     "net": "^1.0.2",
     "node-rsa": "^1.1.1",
     "require.js": "^1.0.0",
-    "validator": "^13.6.0"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@types/node": "^15.12.2",
