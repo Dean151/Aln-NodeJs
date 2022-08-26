@@ -6,6 +6,12 @@
 [![Twitter](https://img.shields.io/badge/twitter-@deanatoire-blue.svg?style=flat)](https://twitter.com/deanatoire)
 
 
+# /!\ Aln-NodeJS is deprecated! /!\
+
+Aln-NodeJS is no longer maintained, and barely unit tested.
+Please consider using [Aln-Symfony](https://github.com/Dean151/Aln-Symfony) instead!
+
+
 Aln-NodeJs is a replacement API to communicate directly with the HoneyGuaridan S25 API.
 
 The original API is absolutly not secure, so it needed a full replacement. ([How anyone could feed my cat](https://blog.thomasdurand.fr/security/iot/2018/01/31/how-anyone-could-feed-my-cat.html))
