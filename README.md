@@ -1,16 +1,15 @@
-# Aln-NodeJs
-
-![GitHub tag](https://img.shields.io/github/tag/Dean151/Aln-NodeJS.svg)
-![Node.js CI](https://github.com/Dean151/Aln-NodeJs/workflows/Node.js%20CI/badge.svg)
-![Libraries.io for GitHub](https://img.shields.io/librariesio/github/Dean151/Aln-NodeJS.svg)
-[![Twitter](https://img.shields.io/badge/twitter-@deanatoire-blue.svg?style=flat)](https://twitter.com/deanatoire)
-
 
 # /!\ Aln-NodeJS is deprecated! /!\
 
 Aln-NodeJS is no longer maintained, and barely unit tested.
 Please consider using [Aln-Symfony](https://github.com/Dean151/Aln-Symfony) instead!
 
+# Aln-NodeJs
+
+![GitHub tag](https://img.shields.io/github/tag/Dean151/Aln-NodeJS.svg)
+![Node.js CI](https://github.com/Dean151/Aln-NodeJs/workflows/Node.js%20CI/badge.svg)
+![Libraries.io for GitHub](https://img.shields.io/librariesio/github/Dean151/Aln-NodeJS.svg)
+[![Twitter](https://img.shields.io/badge/twitter-@deanatoire-blue.svg?style=flat)](https://twitter.com/deanatoire)
 
 Aln-NodeJs is a replacement API to communicate directly with the HoneyGuaridan S25 API.
 
